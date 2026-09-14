@@ -1,37 +1,28 @@
-/* ===================================
+﻿/* ===================================
    PREPVANTA AUTH SCRIPT
-   (frontend-only mock — swap for real API calls later)
+   Real backend authentication
 =================================== */
 
-function getUsers() {
-    return JSON.parse(localStorage.getItem("prepvanta-users") || "[]");
+const API_BASE_URL = "http://localhost:5000/api/auth";
+
+/* ---------------- Session ---------------- */
+
+function startSession(token, user) {
+    localStorage.setItem("prepvanta-loggedIn", "true");
+    localStorage.setItem("prepvanta-token", token);
+    localStorage.setItem("prepvanta-user", JSON.stringify(user));
 }
 
-function saveUsers(users) {
-    localStorage.setItem("prepvanta-users", JSON.stringify(users));
-}
-
-function generateUserId(existing) {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let id;
-    do {
-        id = "";
-        for (let i = 0; i < 8; i++) {
-            id += chars[Math.floor(Math.random() * chars.length)];
-        }
-    } while (existing.some(u => u.userId === id));
-    return id;
-}
+/* ---------------- Form Error ---------------- */
 
 function setFieldError(group, message) {
     group.classList.toggle("error", !!message);
-    const msg = group.querySelector(".form-error");
-    if (msg) msg.textContent = message || "";
-}
 
-function startSession(user) {
-    localStorage.setItem("prepvanta-loggedIn", "true");
-    localStorage.setItem("prepvanta-user", JSON.stringify(user));
+    const msg = group.querySelector(".form-error");
+
+    if (msg) {
+        msg.textContent = message || "";
+    }
 }
 
 /* ---------------- Register ---------------- */
@@ -40,7 +31,7 @@ const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
 
-    registerForm.addEventListener("submit", (e) => {
+    registerForm.addEventListener("submit", async (e) => {
 
         e.preventDefault();
 
@@ -56,56 +47,169 @@ if (registerForm) {
 
         let valid = true;
 
-        setFieldError(fullNameGroup, fullName.length < 2 ? "Enter your full name." : "");
-        if (fullName.length < 2) valid = false;
+        setFieldError(
+            fullNameGroup,
+            fullName.length < 2 ? "Enter your full name." : ""
+        );
 
-        const users = getUsers();
-        const taken = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+        if (fullName.length < 2) {
+            valid = false;
+        }
 
         if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) {
-            setFieldError(usernameGroup, "4-20 characters: letters, numbers, underscore only.");
-            valid = false;
-        } else if (taken) {
-            setFieldError(usernameGroup, "That username is already taken.");
+            setFieldError(
+                usernameGroup,
+                "4-20 characters: letters, numbers, underscore only."
+            );
             valid = false;
         } else {
             setFieldError(usernameGroup, "");
         }
 
-        const contactValid = /^\S+@\S+\.\S+$/.test(contact) || /^[6-9]\d{9}$/.test(contact.replace(/\s/g, ""));
-        setFieldError(contactGroup, contactValid ? "" : "Enter a valid email or 10-digit phone number.");
-        if (!contactValid) valid = false;
+        const contactValid =
+            /^\S+@\S+\.\S+$/.test(contact) ||
+            /^[6-9]\d{9}$/.test(contact.replace(/\s/g, ""));
 
-        setFieldError(passwordGroup, password.length < 6 ? "Use at least 6 characters." : "");
-        if (password.length < 6) valid = false;
+        setFieldError(
+            contactGroup,
+            contactValid
+                ? ""
+                : "Enter a valid email or 10-digit phone number."
+        );
 
-        const termsChecked = document.getElementById("agreeTerms").checked;
-        const termsError = document.getElementById("termsError");
-        termsError.style.display = termsChecked ? "none" : "block";
-        if (!termsChecked) valid = false;
+        if (!contactValid) {
+            valid = false;
+        }
 
-        if (!valid) return;
+        setFieldError(
+            passwordGroup,
+            password.length < 6
+                ? "Use at least 6 characters."
+                : ""
+        );
 
-        const userId = generateUserId(users);
-        const newUser = { fullName, username, contact, userId, joined: new Date().toISOString() };
-        users.push(newUser);
-        saveUsers(users);
+        if (password.length < 6) {
+            valid = false;
+        }
 
-        const box = document.getElementById("useridBox");
-        const uidText = document.getElementById("useridValue");
+        const termsChecked =
+            document.getElementById("agreeTerms").checked;
 
-        uidText.textContent = userId;
-        box.classList.add("show");
+        const termsError =
+            document.getElementById("termsError");
 
-        registerForm.querySelector("button[type=submit]").style.display = "none";
+        termsError.style.display =
+            termsChecked ? "none" : "block";
 
-        const continueBtn = document.getElementById("continueBtn");
-        continueBtn.style.display = "block";
-        continueBtn.addEventListener("click", () => {
-            startSession(newUser);
-            localStorage.setItem("prepvanta-show-walkthrough", "true");
-            location.href = "dashboard.html";
-        });
+        if (!termsChecked) {
+            valid = false;
+        }
+
+        if (!valid) {
+            return;
+        }
+
+        const submitButton =
+            registerForm.querySelector("button[type=submit]");
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Creating account...";
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE_URL}/register`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        username,
+                        contact,
+                        password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                if (
+                    response.status === 409 &&
+                    data.message
+                ) {
+                    setFieldError(
+                        usernameGroup,
+                        data.message
+                    );
+                } else if (data.message) {
+                    setFieldError(
+                        usernameGroup,
+                        data.message
+                    );
+                }
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Register";
+
+                return;
+            }
+
+            const user = data.user;
+
+            const box =
+                document.getElementById("useridBox");
+
+            const uidText =
+                document.getElementById("useridValue");
+
+            uidText.textContent = user.userId;
+
+            box.classList.add("show");
+
+            submitButton.style.display = "none";
+
+            const continueBtn =
+                document.getElementById("continueBtn");
+
+            continueBtn.style.display = "block";
+
+            continueBtn.addEventListener("click", () => {
+
+                /*
+                 * Current backend registration returns
+                 * the user but not a JWT.
+                 *
+                 * Therefore we continue to login.html.
+                 * After login, the JWT will be stored.
+                 */
+
+                localStorage.setItem(
+                    "prepvanta-registered-user",
+                    JSON.stringify(user)
+                );
+
+                location.href = "login.html";
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Registration error:",
+                error
+            );
+
+            setFieldError(
+                contactGroup,
+                "Unable to connect to the server. Please try again."
+            );
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Register";
+        }
     });
 }
 
@@ -115,56 +219,170 @@ const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
 
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
 
         e.preventDefault();
 
-        const contactGroup = document.getElementById("fg-login-contact");
-        const contact = contactGroup.querySelector("input").value.trim();
+        const contactGroup =
+            document.getElementById("fg-login-contact");
+
+        const passwordGroup =
+            document.getElementById("fg-login-password");
+
+        const contact =
+            contactGroup.querySelector("input").value.trim();
+
+        const password =
+            passwordGroup.querySelector("input").value;
 
         if (!contact) {
-            setFieldError(contactGroup, "Enter your email or phone number.");
+
+            setFieldError(
+                contactGroup,
+                "Enter your email or phone number."
+            );
+
+            return;
+        }
+
+        if (!password) {
+
+            setFieldError(
+                passwordGroup,
+                "Enter your password."
+            );
+
             return;
         }
 
         setFieldError(contactGroup, "");
+        setFieldError(passwordGroup, "");
 
-        const users = getUsers();
-        const user = users.find(u => u.contact.toLowerCase() === contact.toLowerCase());
+        const submitButton =
+            loginForm.querySelector("button[type=submit]");
 
-        if (!user) {
-            setFieldError(contactGroup, "No account found with that email or phone number. Please register first.");
-            return;
+        submitButton.disabled = true;
+        submitButton.textContent = "Logging in...";
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE_URL}/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contact,
+                        password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                setFieldError(
+                    contactGroup,
+                    data.message ||
+                    "Invalid contact or password."
+                );
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Login";
+
+                return;
+            }
+
+            startSession(
+                data.token,
+                data.user
+            );
+
+            localStorage.removeItem(
+                "prepvanta-registered-user"
+            );
+
+            location.href = "dashboard.html";
+
+        } catch (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            setFieldError(
+                contactGroup,
+                "Unable to connect to the server. Please try again."
+            );
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Login";
         }
-
-        startSession(user);
-        location.href = "dashboard.html";
     });
 }
 
-/* ---------------- Logout (used by sidebar Logout link) ---------------- */
+/* ---------------- Logout ---------------- */
 
 function prepvantaLogout() {
-    localStorage.removeItem("prepvanta-loggedIn");
+
+    localStorage.removeItem(
+        "prepvanta-loggedIn"
+    );
+
+    localStorage.removeItem(
+        "prepvanta-token"
+    );
+
+    localStorage.removeItem(
+        "prepvanta-user"
+    );
+
     location.href = "index.html";
 }
+
 /* ---------------- Password Visibility Toggle ---------------- */
 
-document.querySelectorAll(".toggle-password").forEach((button) => {
-    button.addEventListener("click", () => {
-        const targetId = button.dataset.target;
-        const passwordInput = document.getElementById(targetId);
+document
+    .querySelectorAll(".toggle-password")
+    .forEach((button) => {
 
-        if (!passwordInput) return;
+        button.addEventListener("click", () => {
 
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            button.textContent = "🙈";
-            button.setAttribute("aria-label", "Hide password");
-        } else {
-            passwordInput.type = "password";
-            button.textContent = "👁️";
-            button.setAttribute("aria-label", "Show password");
-        }
+            const targetId =
+                button.dataset.target;
+
+            const passwordInput =
+                document.getElementById(targetId);
+
+            if (!passwordInput) {
+                return;
+            }
+
+            if (passwordInput.type === "password") {
+
+                passwordInput.type = "text";
+
+                button.textContent = "🙈";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Hide password"
+                );
+
+            } else {
+
+                passwordInput.type = "password";
+
+                button.textContent = "👁️";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Show password"
+                );
+            }
+        });
     });
-});

@@ -4,16 +4,28 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+const authRoutes = require('./routes/authRoutes');
+const testRoutes = require('./routes/testRoutes');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+/* =========================
+   HEALTH CHECK
+========================= */
 app.get('/api/health', (req, res) => {
     res.json({
         message: 'PrepVanta backend is running'
     });
 });
+
+/* =========================
+   AUTH ROUTES
+========================= */
+app.use('/api/auth', authRoutes);
+app.use('/api/test', testRoutes);
 
 const PORT = process.env.PORT || 5000;
 
