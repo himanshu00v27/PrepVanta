@@ -210,9 +210,14 @@
                             <input type="text" id="loginContact" placeholder="you@email.com or 98765 43210">
                             <span class="form-error">Enter your email or phone number.</span>
                         </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Your password">
+                        <div class="form-group password-group">
+                           <label for="loginPassword">Password</label>
+                           <div class="password-wrapper">
+                               <input type="password" id="loginPassword" placeholder="Your password">
+                               <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">
+                                  👁️
+                               </button>
+                           </div>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width:100%;">Log In</button>
                     </form>

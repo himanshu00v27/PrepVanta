@@ -148,3 +148,23 @@ function prepvantaLogout() {
     localStorage.removeItem("prepvanta-loggedIn");
     location.href = "index.html";
 }
+/* ---------------- Password Visibility Toggle ---------------- */
+
+document.querySelectorAll(".toggle-password").forEach((button) => {
+    button.addEventListener("click", () => {
+        const targetId = button.dataset.target;
+        const passwordInput = document.getElementById(targetId);
+
+        if (!passwordInput) return;
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            button.textContent = "🙈";
+            button.setAttribute("aria-label", "Hide password");
+        } else {
+            passwordInput.type = "password";
+            button.textContent = "👁️";
+            button.setAttribute("aria-label", "Show password");
+        }
+    });
+});

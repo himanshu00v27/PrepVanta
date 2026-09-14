@@ -237,3 +237,37 @@
         display:none;
     }
 }
+/* ---------------- Password Visibility Toggle ---------------- */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 48px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    z-index: 2;
+}
+
+.toggle-password:hover {
+    opacity: 0.75;
+}
+
+.toggle-password:focus {
+    outline: none;
+}
