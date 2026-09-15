@@ -203,12 +203,12 @@
                         <a href="register.html">Sign Up</a>
                     </div>
                     <h1>Welcome Back</h1>
-                    <p class="sub">Log in with the email or phone number you registered with.</p>
+                    <p class="sub">Log in with the email address you registered with.</p>
                     <form id="loginForm" novalidate>
-                        <div class="form-group" id="fg-login-contact">
-                            <label for="loginContact">Email or Phone Number</label>
-                            <input type="text" id="loginContact" placeholder="you@email.com or 98765 43210">
-                            <span class="form-error">Enter your email or phone number.</span>
+                        <div class="form-group" id="fg-login-email">
+                           <label for="loginEmail">Email Address</label>
+                           <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                           <span class="form-error">Enter a valid email address.</span>
                         </div>
                         <div class="form-group password-group" id="fg-login-password">
                            <label for="loginPassword">Password</label>

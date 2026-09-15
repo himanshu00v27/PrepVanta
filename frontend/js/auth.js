@@ -1,6 +1,6 @@
 ﻿/* ===================================
    PREPVANTA AUTH SCRIPT
-   Real backend authentication
+   Real backend authentication + OTP
 =================================== */
 
 const API_BASE_URL = "http://localhost:5000/api/auth";
@@ -16,6 +16,8 @@ function startSession(token, user) {
 /* ---------------- Form Error ---------------- */
 
 function setFieldError(group, message) {
+    if (!group) return;
+
     group.classList.toggle("error", !!message);
 
     const msg = group.querySelector(".form-error");
@@ -25,7 +27,9 @@ function setFieldError(group, message) {
     }
 }
 
-/* ---------------- Register ---------------- */
+/* =========================================================
+   REGISTER
+========================================================= */
 
 const registerForm = document.getElementById("registerForm");
 
@@ -35,51 +39,78 @@ if (registerForm) {
 
         e.preventDefault();
 
-        const fullNameGroup = document.getElementById("fg-fullname");
-        const usernameGroup = document.getElementById("fg-username");
-        const contactGroup = document.getElementById("fg-contact");
-        const passwordGroup = document.getElementById("fg-password");
+        const fullNameGroup =
+            document.getElementById("fg-fullname");
 
-        const fullName = fullNameGroup.querySelector("input").value.trim();
-        const username = usernameGroup.querySelector("input").value.trim();
-        const contact = contactGroup.querySelector("input").value.trim();
-        const password = passwordGroup.querySelector("input").value;
+        const usernameGroup =
+            document.getElementById("fg-username");
+
+        const emailGroup =
+            document.getElementById("fg-email");
+
+        const passwordGroup =
+            document.getElementById("fg-password");
+
+        const fullName =
+            fullNameGroup.querySelector("input").value.trim();
+
+        const username =
+            usernameGroup.querySelector("input").value.trim();
+
+        const email =
+            emailGroup.querySelector("input").value.trim();
+
+        const password =
+            passwordGroup.querySelector("input").value;
 
         let valid = true;
 
+        /* Full name */
+
         setFieldError(
             fullNameGroup,
-            fullName.length < 2 ? "Enter your full name." : ""
+            fullName.length < 2
+                ? "Enter your full name."
+                : ""
         );
 
         if (fullName.length < 2) {
             valid = false;
         }
 
+        /* Username */
+
         if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) {
+
             setFieldError(
                 usernameGroup,
                 "4-20 characters: letters, numbers, underscore only."
             );
+
             valid = false;
+
         } else {
+
             setFieldError(usernameGroup, "");
         }
 
-        const contactValid =
-            /^\S+@\S+\.\S+$/.test(contact) ||
-            /^[6-9]\d{9}$/.test(contact.replace(/\s/g, ""));
+        /* Email */
+
+        const emailValid =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
         setFieldError(
-            contactGroup,
-            contactValid
+            emailGroup,
+            emailValid
                 ? ""
-                : "Enter a valid email or 10-digit phone number."
+                : "Enter a valid email address."
         );
 
-        if (!contactValid) {
+        if (!emailValid) {
             valid = false;
         }
+
+        /* Password */
 
         setFieldError(
             passwordGroup,
@@ -92,14 +123,21 @@ if (registerForm) {
             valid = false;
         }
 
-        const termsChecked =
-            document.getElementById("agreeTerms").checked;
+        /* Terms */
+
+        const termsCheckbox =
+            document.getElementById("agreeTerms");
 
         const termsError =
             document.getElementById("termsError");
 
-        termsError.style.display =
-            termsChecked ? "none" : "block";
+        const termsChecked =
+            termsCheckbox && termsCheckbox.checked;
+
+        if (termsError) {
+            termsError.style.display =
+                termsChecked ? "none" : "block";
+        }
 
         if (!termsChecked) {
             valid = false;
@@ -109,11 +147,13 @@ if (registerForm) {
             return;
         }
 
+        /* Disable button */
+
         const submitButton =
             registerForm.querySelector("button[type=submit]");
 
         submitButton.disabled = true;
-        submitButton.textContent = "Creating account...";
+        submitButton.textContent = "Sending OTP...";
 
         try {
 
@@ -121,13 +161,15 @@ if (registerForm) {
                 `${API_BASE_URL}/register`,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type": "application/json"
                     },
+
                     body: JSON.stringify({
                         fullName,
                         username,
-                        contact,
+                        email,
                         password
                     })
                 }
@@ -135,19 +177,14 @@ if (registerForm) {
 
             const data = await response.json();
 
+            /* Backend error */
+
             if (!response.ok) {
 
-                if (
-                    response.status === 409 &&
-                    data.message
-                ) {
+                if (data.message) {
+
                     setFieldError(
-                        usernameGroup,
-                        data.message
-                    );
-                } else if (data.message) {
-                    setFieldError(
-                        usernameGroup,
+                        emailGroup,
                         data.message
                     );
                 }
@@ -158,42 +195,19 @@ if (registerForm) {
                 return;
             }
 
-            const user = data.user;
+            /*
+             * Registration was accepted.
+             * Backend has sent an OTP email.
+             */
 
-            const box =
-                document.getElementById("useridBox");
+            showOTPVerification(
+                fullName,
+                username,
+                email,
+                password
+            );
 
-            const uidText =
-                document.getElementById("useridValue");
-
-            uidText.textContent = user.userId;
-
-            box.classList.add("show");
-
-            submitButton.style.display = "none";
-
-            const continueBtn =
-                document.getElementById("continueBtn");
-
-            continueBtn.style.display = "block";
-
-            continueBtn.addEventListener("click", () => {
-
-                /*
-                 * Current backend registration returns
-                 * the user but not a JWT.
-                 *
-                 * Therefore we continue to login.html.
-                 * After login, the JWT will be stored.
-                 */
-
-                localStorage.setItem(
-                    "prepvanta-registered-user",
-                    JSON.stringify(user)
-                );
-
-                location.href = "login.html";
-            });
+            submitButton.disabled = false;
 
         } catch (error) {
 
@@ -203,7 +217,7 @@ if (registerForm) {
             );
 
             setFieldError(
-                contactGroup,
+                emailGroup,
                 "Unable to connect to the server. Please try again."
             );
 
@@ -213,119 +227,408 @@ if (registerForm) {
     });
 }
 
-/* ---------------- Login ---------------- */
 
-const loginForm = document.getElementById("loginForm");
+/* =========================================================
+   OTP VERIFICATION UI
+========================================================= */
 
-if (loginForm) {
+function showOTPVerification(
+    fullName,
+    username,
+    email,
+    password
+) {
 
-    loginForm.addEventListener("submit", async (e) => {
+    /*
+     * Hide the registration form after OTP is sent.
+     */
 
-        e.preventDefault();
+    registerForm.style.display = "none";
 
-        const contactGroup =
-            document.getElementById("fg-login-contact");
+    /*
+     * Create OTP verification section.
+     */
 
-        const passwordGroup =
-            document.getElementById("fg-login-password");
+    const verificationBox =
+        document.createElement("div");
 
-        const contact =
-            contactGroup.querySelector("input").value.trim();
+    verificationBox.id = "otpVerificationBox";
 
-        const password =
-            passwordGroup.querySelector("input").value;
+    verificationBox.innerHTML = `
+        <div class="otp-verification">
 
-        if (!contact) {
+            <h2>Verify Your Email</h2>
 
-            setFieldError(
-                contactGroup,
-                "Enter your email or phone number."
-            );
+            <p>
+                We sent a 6-digit verification code to
+                <strong>${escapeHTML(email)}</strong>.
+            </p>
 
-            return;
-        }
+            <div class="form-group" id="fg-otp">
 
-        if (!password) {
+                <label for="otpInput">
+                    Verification Code
+                </label>
 
-            setFieldError(
-                passwordGroup,
-                "Enter your password."
-            );
+                <input
+                    type="text"
+                    id="otpInput"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="Enter 6-digit OTP"
+                    autocomplete="one-time-code"
+                >
 
-            return;
-        }
+                <span class="form-error"></span>
 
-        setFieldError(contactGroup, "");
-        setFieldError(passwordGroup, "");
+            </div>
 
-        const submitButton =
-            loginForm.querySelector("button[type=submit]");
+            <button
+                type="button"
+                id="verifyOTPButton"
+            >
+                Verify Email
+            </button>
 
-        submitButton.disabled = true;
-        submitButton.textContent = "Logging in...";
+            <p id="otpStatus"></p>
 
-        try {
+        </div>
+    `;
 
-            const response = await fetch(
-                `${API_BASE_URL}/login`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        contact,
-                        password
-                    })
-                }
-            );
+    /*
+     * Put OTP section where the register form was.
+     */
 
-            const data = await response.json();
+    registerForm.parentNode.insertBefore(
+        verificationBox,
+        registerForm
+    );
 
-            if (!response.ok) {
+    /*
+     * Verify OTP button
+     */
+
+    const verifyButton =
+        document.getElementById("verifyOTPButton");
+
+    verifyButton.addEventListener(
+        "click",
+        async () => {
+
+            const otpInput =
+                document.getElementById("otpInput");
+
+            const otpGroup =
+                document.getElementById("fg-otp");
+
+            const otp =
+                otpInput.value.trim();
+
+            if (!/^\d{6}$/.test(otp)) {
 
                 setFieldError(
-                    contactGroup,
-                    data.message ||
-                    "Invalid contact or password."
+                    otpGroup,
+                    "Enter the 6-digit verification code."
                 );
-
-                submitButton.disabled = false;
-                submitButton.textContent = "Login";
 
                 return;
             }
 
-            startSession(
-                data.token,
-                data.user
-            );
+            setFieldError(otpGroup, "");
 
-            localStorage.removeItem(
-                "prepvanta-registered-user"
-            );
+            verifyButton.disabled = true;
+            verifyButton.textContent = "Verifying...";
 
-            location.href = "dashboard.html";
+            try {
 
-        } catch (error) {
+                const response = await fetch(
+                    `${API_BASE_URL}/verify-otp`,
+                    {
+                        method: "POST",
 
-            console.error(
-                "Login error:",
-                error
-            );
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
-            setFieldError(
-                contactGroup,
-                "Unable to connect to the server. Please try again."
-            );
+                        body: JSON.stringify({
+                            email,
+                            otp
+                        })
+                    }
+                );
 
-            submitButton.disabled = false;
-            submitButton.textContent = "Login";
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    setFieldError(
+                        otpGroup,
+                        data.message ||
+                        "Invalid verification code."
+                    );
+
+                    verifyButton.disabled = false;
+                    verifyButton.textContent = "Verify Email";
+
+                    return;
+                }
+
+                /*
+                 * Account has now been created.
+                 */
+
+                verificationBox.innerHTML = `
+                    <div class="otp-verification">
+
+                        <h2>Email Verified!</h2>
+
+                        <p>
+                            Your PrepVanta account has been
+                            created successfully.
+                        </p>
+
+                        <p>
+                            You can now log in using your
+                            email address and password.
+                        </p>
+
+                        <button
+                            type="button"
+                            id="goToLoginButton"
+                        >
+                            Continue to Login
+                        </button>
+
+                    </div>
+                `;
+
+                const goToLoginButton =
+                    document.getElementById(
+                        "goToLoginButton"
+                    );
+
+                goToLoginButton.addEventListener(
+                    "click",
+                    () => {
+
+                        location.href = "login.html";
+                    }
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "OTP verification error:",
+                    error
+                );
+
+                setFieldError(
+                    document.getElementById("fg-otp"),
+                    "Unable to connect to the server. Please try again."
+                );
+
+                verifyButton.disabled = false;
+                verifyButton.textContent = "Verify Email";
+            }
         }
-    });
+    );
+
+    /*
+     * Allow Enter key to submit OTP.
+     */
+
+    document
+        .getElementById("otpInput")
+        .addEventListener("keydown", (event) => {
+
+            if (event.key === "Enter") {
+                verifyButton.click();
+            }
+        });
 }
 
-/* ---------------- Logout ---------------- */
+
+/* =========================================================
+   HTML ESCAPE HELPER
+========================================================= */
+
+function escapeHTML(value) {
+
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+const loginForm =
+    document.getElementById("loginForm");
+
+if (loginForm) {
+
+    loginForm.addEventListener(
+        "submit",
+        async (e) => {
+
+            e.preventDefault();
+
+            const emailGroup =
+                document.getElementById(
+                    "fg-login-email"
+                );
+
+            const passwordGroup =
+                document.getElementById(
+                    "fg-login-password"
+                );
+
+            const email =
+                emailGroup.querySelector(
+                    "input"
+                ).value.trim();
+
+            const password =
+                passwordGroup.querySelector(
+                    "input"
+                ).value;
+
+            let valid = true;
+
+            /* Email */
+
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
+
+                setFieldError(
+                    emailGroup,
+                    "Enter a valid email address."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    emailGroup,
+                    ""
+                );
+            }
+
+            /* Password */
+
+            if (!password) {
+
+                setFieldError(
+                    passwordGroup,
+                    "Enter your password."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    passwordGroup,
+                    ""
+                );
+            }
+
+            if (!valid) {
+                return;
+            }
+
+            const submitButton =
+                loginForm.querySelector(
+                    "button[type=submit]"
+                );
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Logging in...";
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE_URL}/login`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email,
+                            password
+                        })
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    setFieldError(
+                        emailGroup,
+                        data.message ||
+                        "Invalid email or password."
+                    );
+
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Login";
+
+                    return;
+                }
+
+                /*
+                 * Login successful.
+                 */
+
+                startSession(
+                    data.token,
+                    data.user
+                );
+
+                localStorage.removeItem(
+                    "prepvanta-registered-user"
+                );
+
+                location.href = "dashboard.html";
+
+            } catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+                setFieldError(
+                    emailGroup,
+                    "Unable to connect to the server. Please try again."
+                );
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Login";
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 function prepvantaLogout() {
 
@@ -344,45 +647,57 @@ function prepvantaLogout() {
     location.href = "index.html";
 }
 
-/* ---------------- Password Visibility Toggle ---------------- */
+
+/* =========================================================
+   PASSWORD VISIBILITY TOGGLE
+========================================================= */
 
 document
     .querySelectorAll(".toggle-password")
     .forEach((button) => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const targetId =
-                button.dataset.target;
+                const targetId =
+                    button.dataset.target;
 
-            const passwordInput =
-                document.getElementById(targetId);
+                const passwordInput =
+                    document.getElementById(
+                        targetId
+                    );
 
-            if (!passwordInput) {
-                return;
+                if (!passwordInput) {
+                    return;
+                }
+
+                if (
+                    passwordInput.type ===
+                    "password"
+                ) {
+
+                    passwordInput.type = "text";
+
+                    button.textContent = "🙈";
+
+                    button.setAttribute(
+                        "aria-label",
+                        "Hide password"
+                    );
+
+                } else {
+
+                    passwordInput.type =
+                        "password";
+
+                    button.textContent = "👁️";
+
+                    button.setAttribute(
+                        "aria-label",
+                        "Show password"
+                    );
+                }
             }
-
-            if (passwordInput.type === "password") {
-
-                passwordInput.type = "text";
-
-                button.textContent = "🙈";
-
-                button.setAttribute(
-                    "aria-label",
-                    "Hide password"
-                );
-
-            } else {
-
-                passwordInput.type = "password";
-
-                button.textContent = "👁️";
-
-                button.setAttribute(
-                    "aria-label",
-                    "Show password"
-                );
-            }
-        });
+        );
     });

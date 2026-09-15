@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema(
+const emailVerificationSchema = new mongoose.Schema(
     {
         fullName: {
             type: String,
@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema(
         username: {
             type: String,
             required: true,
-            unique: true,
             trim: true,
             lowercase: true
         },
@@ -19,7 +18,6 @@ const userSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique: true,
             trim: true,
             lowercase: true
         },
@@ -29,16 +27,24 @@ const userSchema = new mongoose.Schema(
             required: true
         },
 
-        userId: {
+        otpHash: {
             type: String,
-            required: true,
-            unique: true
+            required: true
         },
 
-        role: {
-            type: String,
-            enum: ['user', 'admin'],
-            default: 'user'
+        otpExpiresAt: {
+            type: Date,
+            required: true
+        },
+
+        otpAttempts: {
+            type: Number,
+            default: 0
+        },
+
+        verified: {
+            type: Boolean,
+            default: false
         }
     },
     {
@@ -46,4 +52,7 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model(
+    'EmailVerification',
+    emailVerificationSchema
+);
