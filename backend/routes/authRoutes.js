@@ -67,13 +67,12 @@ router.post('/register', async (req, res) => {
 
         /* ---------- Username validation ---------- */
 
-        const normalizedUsername =
-            username.trim().toLowerCase();
+        const normalizedUsername =username.trim();
 
-        if (!/^[a-zA-Z0-9_]{4,20}$/.test(normalizedUsername)) {
+        if (!/^[a-z0-9]{4,20}$/.test(normalizedUsername)) {
             return res.status(400).json({
                 message:
-                    'Username must contain 4-20 letters, numbers, or underscores'
+                    'Username must contain 4-20 letters and contain only lowercase letters and numbers'
             });
         }
 

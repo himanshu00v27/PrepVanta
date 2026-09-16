@@ -80,11 +80,11 @@ if (registerForm) {
 
         /* Username */
 
-        if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) {
+        if (!/^[a-z0-9]{4,20}$/.test(username)) {
 
             setFieldError(
                 usernameGroup,
-                "4-20 characters: letters, numbers, underscore only."
+                "4-20 characters: lowecase letters and numbers only."
             );
 
             valid = false;
