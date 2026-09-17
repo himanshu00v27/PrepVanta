@@ -35,6 +35,76 @@ const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
 
+    const usernameInput =
+        document
+            .getElementById("fg-username")
+            .querySelector("input");
+
+    let usernameCheckTimeout;
+
+    usernameInput.addEventListener("input", () => {
+
+        clearTimeout(usernameCheckTimeout);
+
+        const username =
+            usernameInput.value.trim();
+
+        const oldMessage =
+            document.getElementById(
+                "username-availability"
+            );
+
+        if (oldMessage) {
+            oldMessage.remove();
+        }
+
+        // Only check valid usernames
+        if (!/^[a-z0-9]{4,20}$/.test(username)) {
+            return;
+        }
+
+        usernameCheckTimeout = setTimeout(
+            async () => {
+
+                try {
+
+                    const response = await fetch(
+                        `${API_BASE_URL}/check-username?username=${encodeURIComponent(username)}`
+                    );
+
+                    const data =
+                        await response.json();
+
+                    const message =
+                        document.createElement("small");
+
+                    message.id =
+                        "username-availability";
+
+                    if (data.available) {
+                     message.textContent = "Username is available";
+                     message.classList.add("username-available");
+                  } else {
+                     message.textContent = "Username is already taken";
+                     message.classList.add("username-taken");
+                  }
+                    usernameInput.parentElement.appendChild(
+                        message
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Username availability check failed:",
+                        error
+                    );
+                }
+
+            },
+            400
+        );
+    });
+
     registerForm.addEventListener("submit", async (e) => {
 
         e.preventDefault();

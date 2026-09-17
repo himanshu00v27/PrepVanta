@@ -32,6 +32,46 @@ function generateUserId() {
     return `PV${Date.now().toString(36).toUpperCase()}`;
 }
 
+/* =========================
+   CHECK USERNAME AVAILABILITY
+========================= */
+
+router.get('/check-username', async (req, res) => {
+    try {
+        const username = (req.query.username || '').trim();
+
+        /* ---------- Validate username format ---------- */
+
+        if (!/^[a-z0-9]{4,20}$/.test(username)) {
+            return res.status(400).json({
+                message:
+                    'Username must contain 4-20 lowercase letters and numbers only'
+            });
+        }
+
+        /* ---------- Check existing user ---------- */
+
+        const existingUser = await User.exists({
+            username: username
+        });
+
+        return res.json({
+            available: !existingUser
+        });
+
+    } catch (error) {
+
+        console.error(
+            'Username availability error:',
+            error.message
+        );
+
+        return res.status(500).json({
+            message:
+                'Server error while checking username'
+        });
+    }
+});
 
 /* =========================
    REGISTER
@@ -67,7 +107,7 @@ router.post('/register', async (req, res) => {
 
         /* ---------- Username validation ---------- */
 
-        const normalizedUsername =username.trim();
+        const normalizedUsername = username.trim();
 
         if (!/^[a-z0-9]{4,20}$/.test(normalizedUsername)) {
             return res.status(400).json({

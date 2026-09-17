@@ -271,3 +271,16 @@
 .toggle-password:focus {
     outline: none;
 }
+/* Username availability */
+
+.username-available {
+    display: block;
+    margin-top: 6px;
+    color: #16a34a !important;
+}
+
+.username-taken {
+    display: block;
+    margin-top: 6px;
+    color: #dc2626 !important;
+}
