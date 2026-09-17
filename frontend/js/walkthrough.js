@@ -1,15 +1,12 @@
 /* ===================================
-   PREPVANTA WALKTHROUGH SCRIPT
-
-   Runs once, right after registration, on dashboard.html. Highlights
-   the real navbar/sidebar elements as it introduces each feature.
-   Opens/closes the sliding sidebar automatically for the steps that
-   live inside it (Interview Practice, Companies, Help Desk).
+   PREPVANTA WALKTHROUGH
 =================================== */
 
 (function () {
 
-    if (localStorage.getItem("prepvanta-show-walkthrough") !== "true") return;
+    if (localStorage.getItem("prepvanta-show-walkthrough") !== "true") {
+        return;
+    }
 
     const STEPS = [
         {
@@ -17,57 +14,86 @@
             desc: "Your one-stop placement prep platform — aptitude, reasoning, technical topics, mock interviews and a live compiler, all in one place.",
             target: null
         },
+
         {
-            title: "The side menu",
-            desc: "Tap here anytime to jump to your Dashboard, Interview Practice, Companies, Find Users, or Help Desk — from any page.",
+            title: "Your side menu",
+            desc: "Use this menu anytime to access Dashboard, Interview Practice, Companies, Search Users and Help Desk.",
             target: "#menuBtn"
         },
+
+        {
+            title: "Search topics",
+            desc: "Looking for a specific topic? Use the search bar to quickly find what you need.",
+            target: ".search-box"
+        },
+
         {
             title: "Switch theme",
-            desc: "Prefer dark mode? Toggle it anytime — your choice is remembered.",
+            desc: "Prefer dark mode? Toggle between light and dark mode anytime.",
             target: ".theme-toggle"
         },
+
         {
             title: "Your profile",
-            desc: "This takes you straight to your Dashboard — your account, progress and stats live here.",
+            desc: "Open your dashboard from here to see your account details and preparation progress.",
             target: ".profile-btn"
         },
+
         {
             title: "Explore Topics",
-            desc: "DSA, DBMS, Web Development, Operating Systems, Programming Languages, Core CS (including System Design) — pick a subject, drill into a specific topic.",
+            desc: "Explore DSA, DBMS, Web Development, Operating Systems, Programming Languages and Core CS topics.",
             target: '.nav-links a[href="topics.html"]'
         },
+
         {
-            title: "Practice Aptitude & Reasoning",
-            desc: "Pick a topic and get Objective, Subjective and Coding tabs so you can practice however suits you.",
+            title: "Practice Aptitude",
+            desc: "Practice aptitude questions by topic and strengthen the skills commonly tested in placement exams.",
             target: '.nav-links a[href="aptitude.html"]'
         },
+
+        {
+            title: "Practice Reasoning",
+            desc: "Improve your logical and analytical reasoning through focused practice.",
+            target: '.nav-links a[href="reasoning.html"]'
+        },
+
         {
             title: "Try the Compiler",
-            desc: "Write and run code right in your browser — no setup needed.",
+            desc: "Write and run code directly in your browser without installing a local development environment.",
             target: '.nav-links a[href="compiler.html"]'
         },
+
         {
             title: "Interview Practice",
-            desc: "Mock tests live under Objective. Written and coding questions live together under Subjective.",
+            desc: "Prepare for interviews with mock tests, written questions and coding practice.",
             target: '.sidebar a[href="interview.html"]',
             needsSidebar: true
         },
+
         {
             title: "Company-specific Prep",
-            desc: "Prepping for a specific company? Get question patterns tuned to how TCS, Infosys, Wipro and others actually hire.",
+            desc: "Explore company-focused preparation and get familiar with the types of questions asked by recruiters.",
             target: '.sidebar a[href="companies.html"]',
             needsSidebar: true
         },
+
+        {
+            title: "Search Users",
+            desc: "Find other PrepVanta users using their username or user ID.",
+            target: '.sidebar a[href="search-users.html"]',
+            needsSidebar: true
+        },
+
         {
             title: "Help Desk",
-            desc: "Stuck on something? Help Desk has FAQs and ways to reach support, accessible anytime from the side menu.",
+            desc: "Need help? Visit the Help Desk for FAQs and support options.",
             target: '.sidebar a[href="help-desk.html"]',
             needsSidebar: true
         },
+
         {
-            title: "Track your progress",
-            desc: "Your dashboard shows questions solved, mock test history and topic-wise progress. You're all set — happy practicing!",
+            title: "Your progress",
+            desc: "Your dashboard keeps your preparation information and progress in one place. You're ready to start practicing!",
             target: ".profile-card",
             needsSidebar: false
         }
@@ -77,174 +103,533 @@
     let overlay = null;
     let highlightBox = null;
     let tooltip = null;
+    let renderTimer = null;
 
-    function getVisibleRect(selector) {
-        const el = document.querySelector(selector);
-        if (!el) return null;
-        // if this target lives inside a scrollable container (e.g. the
-        // sidebar), make sure it's actually scrolled into view first —
-        // otherwise its rect can land off-screen and strand the tooltip
-        el.scrollIntoView({ block: "center", behavior: "auto" });
-        const rect = el.getBoundingClientRect();
-        if (rect.width === 0 && rect.height === 0) return null;
-        return rect;
+    function getTarget(selector) {
+        return document.querySelector(selector);
     }
 
     function clearOverlayElements() {
-        [overlay, highlightBox, tooltip].forEach(el => el && el.remove());
+
+        if (renderTimer) {
+            clearTimeout(renderTimer);
+            renderTimer = null;
+        }
+
+        if (overlay) overlay.remove();
+        if (highlightBox) highlightBox.remove();
+        if (tooltip) tooltip.remove();
+
         overlay = null;
         highlightBox = null;
         tooltip = null;
     }
 
     function buildTooltipHTML(step, index) {
+
         const isFirst = index === 0;
         const isLast = index === STEPS.length - 1;
-        const dots = STEPS.map((_, i) => `<span class="${i === index ? "wt-dot-active" : ""}"></span>`).join("");
+
+        const dots = STEPS
+            .map((_, i) => {
+                return `<span class="${i === index ? "wt-dot-active" : ""}"></span>`;
+            })
+            .join("");
 
         return `
-            <div class="wt-step-count">Step ${index + 1} of ${STEPS.length}</div>
-            <div class="wt-title">${step.title}</div>
-            <div class="wt-desc">${step.desc}</div>
-            <div class="wt-dots">${dots}</div>
+            <div class="wt-step-count">
+                Step ${index + 1} of ${STEPS.length}
+            </div>
+
+            <div class="wt-title">
+                ${step.title}
+            </div>
+
+            <div class="wt-desc">
+                ${step.desc}
+            </div>
+
+            <div class="wt-dots">
+                ${dots}
+            </div>
+
             <div class="wt-actions">
-                <button type="button" class="wt-skip" id="wtSkip">Skip tour</button>
+
+                <button
+                    type="button"
+                    class="wt-skip"
+                    id="wtSkip">
+                    Skip tour
+                </button>
+
                 <div class="wt-nav-btns">
-                    ${isFirst ? "" : '<button type="button" class="wt-btn wt-btn-back" id="wtBack">Back</button>'}
-                    <button type="button" class="wt-btn wt-btn-next" id="wtNext">${isLast ? "Finish" : "Next"}</button>
+
+                    ${
+                        isFirst
+                            ? ""
+                            : `
+                                <button
+                                    type="button"
+                                    class="wt-btn wt-btn-back"
+                                    id="wtBack">
+                                    Back
+                                </button>
+                              `
+                    }
+
+                    <button
+                        type="button"
+                        class="wt-btn wt-btn-next"
+                        id="wtNext">
+                        ${isLast ? "Finish" : "Next"}
+                    </button>
+
                 </div>
+
             </div>
         `;
     }
 
-    function positionTooltipNear(rect, tooltipEl) {
-        const margin = 16;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const tw = tooltipEl.offsetWidth;
-        const th = tooltipEl.offsetHeight;
+    function createOverlay() {
 
-        let top = rect.bottom + margin;
-        if (top + th > vh - margin) {
-            top = rect.top - th - margin;
+        overlay = document.createElement("div");
+
+        overlay.className = "wt-plain-overlay";
+
+        document.body.appendChild(overlay);
+    }
+
+    function createHighlight(rect) {
+
+        highlightBox = document.createElement("div");
+
+        highlightBox.className = "wt-highlight";
+
+        highlightBox.style.top =
+            `${rect.top - 8}px`;
+
+        highlightBox.style.left =
+            `${rect.left - 8}px`;
+
+        highlightBox.style.width =
+            `${rect.width + 16}px`;
+
+        highlightBox.style.height =
+            `${rect.height + 16}px`;
+
+        document.body.appendChild(highlightBox);
+    }
+
+    function positionTooltip(rect) {
+
+        const margin = 18;
+
+        const viewportWidth =
+            window.innerWidth;
+
+        const viewportHeight =
+            window.innerHeight;
+
+        const tooltipWidth =
+            tooltip.offsetWidth;
+
+        const tooltipHeight =
+            tooltip.offsetHeight;
+
+        /*
+            Try below the feature first.
+        */
+
+        let top =
+            rect.bottom + margin;
+
+        /*
+            If there isn't enough room below,
+            place it above.
+        */
+
+        if (
+            top + tooltipHeight >
+            viewportHeight - margin
+        ) {
+
+            top =
+                rect.top -
+                tooltipHeight -
+                margin;
         }
-        // hard clamp: whatever placement was chosen above, never let the
-        // tooltip render partly or fully outside the viewport
-        top = Math.max(margin, Math.min(top, vh - th - margin));
+
+        /*
+            Keep tooltip inside viewport vertically.
+        */
+
+        top = Math.max(
+            margin,
+            Math.min(
+                top,
+                viewportHeight -
+                tooltipHeight -
+                margin
+            )
+        );
+
+        /*
+            Align tooltip with the target.
+        */
 
         let left = rect.left;
-        if (left + tw > vw - margin) left = vw - tw - margin;
-        left = Math.max(margin, left);
 
-        tooltipEl.style.top = top + "px";
-        tooltipEl.style.left = left + "px";
+        /*
+            Prevent it from going off the right side.
+        */
+
+        if (
+            left + tooltipWidth >
+            viewportWidth - margin
+        ) {
+
+            left =
+                viewportWidth -
+                tooltipWidth -
+                margin;
+        }
+
+        /*
+            Prevent it from going off the left side.
+        */
+
+        left = Math.max(
+            margin,
+            left
+        );
+
+        tooltip.style.top =
+            `${top}px`;
+
+        tooltip.style.left =
+            `${left}px`;
     }
 
     function renderCentered(step, index) {
-        overlay = document.createElement("div");
-        overlay.className = "wt-plain-overlay";
-        document.body.appendChild(overlay);
 
-        tooltip = document.createElement("div");
-        tooltip.className = "wt-tooltip wt-centered";
-        tooltip.innerHTML = buildTooltipHTML(step, index);
-        document.body.appendChild(tooltip);
+        createOverlay();
+
+        tooltip =
+            document.createElement("div");
+
+        tooltip.className =
+            "wt-tooltip wt-centered";
+
+        tooltip.innerHTML =
+            buildTooltipHTML(
+                step,
+                index
+            );
+
+        document.body.appendChild(
+            tooltip
+        );
 
         wireControls();
     }
 
-    function renderOnTarget(step, index, rect) {
-        highlightBox = document.createElement("div");
-        highlightBox.className = "wt-highlight";
-        highlightBox.style.top = (rect.top - 6) + "px";
-        highlightBox.style.left = (rect.left - 6) + "px";
-        highlightBox.style.width = (rect.width + 12) + "px";
-        highlightBox.style.height = (rect.height + 12) + "px";
-        document.body.appendChild(highlightBox);
+    function renderTarget(step, index, target) {
 
-        tooltip = document.createElement("div");
-        tooltip.className = "wt-tooltip";
-        tooltip.innerHTML = buildTooltipHTML(step, index);
-        document.body.appendChild(tooltip);
+        /*
+            Scroll the actual feature into view.
+            "nearest" prevents unnecessary page jumps.
+        */
 
-        positionTooltipNear(rect, tooltip);
+        target.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+        });
 
-        wireControls();
+        /*
+            Wait for the browser to finish scrolling
+            before measuring the element.
+        */
+
+        renderTimer = setTimeout(() => {
+
+            const rect =
+                target.getBoundingClientRect();
+
+            if (
+                rect.width === 0 ||
+                rect.height === 0
+            ) {
+
+                renderCentered(
+                    step,
+                    index
+                );
+
+                return;
+            }
+
+            createHighlight(rect);
+
+            tooltip =
+                document.createElement("div");
+
+            tooltip.className =
+                "wt-tooltip";
+
+            tooltip.innerHTML =
+                buildTooltipHTML(
+                    step,
+                    index
+                );
+
+            document.body.appendChild(
+                tooltip
+            );
+
+            positionTooltip(rect);
+
+            wireControls();
+
+        }, 450);
     }
 
     function wireControls() {
-        const skipBtn = document.getElementById("wtSkip");
-        const backBtn = document.getElementById("wtBack");
-        const nextBtn = document.getElementById("wtNext");
 
-        if (skipBtn) skipBtn.addEventListener("click", endTour);
-        if (backBtn) backBtn.addEventListener("click", () => goToStep(stepIndex - 1));
-        if (nextBtn) {
-            nextBtn.addEventListener("click", () => {
-                if (stepIndex === STEPS.length - 1) {
-                    endTour();
-                } else {
-                    goToStep(stepIndex + 1);
+        const skipBtn =
+            document.getElementById(
+                "wtSkip"
+            );
+
+        const backBtn =
+            document.getElementById(
+                "wtBack"
+            );
+
+        const nextBtn =
+            document.getElementById(
+                "wtNext"
+            );
+
+        if (skipBtn) {
+
+            skipBtn.addEventListener(
+                "click",
+                endTour
+            );
+        }
+
+        if (backBtn) {
+
+            backBtn.addEventListener(
+                "click",
+                () => {
+
+                    goToStep(
+                        stepIndex - 1
+                    );
+
                 }
-            });
+            );
+        }
+
+        if (nextBtn) {
+
+            nextBtn.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        stepIndex ===
+                        STEPS.length - 1
+                    ) {
+
+                        endTour();
+
+                    } else {
+
+                        goToStep(
+                            stepIndex + 1
+                        );
+
+                    }
+
+                }
+            );
         }
     }
 
     function renderStep(index) {
-        clearOverlayElements();
-        const step = STEPS[index];
 
-        if (typeof openSidebar === "function" && typeof closeSidebar === "function") {
+        clearOverlayElements();
+
+        stepIndex =
+            Math.max(
+                0,
+                Math.min(
+                    index,
+                    STEPS.length - 1
+                )
+            );
+
+        const step =
+            STEPS[stepIndex];
+
+        /*
+            Open/close sidebar automatically.
+        */
+
+        if (
+            typeof openSidebar === "function" &&
+            typeof closeSidebar === "function"
+        ) {
+
             if (step.needsSidebar) {
+
                 openSidebar();
+
             } else {
+
                 closeSidebar();
+
             }
         }
 
-        const render = () => {
+        /*
+            Give sidebar time to open.
+        */
+
+        const startRender = () => {
+
             if (!step.target) {
-                renderCentered(step, index);
+
+                renderCentered(
+                    step,
+                    stepIndex
+                );
+
                 return;
             }
-            const rect = getVisibleRect(step.target);
-            if (!rect) {
-                renderCentered(step, index);
+
+            const target =
+                getTarget(
+                    step.target
+                );
+
+            if (!target) {
+
+                renderCentered(
+                    step,
+                    stepIndex
+                );
+
                 return;
             }
-            renderOnTarget(step, index, rect);
+
+            renderTarget(
+                step,
+                stepIndex,
+                target
+            );
         };
 
-        // give the sidebar's slide animation a moment to finish before measuring it
         if (step.needsSidebar) {
-            setTimeout(render, 380);
+
+            renderTimer =
+                setTimeout(
+                    startRender,
+                    400
+                );
+
         } else {
-            render();
+
+            startRender();
+
         }
     }
 
     function goToStep(index) {
-        stepIndex = Math.max(0, Math.min(index, STEPS.length - 1));
-        renderStep(stepIndex);
+
+        renderStep(index);
     }
 
     function endTour() {
-        localStorage.setItem("prepvanta-show-walkthrough", "false");
+
         clearOverlayElements();
-        if (typeof closeSidebar === "function") closeSidebar();
-        document.body.style.overflow = "";
+
+        localStorage.setItem(
+            "prepvanta-show-walkthrough",
+            "false"
+        );
+
+        if (
+            typeof closeSidebar === "function"
+        ) {
+
+            closeSidebar();
+
+        }
+
+        document.body.style.overflow =
+            "";
     }
 
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && tooltip) endTour();
-    });
+    /*
+        ESC closes the walkthrough.
+    */
 
-    window.addEventListener("resize", () => {
-        if (tooltip) renderStep(stepIndex);
-    });
+    document.addEventListener(
+        "keydown",
+        (event) => {
 
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => goToStep(0), 500);
-    });
+            if (
+                event.key === "Escape" &&
+                tooltip
+            ) {
+
+                endTour();
+
+            }
+
+        }
+    );
+
+    /*
+        Recalculate position if the
+        browser window changes size.
+    */
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            if (tooltip) {
+
+                renderStep(
+                    stepIndex
+                );
+
+            }
+
+        }
+    );
+
+    /*
+        Start after dashboard has loaded.
+    */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            setTimeout(
+                () => {
+                    goToStep(0);
+                },
+                700
+            );
+
+        }
+    );
 
 })();
