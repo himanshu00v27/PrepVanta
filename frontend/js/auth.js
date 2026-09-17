@@ -775,3 +775,366 @@ document
             }
         );
     });
+    /* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+const forgotPasswordForm =
+    document.getElementById("forgotPasswordForm");
+
+if (forgotPasswordForm) {
+
+    forgotPasswordForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const emailGroup =
+            document.getElementById("fg-forgot-email");
+
+        const emailInput =
+            document.getElementById("forgotEmail");
+
+        const submitButton =
+            forgotPasswordForm.querySelector(
+                "button[type=submit]"
+            );
+
+        const email =
+            emailInput.value.trim();
+
+        /* Validate email */
+        const emailValid =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (!emailValid) {
+
+            setFieldError(
+                emailGroup,
+                "Enter a valid email address."
+            );
+
+            return;
+        }
+
+        setFieldError(emailGroup, "");
+
+        /* Disable button */
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE_URL}/forgot-password`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                setFieldError(
+                    emailGroup,
+                    data.message ||
+                    "Unable to send verification code."
+                );
+
+                submitButton.disabled = false;
+                submitButton.textContent =
+                    "Send Verification Code";
+
+                return;
+            }
+
+            /*
+             * OTP was successfully requested.
+             * Pass the email to the reset page.
+             */
+            localStorage.setItem(
+                "prepvanta-reset-email",
+                email
+            );
+
+            location.href =
+                `reset-password.html?email=${encodeURIComponent(email)}`;
+
+        } catch (error) {
+
+            console.error(
+                "Forgot password error:",
+                error
+            );
+
+            setFieldError(
+                emailGroup,
+                "Unable to connect to the server. Please try again."
+            );
+
+            submitButton.disabled = false;
+            submitButton.textContent =
+                "Send Verification Code";
+        }
+    });
+}
+
+
+/* =========================================================
+   RESET PASSWORD
+========================================================= */
+
+const resetPasswordForm =
+    document.getElementById("resetPasswordForm");
+
+if (resetPasswordForm) {
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const emailFromURL =
+        params.get("email");
+
+    const resetEmailInput =
+        document.getElementById("resetEmail");
+
+    /*
+     * Automatically populate email from
+     * forgot-password.html.
+     */
+    if (emailFromURL) {
+
+        resetEmailInput.value =
+            emailFromURL;
+
+    } else {
+
+        const savedEmail =
+            localStorage.getItem(
+                "prepvanta-reset-email"
+            );
+
+        if (savedEmail) {
+
+            resetEmailInput.value =
+                savedEmail;
+        }
+    }
+
+    resetPasswordForm.addEventListener(
+        "submit",
+        async (e) => {
+
+            e.preventDefault();
+
+            const emailGroup =
+                document.getElementById(
+                    "fg-reset-email"
+                );
+
+            const otpGroup =
+                document.getElementById(
+                    "fg-reset-otp"
+                );
+
+            const passwordGroup =
+                document.getElementById(
+                    "fg-reset-password"
+                );
+
+            const confirmPasswordGroup =
+                document.getElementById(
+                    "fg-reset-confirm-password"
+                );
+
+            const email =
+                document.getElementById(
+                    "resetEmail"
+                ).value.trim();
+
+            const otp =
+                document.getElementById(
+                    "resetOtp"
+                ).value.trim();
+
+            const password =
+                document.getElementById(
+                    "resetPassword"
+                ).value;
+
+            const confirmPassword =
+                document.getElementById(
+                    "resetConfirmPassword"
+                ).value;
+
+            const submitButton =
+                resetPasswordForm.querySelector(
+                    "button[type=submit]"
+                );
+
+            let valid = true;
+
+            /* Email */
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
+
+                setFieldError(
+                    emailGroup,
+                    "Enter a valid email address."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    emailGroup,
+                    ""
+                );
+            }
+
+            /* OTP */
+            if (!/^\d{6}$/.test(otp)) {
+
+                setFieldError(
+                    otpGroup,
+                    "Enter the 6-digit verification code."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    otpGroup,
+                    ""
+                );
+            }
+
+            /* Password */
+            if (password.length < 6) {
+
+                setFieldError(
+                    passwordGroup,
+                    "Password must be at least 6 characters."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    passwordGroup,
+                    ""
+                );
+            }
+
+            /* Confirm password */
+            if (password !== confirmPassword) {
+
+                setFieldError(
+                    confirmPasswordGroup,
+                    "Passwords do not match."
+                );
+
+                valid = false;
+
+            } else {
+
+                setFieldError(
+                    confirmPasswordGroup,
+                    ""
+                );
+            }
+
+            if (!valid) {
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent =
+                "Resetting Password...";
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE_URL}/reset-password`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email,
+                            otp,
+                            newPassword: password
+                        })
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    setFieldError(
+                        otpGroup,
+                        data.message ||
+                        "Unable to reset password."
+                    );
+
+                    submitButton.disabled = false;
+                    submitButton.textContent =
+                        "Reset Password";
+
+                    return;
+                }
+
+                /*
+                 * Password reset succeeded.
+                 */
+                localStorage.removeItem(
+                    "prepvanta-reset-email"
+                );
+
+                alert(
+                    data.message ||
+                    "Password reset successful. You can now log in."
+                );
+
+                location.href =
+                    "login.html";
+
+            } catch (error) {
+
+                console.error(
+                    "Reset password error:",
+                    error
+                );
+
+                setFieldError(
+                    passwordGroup,
+                    "Unable to connect to the server. Please try again."
+                );
+
+                submitButton.disabled = false;
+                submitButton.textContent =
+                    "Reset Password";
+            }
+        }
+    );
+}

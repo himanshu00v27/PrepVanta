@@ -516,5 +516,249 @@ router.post('/login', async (req, res) => {
     }
 });
 
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                message: 'Email is required'
+            });
+        }
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+            return res.status(400).json({
+                message: 'Enter a valid email address'
+            });
+        }
+
+        const user = await User.findOne({
+            email: normalizedEmail
+        });
+
+        /*
+         * Do not reveal whether an email exists.
+         */
+        if (!user) {
+            return res.json({
+                message:
+                    'If an account exists with this email, a verification code has been sent.'
+            });
+        }
+
+        const otp = generateOTP();
+
+        const otpHash = hashOTP(otp);
+
+        const otpExpiresAt =
+            new Date(Date.now() + 5 * 60 * 1000);
+
+        await EmailVerification.deleteMany({
+            email: normalizedEmail
+        });
+
+        await EmailVerification.create({
+            fullName: user.fullName,
+            username: user.username,
+            email: normalizedEmail,
+            password: user.password,
+            otpHash,
+            otpExpiresAt,
+            otpAttempts: 0,
+            verified: false
+        });
+
+        await sendEmail({
+            to: normalizedEmail,
+            subject: 'PrepVanta Password Reset Code',
+            html: `
+                <div style="font-family:Arial,sans-serif;">
+                    <h2>PrepVanta Password Reset</h2>
+
+                    <p>Hello ${user.fullName},</p>
+
+                    <p>
+                        Use the verification code below to reset your password:
+                    </p>
+
+                    <h1 style="letter-spacing:6px;">
+                        ${otp}
+                    </h1>
+
+                    <p>
+                        This code expires in 5 minutes.
+                    </p>
+
+                    <p>
+                        If you did not request a password reset,
+                        you can safely ignore this email.
+                    </p>
+                </div>
+            `
+        });
+
+        return res.json({
+            message:
+                'If an account exists with this email, a verification code has been sent.'
+        });
+
+    } catch (error) {
+
+        console.error(
+            'Forgot password error:',
+            error.message
+        );
+
+        return res.status(500).json({
+            message:
+                'Server error while processing password reset'
+        });
+    }
+});
+/* =========================================================
+   RESET PASSWORD
+========================================================= */
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        const {
+            email,
+            otp,
+            newPassword
+        } = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({
+                message:
+                    'Email, verification code and new password are required'
+            });
+        }
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+            return res.status(400).json({
+                message:
+                    'Enter a valid email address'
+            });
+        }
+
+        if (!/^\d{6}$/.test(otp)) {
+            return res.status(400).json({
+                message:
+                    'Verification code must be 6 digits'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                message:
+                    'Password must be at least 6 characters'
+            });
+        }
+
+        const verification =
+            await EmailVerification.findOne({
+                email: normalizedEmail,
+                verified: false
+            });
+
+        if (!verification) {
+            return res.status(400).json({
+                message:
+                    'Invalid or expired verification code'
+            });
+        }
+
+        if (
+            new Date() >
+            verification.otpExpiresAt
+        ) {
+            await EmailVerification.deleteOne({
+                _id: verification._id
+            });
+
+            return res.status(400).json({
+                message:
+                    'Verification code has expired'
+            });
+        }
+
+        if (verification.otpAttempts >= 5) {
+            return res.status(429).json({
+                message:
+                    'Too many verification attempts. Please request a new code.'
+            });
+        }
+
+        const submittedOtpHash =
+            hashOTP(otp);
+
+        if (
+            submittedOtpHash !==
+            verification.otpHash
+        ) {
+            verification.otpAttempts += 1;
+
+            await verification.save();
+
+            return res.status(400).json({
+                message:
+                    'Invalid verification code'
+            });
+        }
+
+        const user = await User.findOne({
+            email: normalizedEmail
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message:
+                    'Account not found'
+            });
+        }
+
+        const hashedPassword =
+            await bcrypt.hash(
+                newPassword,
+                10
+            );
+
+        user.password =
+            hashedPassword;
+
+        await user.save();
+
+        await EmailVerification.deleteOne({
+            _id: verification._id
+        });
+
+        return res.json({
+            message:
+                'Password reset successful'
+        });
+
+    } catch (error) {
+
+        console.error(
+            'Reset password error:',
+            error.message
+        );
+
+        return res.status(500).json({
+            message:
+                'Server error while resetting password'
+        });
+    }
+});
 
 module.exports = router;

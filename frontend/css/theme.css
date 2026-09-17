@@ -51,3 +51,7 @@
 
     --border:#334155;
 }
+/* Theme Toggle Icons */
+.theme-toggle .fa-sun {
+    color: #FFD700;
+}

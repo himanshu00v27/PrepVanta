@@ -284,3 +284,75 @@
     margin-top: 6px;
     color: #dc2626 !important;
 }
+/* ===================================
+   AUTH PAGE LAYOUT
+=================================== */
+
+.auth-page {
+    padding: 60px 0;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+}
+
+.auth-page .container {
+    width: 100%;
+}
+
+.auth-page .auth-grid {
+    width: 100%;
+}
+
+/* Forgot / Reset Password Pages */
+
+#forgotPasswordForm,
+#resetPasswordForm {
+    width: 100%;
+}
+
+#forgotPasswordForm .btn,
+#resetPasswordForm .btn {
+    margin-top: 4px;
+}
+
+#forgotPasswordForm .form-group,
+#resetPasswordForm .form-group {
+    width: 100%;
+}
+
+/* Better OTP input */
+
+#resetOtp {
+    letter-spacing: 4px;
+    font-weight: 600;
+}
+
+/* Mobile */
+
+@media (max-width: 900px) {
+
+    .auth-page {
+        padding: 40px 0;
+    }
+
+    .auth-form-wrap {
+        padding: 45px 30px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .auth-page {
+        padding: 25px 0;
+    }
+
+    .auth-form-wrap {
+        padding: 35px 22px;
+    }
+
+    .auth-form-wrap h1 {
+        font-size: 1.7rem;
+    }
+
+}
