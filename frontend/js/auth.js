@@ -447,6 +447,10 @@ function showOTPVerification(
                 /*
                  * Account has now been created.
                  */
+                localStorage.setItem(
+                     "prepvanta-show-walkthrough",
+                     "true"
+                );
 
                 verificationBox.innerHTML = `
                     <div class="otp-verification">
