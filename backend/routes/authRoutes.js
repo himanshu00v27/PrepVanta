@@ -1,12 +1,19 @@
-const { loginLimiter, passwordResetLimiter, registrationLimiter, otpVerificationLimiter, usernameCheckLimiter } = require('../middleware/rateLimiters');
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const {
+  loginLimiter,
+  passwordResetLimiter,
+  registrationLimiter,
+  otpVerificationLimiter,
+  usernameCheckLimiter,
+} = require("../middleware/rateLimiters");
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
-const User = require('../models/User');
-const EmailVerification = require('../models/EmailVerification');
-const { sendEmail } = require('../services/emailService');
+const User = require("../models/User");
+const EmailVerification = require("../models/EmailVerification");
+const { sendEmail } = require("../services/emailService");
+const { createAuditLog } = require("../services/auditService");
 
 const router = express.Router();
 
@@ -15,63 +22,54 @@ const router = express.Router();
 ========================= */
 
 function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function generateOTP() {
-    return crypto.randomInt(100000, 1000000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 function hashOTP(otp) {
-    return crypto
-        .createHash('sha256')
-        .update(otp)
-        .digest('hex');
+  return crypto.createHash("sha256").update(otp).digest("hex");
 }
 
 function generateUserId() {
-    return `PV${Date.now().toString(36).toUpperCase()}`;
+  return `PV${Date.now().toString(36).toUpperCase()}`;
 }
 
 /* =========================
    CHECK USERNAME AVAILABILITY
 ========================= */
 
-router.get('/check-username', usernameCheckLimiter, async (req, res) => {
-    try {
-        const username = (req.query.username || '').trim();
+router.get("/check-username", usernameCheckLimiter, async (req, res) => {
+  try {
+    const username = (req.query.username || "").trim();
 
-        /* ---------- Validate username format ---------- */
+    /* ---------- Validate username format ---------- */
 
-        if (!/^[a-z0-9]{4,20}$/.test(username)) {
-            return res.status(400).json({
-                message:
-                    'Username must contain 4-20 lowercase letters and numbers only'
-            });
-        }
-
-        /* ---------- Check existing user ---------- */
-
-        const existingUser = await User.exists({
-            username: username
-        });
-
-        return res.json({
-            available: !existingUser
-        });
-
-    } catch (error) {
-
-        console.error(
-            'Username availability error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Server error while checking username'
-        });
+    if (!/^[a-z0-9]{4,20}$/.test(username)) {
+      return res.status(400).json({
+        message:
+          "Username must contain 4-20 lowercase letters and numbers only",
+      });
     }
+
+    /* ---------- Check existing user ---------- */
+
+    const existingUser = await User.exists({
+      username: username,
+    });
+
+    return res.json({
+      available: !existingUser,
+    });
+  } catch (error) {
+    console.error("Username availability error:", error.message);
+
+    return res.status(500).json({
+      message: "Server error while checking username",
+    });
+  }
 });
 
 /* =========================
@@ -79,118 +77,104 @@ router.get('/check-username', usernameCheckLimiter, async (req, res) => {
    Send email OTP
 ========================= */
 
-router.post('/register', registrationLimiter, async (req, res) => {
-    try {
-        const {
-            fullName,
-            username,
-            email,
-            password
-        } = req.body;
+router.post("/register", registrationLimiter, async (req, res) => {
+  try {
+    const { fullName, username, email, password } = req.body;
 
-        /* ---------- Required fields ---------- */
+    /* ---------- Required fields ---------- */
 
-        if (!fullName || !username || !email || !password) {
-            return res.status(400).json({
-                message: 'All fields are required'
-            });
-        }
+    if (!fullName || !username || !email || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
 
-        /* ---------- Email validation ---------- */
+    /* ---------- Email validation ---------- */
 
-        const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-        if (!isValidEmail(normalizedEmail)) {
-            return res.status(400).json({
-                message: 'Please enter a valid email address'
-            });
-        }
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
+      });
+    }
 
-        /* ---------- Username validation ---------- */
+    /* ---------- Username validation ---------- */
 
-        const normalizedUsername = username.trim();
+    const normalizedUsername = username.trim();
 
-        if (!/^[a-z0-9]{4,20}$/.test(normalizedUsername)) {
-            return res.status(400).json({
-                message:
-                    'Username must contain 4-20 letters and contain only lowercase letters and numbers'
-            });
-        }
+    if (!/^[a-z0-9]{4,20}$/.test(normalizedUsername)) {
+      return res.status(400).json({
+        message:
+          "Username must contain 4-20 letters and contain only lowercase letters and numbers",
+      });
+    }
 
-        /* ---------- Password validation ---------- */
+    /* ---------- Password validation ---------- */
 
-        if (password.length < 6) {
-            return res.status(400).json({
-                message: 'Password must be at least 6 characters'
-            });
-        }
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
 
-        /* ---------- Check existing user ---------- */
+    /* ---------- Check existing user ---------- */
 
-        const existingUser = await User.findOne({
-            $or: [
-                { username: normalizedUsername },
-                { email: normalizedEmail }
-            ]
+    const existingUser = await User.findOne({
+      $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
+    });
+
+    if (existingUser) {
+      if (existingUser.username === normalizedUsername) {
+        return res.status(409).json({
+          message: "Username is already registered",
         });
+      }
 
-        if (existingUser) {
+      return res.status(409).json({
+        message: "Email is already registered",
+      });
+    }
 
-            if (existingUser.username === normalizedUsername) {
-                return res.status(409).json({
-                    message: 'Username is already registered'
-                });
-            }
+    /* ---------- Remove old pending registration ---------- */
 
-            return res.status(409).json({
-                message: 'Email is already registered'
-            });
-        }
+    await EmailVerification.deleteMany({
+      $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
+    });
 
-        /* ---------- Remove old pending registration ---------- */
+    /* ---------- Generate OTP ---------- */
 
-        await EmailVerification.deleteMany({
-            $or: [
-                { email: normalizedEmail },
-                { username: normalizedUsername }
-            ]
-        });
+    const otp = generateOTP();
 
-        /* ---------- Generate OTP ---------- */
+    const otpHash = hashOTP(otp);
 
-        const otp = generateOTP();
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-        const otpHash = hashOTP(otp);
+    /* ---------- Hash password ---------- */
 
-        const otpExpiresAt =
-            new Date(Date.now() + 5 * 60 * 1000);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        /* ---------- Hash password ---------- */
+    /* ---------- Store pending registration ---------- */
 
-        const hashedPassword =
-            await bcrypt.hash(password, 10);
+    await EmailVerification.create({
+      fullName: fullName.trim(),
+      username: normalizedUsername,
+      email: normalizedEmail,
+      password: hashedPassword,
+      otpHash,
+      otpExpiresAt,
+      otpAttempts: 0,
+      verified: false,
+    });
 
-        /* ---------- Store pending registration ---------- */
+    /* ---------- Send OTP email ---------- */
 
-        await EmailVerification.create({
-            fullName: fullName.trim(),
-            username: normalizedUsername,
-            email: normalizedEmail,
-            password: hashedPassword,
-            otpHash,
-            otpExpiresAt,
-            otpAttempts: 0,
-            verified: false
-        });
+    await sendEmail({
+      to: normalizedEmail,
 
-        /* ---------- Send OTP email ---------- */
+      subject: "PrepVanta Email Verification",
 
-        await sendEmail({
-            to: normalizedEmail,
-
-            subject: 'PrepVanta Email Verification',
-
-            html: `
+      html: `
                 <div style="
                     font-family: Arial, sans-serif;
                     max-width: 600px;
@@ -234,360 +218,350 @@ router.post('/register', registrationLimiter, async (req, res) => {
                     </p>
 
                 </div>
-            `
-        });
+            `,
+    });
 
-        return res.status(200).json({
-            message: 'OTP sent successfully',
-            email: normalizedEmail
-        });
+    return res.status(200).json({
+      message: "OTP sent successfully",
+      email: normalizedEmail,
+    });
+  } catch (error) {
+    console.error("Registration error:", error.message);
 
-    } catch (error) {
-
-        console.error(
-            'Registration error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Unable to send verification email. Please try again.'
-        });
-    }
+    return res.status(500).json({
+      message: "Unable to send verification email. Please try again.",
+    });
+  }
 });
-
 
 /* =========================
    VERIFY OTP
 ========================= */
 
-router.post('/verify-otp', otpVerificationLimiter, async (req, res) => {
-    try {
+router.post("/verify-otp", otpVerificationLimiter, async (req, res) => {
+  try {
+    const { email, otp } = req.body;
 
-        const {
-            email,
-            otp
-        } = req.body;
+    /* ---------- Validate input ---------- */
 
-        /* ---------- Validate input ---------- */
-
-        if (!email || !otp) {
-            return res.status(400).json({
-                message: 'Email and OTP are required'
-            });
-        }
-
-        const normalizedEmail =
-            email.trim().toLowerCase();
-
-        if (!/^\d{6}$/.test(otp)) {
-            return res.status(400).json({
-                message: 'OTP must be a 6-digit number'
-            });
-        }
-
-        /* ---------- Find pending registration ---------- */
-
-        const verification =
-            await EmailVerification.findOne({
-                email: normalizedEmail,
-                verified: false
-            });
-
-        if (!verification) {
-            return res.status(404).json({
-                message:
-                    'No pending verification found. Please register again.'
-            });
-        }
-
-        /* ---------- Check expiry ---------- */
-
-        if (
-            new Date() >
-            verification.otpExpiresAt
-        ) {
-            await EmailVerification.deleteOne({
-                _id: verification._id
-            });
-
-            return res.status(410).json({
-                message:
-                    'OTP has expired. Please register again.'
-            });
-        }
-
-        /* ---------- Check attempts ---------- */
-
-        if (verification.otpAttempts >= 5) {
-
-            await EmailVerification.deleteOne({
-                _id: verification._id
-            });
-
-            return res.status(429).json({
-                message:
-                    'Too many incorrect attempts. Please register again.'
-            });
-        }
-
-        /* ---------- Compare OTP ---------- */
-
-        const submittedOTPHash =
-            hashOTP(otp);
-
-        if (
-            submittedOTPHash !==
-            verification.otpHash
-        ) {
-
-            verification.otpAttempts += 1;
-
-            await verification.save();
-
-            return res.status(401).json({
-                message: 'Incorrect OTP'
-            });
-        }
-
-        /* ---------- Mark verified ---------- */
-
-        verification.verified = true;
-
-        await verification.save();
-
-        /* ---------- Double-check uniqueness ---------- */
-
-        const existingUser = await User.findOne({
-            $or: [
-                { username: verification.username },
-                { email: verification.email }
-            ]
-        });
-
-        if (existingUser) {
-
-            await EmailVerification.deleteOne({
-                _id: verification._id
-            });
-
-            return res.status(409).json({
-                message:
-                    'Username or email is already registered'
-            });
-        }
-
-        /* ---------- Create actual user ---------- */
-
-        const user = await User.create({
-            fullName: verification.fullName,
-            username: verification.username,
-            email: verification.email,
-            password: verification.password,
-            userId: generateUserId(),
-            role: 'user'
-        });
-
-        /* ---------- Delete temporary verification ---------- */
-
-        await EmailVerification.deleteOne({
-            _id: verification._id
-        });
-
-        return res.status(201).json({
-            message: 'Email verified and registration successful',
-
-            user: {
-                userId: user.userId,
-                fullName: user.fullName,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
-        });
-
-    } catch (error) {
-
-        console.error(
-            'OTP verification error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Server error during email verification'
-        });
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
     }
-});
 
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({
+        message: "OTP must be a 6-digit number",
+      });
+    }
+
+    /* ---------- Find pending registration ---------- */
+
+    const verification = await EmailVerification.findOne({
+      email: normalizedEmail,
+      verified: false,
+    });
+
+    if (!verification) {
+      return res.status(404).json({
+        message: "No pending verification found. Please register again.",
+      });
+    }
+
+    /* ---------- Check expiry ---------- */
+
+    if (new Date() > verification.otpExpiresAt) {
+      await EmailVerification.deleteOne({
+        _id: verification._id,
+      });
+
+      return res.status(410).json({
+        message: "OTP has expired. Please register again.",
+      });
+    }
+
+    /* ---------- Check attempts ---------- */
+
+    if (verification.otpAttempts >= 5) {
+      await EmailVerification.deleteOne({
+        _id: verification._id,
+      });
+
+      return res.status(429).json({
+        message: "Too many incorrect attempts. Please register again.",
+      });
+    }
+
+    /* ---------- Compare OTP ---------- */
+
+    const submittedOTPHash = hashOTP(otp);
+
+    if (submittedOTPHash !== verification.otpHash) {
+      verification.otpAttempts += 1;
+
+      await verification.save();
+
+      await createAuditLog({
+        username: verification.username,
+        action: "OTP_VERIFICATION",
+        status: "failure",
+        ipAddress: req.ip,
+        details: "Invalid OTP entered",
+      });
+
+      return res.status(401).json({
+        message: "Incorrect OTP",
+      });
+    }
+
+    /* ---------- Mark verified ---------- */
+
+    verification.verified = true;
+
+    await verification.save();
+    await createAuditLog({
+      username: verification.username,
+      action: "OTP_VERIFICATION",
+      status: "success",
+      ipAddress: req.ip,
+      details: "OTP verification successful",
+    });
+
+    /* ---------- Double-check uniqueness ---------- */
+
+    const existingUser = await User.findOne({
+      $or: [{ username: verification.username }, { email: verification.email }],
+    });
+
+    if (existingUser) {
+      await EmailVerification.deleteOne({
+        _id: verification._id,
+      });
+
+      return res.status(409).json({
+        message: "Username or email is already registered",
+      });
+    }
+
+    /* ---------- Create actual user ---------- */
+
+    const user = await User.create({
+      fullName: verification.fullName,
+      username: verification.username,
+      email: verification.email,
+      password: verification.password,
+      userId: generateUserId(),
+      role: "user",
+    });
+
+    await createAuditLog({
+      userId: user.userId,
+      username: user.username,
+      action: "REGISTRATION",
+      status: "success",
+      ipAddress: req.ip,
+      details: "User registration completed successfully",
+    });
+
+    /* ---------- Delete temporary verification ---------- */
+
+    await EmailVerification.deleteOne({
+      _id: verification._id,
+    });
+
+    return res.status(201).json({
+      message: "Email verified and registration successful",
+
+      user: {
+        userId: user.userId,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("OTP verification error:", error.message);
+
+    return res.status(500).json({
+      message: "Server error during email verification",
+    });
+  }
+});
 
 /* =========================
    LOGIN
 ========================= */
 
-router.post('/login',loginLimiter, async (req, res) => {
-    try {
+router.post("/login", loginLimiter, async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        const {
-            email,
-            password
-        } = req.body;
+    /* ---------- Validate input ---------- */
 
-        /* ---------- Validate input ---------- */
-
-        if (!email || !password) {
-            return res.status(400).json({
-                message:
-                    'Email and password are required'
-            });
-        }
-
-        const normalizedEmail =
-            email.trim().toLowerCase();
-
-        /* ---------- Find user ---------- */
-
-        const user = await User.findOne({
-            email: normalizedEmail
-        });
-
-        if (!user) {
-            return res.status(401).json({
-                message:
-                    'Invalid email or password'
-            });
-        }
-        /* ---------- Check account status ---------- */
-
-if (!user.isActive) {
-    return res.status(403).json({
-        message:
-            'Account is deactivated'
-    });
-}
-
-        /* ---------- Compare password ---------- */
-
-        const passwordMatch =
-            await bcrypt.compare(
-                password,
-                user.password
-            );
-
-        if (!passwordMatch) {
-            return res.status(401).json({
-                message:
-                    'Invalid email or password'
-            });
-        }
-
-        /* ---------- Create JWT ---------- */
-
-        const token = jwt.sign(
-            {
-                userId: user.userId,
-                username: user.username,
-                role: user.role
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: '7d'
-            }
-        );
-
-        /* ---------- Send response ---------- */
-
-        return res.json({
-            message: 'Login successful',
-
-            token,
-
-            user: {
-                userId: user.userId,
-                fullName: user.fullName,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
-        });
-
-    } catch (error) {
-
-        console.error(
-            'Login error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Server error during login'
-        });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    /* ---------- Find user ---------- */
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      await createAuditLog({
+        action: "LOGIN",
+        status: "failure",
+        ipAddress: req.ip,
+        details: `Failed login attempt for email: ${normalizedEmail}`,
+      });
+
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+    /* ---------- Check account status ---------- */
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        message: "Account is deactivated",
+      });
+    }
+
+    /* ---------- Compare password ---------- */
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      await createAuditLog({
+        userId: user.userId,
+        username: user.username,
+        action: "LOGIN",
+        status: "failure",
+        ipAddress: req.ip,
+        details: "Incorrect password",
+      });
+
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+    /* ---------- Create JWT ---------- */
+
+    const token = jwt.sign(
+      {
+        userId: user.userId,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    await createAuditLog({
+      userId: user.userId,
+      username: user.username,
+      action: "LOGIN",
+      status: "success",
+      ipAddress: req.ip,
+      details: "User logged in successfully",
+    });
+
+    /* ---------- Send response ---------- */
+
+    return res.json({
+      message: "Login successful",
+
+      token,
+
+      user: {
+        userId: user.userId,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error.message);
+
+    return res.status(500).json({
+      message: "Server error during login",
+    });
+  }
 });
 
 /* =========================================================
    FORGOT PASSWORD
 ========================================================= */
 
-router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
-    try {
-        const { email } = req.body;
+router.post("/forgot-password", passwordResetLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
 
-        if (!email) {
-            return res.status(400).json({
-                message: 'Email is required'
-            });
-        }
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
 
-        const normalizedEmail =
-            email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-        if (!isValidEmail(normalizedEmail)) {
-            return res.status(400).json({
-                message: 'Enter a valid email address'
-            });
-        }
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Enter a valid email address",
+      });
+    }
 
-        const user = await User.findOne({
-            email: normalizedEmail
-        });
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
 
-        /*
-         * Do not reveal whether an email exists.
-         */
-        if (!user) {
-            return res.json({
-                message:
-                    'If an account exists with this email, a verification code has been sent.'
-            });
-        }
+    /*
+     * Do not reveal whether an email exists.
+     */
+    if (!user) {
+      return res.json({
+        message:
+          "If an account exists with this email, a verification code has been sent.",
+      });
+    }
 
-        const otp = generateOTP();
+    const otp = generateOTP();
 
-        const otpHash = hashOTP(otp);
+    const otpHash = hashOTP(otp);
 
-        const otpExpiresAt =
-            new Date(Date.now() + 5 * 60 * 1000);
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-        await EmailVerification.deleteMany({
-            email: normalizedEmail
-        });
+    await EmailVerification.deleteMany({
+      email: normalizedEmail,
+    });
 
-        await EmailVerification.create({
-            fullName: user.fullName,
-            username: user.username,
-            email: normalizedEmail,
-            password: user.password,
-            otpHash,
-            otpExpiresAt,
-            otpAttempts: 0,
-            verified: false
-        });
+    await EmailVerification.create({
+      fullName: user.fullName,
+      username: user.username,
+      email: normalizedEmail,
+      password: user.password,
+      otpHash,
+      otpExpiresAt,
+      otpAttempts: 0,
+      verified: false,
+    });
 
-        await sendEmail({
-            to: normalizedEmail,
-            subject: 'PrepVanta Password Reset Code',
-            html: `
+    await sendEmail({
+      to: normalizedEmail,
+      subject: "PrepVanta Password Reset Code",
+      html: `
                 <div style="font-family:Arial,sans-serif;">
                     <h2>PrepVanta Password Reset</h2>
 
@@ -610,164 +584,140 @@ router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
                         you can safely ignore this email.
                     </p>
                 </div>
-            `
-        });
+            `,
+    });
 
-        return res.json({
-            message:
-                'If an account exists with this email, a verification code has been sent.'
-        });
+    return res.json({
+      message:
+        "If an account exists with this email, a verification code has been sent.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error.message);
 
-    } catch (error) {
-
-        console.error(
-            'Forgot password error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Server error while processing password reset'
-        });
-    }
+    return res.status(500).json({
+      message: "Server error while processing password reset",
+    });
+  }
 });
 /* =========================================================
    RESET PASSWORD
 ========================================================= */
 
-router.post('/reset-password',passwordResetLimiter, async (req, res) => {
-    try {
-        const {
-            email,
-            otp,
-            newPassword
-        } = req.body;
+router.post("/reset-password", passwordResetLimiter, async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
 
-        if (!email || !otp || !newPassword) {
-            return res.status(400).json({
-                message:
-                    'Email, verification code and new password are required'
-            });
-        }
-
-        const normalizedEmail =
-            email.trim().toLowerCase();
-
-        if (!isValidEmail(normalizedEmail)) {
-            return res.status(400).json({
-                message:
-                    'Enter a valid email address'
-            });
-        }
-
-        if (!/^\d{6}$/.test(otp)) {
-            return res.status(400).json({
-                message:
-                    'Verification code must be 6 digits'
-            });
-        }
-
-        if (newPassword.length < 6) {
-            return res.status(400).json({
-                message:
-                    'Password must be at least 6 characters'
-            });
-        }
-
-        const verification =
-            await EmailVerification.findOne({
-                email: normalizedEmail,
-                verified: false
-            });
-
-        if (!verification) {
-            return res.status(400).json({
-                message:
-                    'Invalid or expired verification code'
-            });
-        }
-
-        if (
-            new Date() >
-            verification.otpExpiresAt
-        ) {
-            await EmailVerification.deleteOne({
-                _id: verification._id
-            });
-
-            return res.status(400).json({
-                message:
-                    'Verification code has expired'
-            });
-        }
-
-        if (verification.otpAttempts >= 5) {
-            return res.status(429).json({
-                message:
-                    'Too many verification attempts. Please request a new code.'
-            });
-        }
-
-        const submittedOtpHash =
-            hashOTP(otp);
-
-        if (
-            submittedOtpHash !==
-            verification.otpHash
-        ) {
-            verification.otpAttempts += 1;
-
-            await verification.save();
-
-            return res.status(400).json({
-                message:
-                    'Invalid verification code'
-            });
-        }
-
-        const user = await User.findOne({
-            email: normalizedEmail
-        });
-
-        if (!user) {
-            return res.status(404).json({
-                message:
-                    'Account not found'
-            });
-        }
-
-        const hashedPassword =
-            await bcrypt.hash(
-                newPassword,
-                10
-            );
-
-        user.password =
-            hashedPassword;
-
-        await user.save();
-
-        await EmailVerification.deleteOne({
-            _id: verification._id
-        });
-
-        return res.json({
-            message:
-                'Password reset successful'
-        });
-
-    } catch (error) {
-
-        console.error(
-            'Reset password error:',
-            error.message
-        );
-
-        return res.status(500).json({
-            message:
-                'Server error while resetting password'
-        });
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        message: "Email, verification code and new password are required",
+      });
     }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Enter a valid email address",
+      });
+    }
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({
+        message: "Verification code must be 6 digits",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    const verification = await EmailVerification.findOne({
+      email: normalizedEmail,
+      verified: false,
+    });
+
+    if (!verification) {
+      return res.status(400).json({
+        message: "Invalid or expired verification code",
+      });
+    }
+
+    if (new Date() > verification.otpExpiresAt) {
+      await EmailVerification.deleteOne({
+        _id: verification._id,
+      });
+
+      return res.status(400).json({
+        message: "Verification code has expired",
+      });
+    }
+
+    if (verification.otpAttempts >= 5) {
+      return res.status(429).json({
+        message: "Too many verification attempts. Please request a new code.",
+      });
+    }
+
+    const submittedOtpHash = hashOTP(otp);
+
+    if (submittedOtpHash !== verification.otpHash) {
+      verification.otpAttempts += 1;
+
+      await verification.save();
+
+      await createAuditLog({
+        username: verification.username,
+        action: "PASSWORD_RESET",
+        status: "failure",
+        ipAddress: req.ip,
+        details: "Invalid OTP entered during password reset",
+      });
+
+      return res.status(400).json({
+        message: "Invalid verification code",
+      });
+    }
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    await createAuditLog({
+      userId: user.userId,
+      username: user.username,
+      action: "PASSWORD_RESET",
+      status: "success",
+      ipAddress: req.ip,
+      details: "Password reset successfully",
+    });
+
+    await EmailVerification.deleteOne({
+      _id: verification._id,
+    });
+
+    return res.json({
+      message: "Password reset successful",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error.message);
+
+    return res.status(500).json({
+      message: "Server error while resetting password",
+    });
+  }
 });
 
 module.exports = router;
