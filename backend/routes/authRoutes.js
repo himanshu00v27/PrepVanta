@@ -1,3 +1,4 @@
+const { loginLimiter, passwordResetLimiter, registrationLimiter, otpVerificationLimiter, usernameCheckLimiter } = require('../middleware/rateLimiters');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -36,7 +37,7 @@ function generateUserId() {
    CHECK USERNAME AVAILABILITY
 ========================= */
 
-router.get('/check-username', async (req, res) => {
+router.get('/check-username', usernameCheckLimiter, async (req, res) => {
     try {
         const username = (req.query.username || '').trim();
 
@@ -78,7 +79,7 @@ router.get('/check-username', async (req, res) => {
    Send email OTP
 ========================= */
 
-router.post('/register', async (req, res) => {
+router.post('/register', registrationLimiter, async (req, res) => {
     try {
         const {
             fullName,
@@ -260,7 +261,7 @@ router.post('/register', async (req, res) => {
    VERIFY OTP
 ========================= */
 
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', otpVerificationLimiter, async (req, res) => {
     try {
 
         const {
@@ -424,7 +425,7 @@ router.post('/verify-otp', async (req, res) => {
    LOGIN
 ========================= */
 
-router.post('/login', async (req, res) => {
+router.post('/login',loginLimiter, async (req, res) => {
     try {
 
         const {
@@ -456,6 +457,14 @@ router.post('/login', async (req, res) => {
                     'Invalid email or password'
             });
         }
+        /* ---------- Check account status ---------- */
+
+if (!user.isActive) {
+    return res.status(403).json({
+        message:
+            'Account is deactivated'
+    });
+}
 
         /* ---------- Compare password ---------- */
 
@@ -520,7 +529,7 @@ router.post('/login', async (req, res) => {
    FORGOT PASSWORD
 ========================================================= */
 
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 
@@ -626,7 +635,7 @@ router.post('/forgot-password', async (req, res) => {
    RESET PASSWORD
 ========================================================= */
 
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password',passwordResetLimiter, async (req, res) => {
     try {
         const {
             email,

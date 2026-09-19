@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,7 +15,23 @@ function authMiddleware(req, res, next) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = decoded;
+        const user = await User.findOne({
+            userId: decoded.userId
+        }).select('-password');
+
+        if (!user) {
+            return res.status(401).json({
+                message: 'User account not found'
+            });
+        }
+
+        if (!user.isActive) {
+            return res.status(403).json({
+                message: 'Account is deactivated'
+            });
+        }
+
+        req.user = user;
 
         next();
     } catch (error) {
