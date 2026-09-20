@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="js/auth-guard.js"></script>
+
+    <title>Admin Panel | PrepVanta</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+            <h2>
+                <img src="assets/img/logo-icon.png"
+                    alt="PrepVanta logo"
+                    class="logo-icon">
+                <span class="logo-text">
+                    <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                </span>
+            </h2>
+        </div>
+
+        <div class="sidebar-section">
+
+            <h4>Dashboard</h4>
+
+            <a href="dashboard.html">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+
+        </div>
+
+        <div class="sidebar-section">
+
+            <h4>Administration</h4>
+
+            <a href="admin.html" class="active">
+                <i class="fa-solid fa-shield-halved"></i>
+                Admin Panel
+            </a>
+
+        </div>
+
+        <div class="sidebar-section">
+
+            <h4>Account</h4>
+
+            <a href="dashboard.html">
+                <i class="fa-solid fa-user"></i>
+                My Dashboard
+            </a>
+
+            <a href="#" class="logout-link"
+                onclick="prepvantaLogout(); return false;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+    <nav class="navbar">
+
+        <div class="container nav-container">
+
+            <div class="nav-left">
+
+                <button class="menu-btn" id="menuBtn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <a href="index.html" class="logo">
+                    <img src="assets/img/logo-icon.png"
+                        alt="PrepVanta logo"
+                        class="logo-icon">
+                    <span class="logo-text">
+                        <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                    </span>
+                </a>
+
+            </div>
+
+            <div class="nav-links">
+
+                <a href="index.html">Home</a>
+                <a href="aptitude.html">Aptitude</a>
+                <a href="reasoning.html">Reasoning</a>
+                <a href="topics.html">Topics</a>
+                <a href="compiler.html">Compiler</a>
+
+            </div>
+
+            <div class="nav-right">
+
+                <button class="theme-toggle">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <a href="dashboard.html"
+                    class="profile-btn"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    <i class="fa-solid fa-user"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <section class="dashboard-page">
+
+        <div class="container">
+
+            <div class="dash-head">
+                <h1>Admin Panel</h1>
+                <p>Manage and monitor PrepVanta administration.</p>
+            </div>
+
+            <div class="profile-card">
+
+                <div class="profile-avatar">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+                <div class="profile-info">
+
+                    <h2>Administrator Access</h2>
+
+                    <div class="profile-meta">
+                        <span>
+                            <i class="fa-solid fa-circle-check"></i>
+                            Admin role verified
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="dash-grid">
+
+                <div class="panel-card">
+
+                    <h3>
+                        <i class="fa-solid fa-users"></i>
+                        User Management
+                    </h3>
+
+                    <p>
+                        Manage user accounts and account status.
+                    </p>
+
+                </div>
+
+                <div class="panel-card">
+
+                    <h3>
+                        <i class="fa-solid fa-file-shield"></i>
+                        Audit Logs
+                    </h3>
+
+                    <p>
+                        Review security and authentication activity.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="dash-cta">
+
+                <div>
+                    <h3>Admin API Status</h3>
+                    <p id="adminStatus">
+                        Checking administrator authorization...
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer>
+
+        <div class="container">
+
+            <div class="copyright">
+                © 2026 PrepVanta. All Rights Reserved.
+            </div>
+
+        </div>
+
+    </footer>
+
+    <script src="js/sidebar.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+
+</body>
+
+</html>
