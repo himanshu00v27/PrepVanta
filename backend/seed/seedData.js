@@ -50,27 +50,9 @@ async function seedDatabase() {
       {
         name: "PrepVanta Technologies",
         slug: "prepvanta-tech",
-        description:
-          "Demo company used for testing the PrepVanta company platform.",
         industry: "Technology",
-        difficulty: "medium",
-        status: "published",
-        hiringRoles: ["Software Developer", "Frontend Developer"],
-        eligibility: "B.Tech / B.E. students",
-        packageInfo: "Demo package information",
-        selectionRounds: [
-          "Online Assessment",
-          "Technical Interview",
-          "HR Interview",
-        ],
-        tips: [
-          "Practice DSA regularly",
-          "Prepare core CS subjects",
-          "Build practical projects",
-        ],
-        focusTopics: ["DSA", "JavaScript", "DBMS", "Operating Systems"],
         website: "https://example.com",
-        lastVerifiedAt: new Date(),
+        practiceLink: "/company.html?company=prepvanta-tech",
       },
       {
         new: true,

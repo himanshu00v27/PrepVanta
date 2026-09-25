@@ -16,69 +16,7 @@ const companySchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
     industry: {
-      type: String,
-      trim: true,
-    },
-
-    difficulty: {
-      type: String,
-      enum: ["easy", "medium", "hard"],
-      default: "medium",
-    },
-
-    status: {
-      type: String,
-      enum: ["draft", "published"],
-      default: "draft",
-      index: true,
-    },
-
-    hiringRoles: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-
-    eligibility: {
-      type: String,
-      trim: true,
-    },
-
-    packageInfo: {
-      type: String,
-      trim: true,
-    },
-
-    selectionRounds: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-
-    tips: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-
-    focusTopics: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-
-    practiceLink: {
       type: String,
       trim: true,
     },
@@ -88,8 +26,9 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
-    lastVerifiedAt: {
-      type: Date,
+    practiceLink: {
+      type: String,
+      trim: true,
     },
   },
   {
