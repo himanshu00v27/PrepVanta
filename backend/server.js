@@ -8,6 +8,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const testRoutes = require('./routes/testRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const companyRoutes = require('./routes/companyRoutes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/companies', companyRoutes);
 
 const PORT = process.env.PORT || 5000;
 

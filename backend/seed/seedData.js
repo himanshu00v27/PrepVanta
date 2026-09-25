@@ -8,12 +8,12 @@ const Company = require("../models/Company");
 const Setting = require("../models/Setting");
 const Ticket = require("../models/Ticket");
 
-const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/prepvanta";
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/prepvanta";
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGODB_URI);
 
     console.log("MongoDB connected");
 
