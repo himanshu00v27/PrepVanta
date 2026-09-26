@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 
 const companyQuestionSchema = new mongoose.Schema(
   {
+    questionId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+    },
+
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
@@ -18,7 +26,7 @@ const companyQuestionSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["mcq", "coding", "aptitude", "reasoning"],
+      enum: ["programming", "database", "aptitude", "reasoning", "communication"],
       required: true,
       trim: true,
     },
