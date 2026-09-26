@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const companyQuestionRoutes = require('./routes/companyQuestionRoutes');
 const companyQuestionAttemptRoutes = require('./routes/companyQuestionAttemptRoutes');
+const companyProgressRoutes = require('./routes/companyProgressRoutes');
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/company-questions', companyQuestionRoutes);
 app.use('/api/company-question-attempts', companyQuestionAttemptRoutes);
+app.use('/api/company-progress', companyProgressRoutes);
 
 const PORT = process.env.PORT || 5000;
 
