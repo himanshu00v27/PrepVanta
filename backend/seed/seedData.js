@@ -8,6 +8,7 @@ const Company = require("../models/Company");
 const Setting = require("../models/Setting");
 const Ticket = require("../models/Ticket");
 const CompanyQuestion = require("../models/CompanyQuestion");
+const InterviewQuestion = require("../models/InterviewQuestion");
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/prepvanta";
@@ -191,7 +192,79 @@ async function seedDatabase() {
 
 
     // -----------------------------
-    // 4. Create platform setting
+    // 4. Create demo interview questions
+    // -----------------------------
+    const interviewQuestions = [
+      {
+        company: company._id,
+        category: "technical",
+        question: "Tell me about a technical project you have worked on.",
+        hint: "Choose a project where you made a meaningful contribution.",
+        tips: [
+          "Briefly explain the project and its purpose.",
+          "Clearly describe your own contribution.",
+          "Mention the technologies or tools you used.",
+          "End with the outcome or what you learned.",
+        ],
+        answerGuidance:
+          "Structure your answer around the project context, your specific contribution, the technologies used, challenges faced, and the final result.",
+        difficulty: "medium",
+        tags: ["technical", "project", "experience"],
+      },
+      {
+        company: company._id,
+        category: "general",
+        question: "Why do you want to work for this company?",
+        hint: "Connect your interests and skills with the company's work.",
+        tips: [
+          "Research the company's products or services.",
+          "Mention specific aspects that interest you.",
+          "Connect the role with your skills and career goals.",
+        ],
+        answerGuidance:
+          "Give a specific answer based on the company's work, the role, your relevant skills, and what you hope to learn or contribute.",
+        difficulty: "easy",
+        tags: ["general", "motivation", "company"],
+      },
+      {
+        company: company._id,
+        category: "behavioral",
+        question: "Tell me about a challenge you faced and how you handled it.",
+        hint: "Use a real example from a project, college activity, internship, or other relevant experience.",
+        tips: [
+          "Briefly describe the situation.",
+          "Explain the specific action you took.",
+          "Describe the result.",
+          "Mention what you learned from the experience.",
+        ],
+        answerGuidance:
+          "Use a clear situation, action, and result structure. Focus on your own actions rather than only describing what the team did.",
+        difficulty: "medium",
+        tags: ["behavioral", "problem-solving", "communication"],
+      },
+    ];
+
+    for (const interviewQuestionData of interviewQuestions) {
+      await InterviewQuestion.findOneAndUpdate(
+        {
+          company: interviewQuestionData.company,
+          question: interviewQuestionData.question,
+        },
+        interviewQuestionData,
+        {
+          new: true,
+          upsert: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    }
+
+    console.log(
+      `Interview questions ready: ${interviewQuestions.length}`
+    );
+
+    // -----------------------------
+    // 5. Create platform setting
     // -----------------------------
     const setting = await Setting.findOneAndUpdate(
       { key: "platform_name" },
@@ -211,7 +284,7 @@ async function seedDatabase() {
     console.log(`Setting ready: ${setting.key}`);
 
     // -----------------------------
-    // 5. Create demo help-desk ticket
+    // 6. Create demo help-desk ticket
     // -----------------------------
     const ticket = await Ticket.findOneAndUpdate(
       {
