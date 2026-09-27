@@ -129,9 +129,9 @@ router.post("/tickets/:id/messages", authMiddleware, async (req, res) => {
       });
     }
 
-    if (ticket.status === "closed") {
+    if (ticket.status === "resolved" || ticket.status === "closed") {
       return res.status(400).json({
-        message: "Closed tickets cannot receive new messages",
+        message: "Resolved or closed tickets cannot receive new messages",
       });
     }
 
@@ -139,14 +139,6 @@ router.post("/tickets/:id/messages", authMiddleware, async (req, res) => {
       sender: req.user._id,
       message: message.trim(),
     });
-
-    /*
-     * If the user replies to a resolved ticket,
-     * reopen it because further assistance is needed.
-     */
-    if (ticket.status === "resolved") {
-      ticket.status = "open";
-    }
 
     ticket.lastActivityAt = new Date();
 
@@ -213,6 +205,43 @@ router.get(
   },
 );
 
+/* ===================================
+   ADMIN - GET SINGLE TICKET
+   GET /api/support/admin/tickets/:id
+=================================== */
+router.get(
+  "/admin/tickets/:id",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const ticket = await Ticket.findById(req.params.id)
+        .populate("user", "userId fullName username email role")
+        .populate("messages.sender", "userId fullName username role")
+        .lean();
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error fetching admin ticket:", error.message);
+
+      if (error.name === "CastError") {
+        return res.status(400).json({
+          message: "Invalid ticket ID",
+        });
+      }
+
+      res.status(500).json({
+        message: "Failed to fetch support ticket",
+      });
+    }
+  },
+);
 /* ===================================
    ADMIN - UPDATE TICKET STATUS
    PATCH /api/support/admin/tickets/:id/status
