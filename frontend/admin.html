@@ -163,19 +163,46 @@
 
             <div class="dash-grid">
 
-                <div class="panel-card">
+                <div class="panel-card admin-users-panel">
 
-                    <h3>
-                        <i class="fa-solid fa-users"></i>
-                        User Management
-                    </h3>
+    <div class="admin-panel-head">
+        <div>
+            <h3>
+                <i class="fa-solid fa-users"></i>
+                User Management
+            </h3>
 
-                    <p>
-                        Manage user accounts and account status.
-                    </p>
+            <p>
+                Search users and manage account access.
+            </p>
+        </div>
 
-                </div>
+        <span class="admin-user-count" id="adminUserCount">
+            0 users
+        </span>
+    </div>
 
+    <div class="admin-user-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+            type="search"
+            id="adminUserSearch"
+            placeholder="Search name, username, email or user ID..."
+            autocomplete="off"
+        >
+    </div>
+
+    <div class="admin-users-list" id="adminUsersList">
+
+        <div class="admin-users-state">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <p>Loading users...</p>
+        </div>
+
+    </div>
+
+</div>
                 <div class="panel-card">
 
                     <h3>
