@@ -1,3 +1,4 @@
+const { getSettingValue } = require("../services/settingsService");
 const express = require("express");
 const User = require("../models/User");
 const Profile = require("../models/Profile");
@@ -12,6 +13,13 @@ const router = express.Router();
 
 router.get("/search", authMiddleware, async (req, res) => {
   try {
+    const userSearchEnabled = await getSettingValue("userSearchEnabled");
+
+    if (!userSearchEnabled) {
+      return res.status(403).json({
+        message: "User search is currently disabled by the administrator.",
+      });
+    }
     const q = (req.query.q || "").trim();
 
     if (!q) {

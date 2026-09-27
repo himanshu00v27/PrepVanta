@@ -1,4 +1,5 @@
 const { generalLimiter } = require("./middleware/rateLimiters");
+const maintenanceMiddleware = require("./middleware/maintenanceMiddleware");
 require("dotenv").config();
 
 const express = require("express");
@@ -12,6 +13,7 @@ const companyRoutes = require("./routes/companyRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const userRoutes = require("./routes/userRoutes");
 const compilerRoutes = require("./routes/compilerRoutes");
+const settingsRoutes = require("./routes/settingsRoutes");
 
 const app = express();
 
@@ -29,6 +31,11 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
+   MAINTENANCE MODE
+========================= */
+app.use(maintenanceMiddleware);
+
+/* =========================
    AUTH ROUTES
 ========================= */
 app.use("/api/auth", authRoutes);
@@ -38,6 +45,7 @@ app.use("/api/companies", companyRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/compiler", compilerRoutes);
+app.use("/api/settings", settingsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

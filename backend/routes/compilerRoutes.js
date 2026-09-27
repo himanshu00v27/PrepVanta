@@ -2,6 +2,7 @@ const express = require("express");
 
 const authMiddleware = require("../middleware/authMiddleware");
 const CompilerRun = require("../models/CompilerRun");
+const { getSettingValue } = require("../services/settingsService");
 const {
   executeCode,
   getSupportedLanguages,
@@ -65,6 +66,19 @@ router.post("/run", authMiddleware, async (req, res) => {
     if (input.length > MAX_INPUT_LENGTH) {
       return res.status(400).json({
         message: `Input must not exceed ${MAX_INPUT_LENGTH} characters.`,
+      });
+    }
+
+    /*
+     * Check whether compiler execution is enabled.
+     * This happens before contacting the execution provider,
+     * so disabled requests do not consume API credits.
+     */
+    const compilerEnabled = await getSettingValue("compilerEnabled");
+
+    if (!compilerEnabled) {
+      return res.status(403).json({
+        message: "Compiler is currently disabled by the administrator.",
       });
     }
 

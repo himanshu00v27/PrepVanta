@@ -1,0 +1,138 @@
+/* ===================================
+   PREPVANTA PLATFORM ANNOUNCEMENT
+=================================== */
+
+.platform-announcement {
+    position: relative;
+    z-index: 900;
+
+    width: 100%;
+
+    background: linear-gradient(
+        135deg,
+        #4F46E5,
+        #6366F1
+    );
+
+    color: #FFFFFF;
+
+    box-shadow:
+        0 5px 18px rgba(79, 70, 229, 0.18);
+}
+
+
+.platform-announcement-content {
+    width: min(1200px, calc(100% - 40px));
+
+    min-height: 46px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 10px 42px;
+
+    position: relative;
+}
+
+
+.platform-announcement-content > i {
+    flex-shrink: 0;
+
+    font-size: 0.9rem;
+}
+
+
+.platform-announcement-message {
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1.5;
+
+    text-align: center;
+
+    overflow-wrap: anywhere;
+}
+
+
+.platform-announcement-close {
+    position: absolute;
+
+    right: 4px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+    color: #FFFFFF;
+
+    cursor: pointer;
+
+    opacity: 0.85;
+
+    transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.platform-announcement-close:hover {
+    background: rgba(255, 255, 255, 0.14);
+    opacity: 1;
+}
+
+
+/* ===================================
+   DARK MODE
+=================================== */
+
+[data-theme="dark"] .platform-announcement {
+    background: linear-gradient(
+        135deg,
+        #4338CA,
+        #4F46E5
+    );
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ===================================
+   MOBILE
+=================================== */
+
+@media (max-width: 600px) {
+
+    .platform-announcement-content {
+        width: 100%;
+
+        padding:
+            10px 48px
+            10px 16px;
+
+        justify-content: flex-start;
+    }
+
+    .platform-announcement-message {
+        text-align: left;
+        font-size: 0.78rem;
+    }
+
+    .platform-announcement-close {
+        right: 10px;
+    }
+}

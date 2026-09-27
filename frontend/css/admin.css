@@ -1,0 +1,540 @@
+/* ===================================
+   PREPVANTA ADMIN
+=================================== */
+
+.admin-settings-panel {
+    grid-column: 1 / -1;
+}
+
+.admin-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.admin-panel-head h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 5px;
+}
+
+.admin-panel-head p {
+    color: var(--text-light);
+    font-size: .86rem;
+    line-height: 1.5;
+}
+
+
+/* ===================================
+   SETTINGS GROUPS
+=================================== */
+
+.settings-groups {
+    display: grid;
+    gap: 20px;
+}
+
+.settings-group {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card);
+}
+
+.settings-group-head {
+    padding: 17px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(79, 70, 229, .035);
+}
+
+.settings-group-head h4 {
+    margin: 0 0 3px;
+    font-size: .95rem;
+    color: var(--text);
+}
+
+.settings-group-head p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: .78rem;
+}
+
+
+/* ===================================
+   SETTING ROW
+=================================== */
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    padding: 17px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.setting-info strong {
+    color: var(--text);
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.setting-info span {
+    color: var(--text-light);
+    font-size: .77rem;
+    line-height: 1.45;
+}
+
+
+/* ===================================
+   TOGGLE SWITCH
+=================================== */
+
+.setting-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 25px;
+    flex: 0 0 auto;
+}
+
+.setting-switch input {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.setting-slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: #CBD5E1;
+    border-radius: 999px;
+    transition: .2s ease;
+}
+
+.setting-slider::before {
+    content: "";
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    left: 3px;
+    top: 3px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+    transition: .2s ease;
+}
+
+.setting-switch input:checked + .setting-slider {
+    background: #4F46E5;
+}
+
+.setting-switch input:checked + .setting-slider::before {
+    transform: translateX(21px);
+}
+
+.setting-switch input:focus-visible + .setting-slider {
+    outline: 3px solid rgba(79, 70, 229, .2);
+}
+
+
+/* ===================================
+   ANNOUNCEMENT EDITOR
+=================================== */
+
+.announcement-editor {
+    padding: 18px 20px;
+}
+
+.announcement-editor label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.announcement-editor textarea {
+    display: block;
+    width: 100%;
+    min-height: 105px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+    font: inherit;
+    font-size: .84rem;
+    line-height: 1.55;
+}
+
+.announcement-editor textarea:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+}
+
+.announcement-editor-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    color: var(--text-light);
+    font-size: .72rem;
+}
+
+
+/* ===================================
+   SAVE AREA
+=================================== */
+
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.save-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    background: #4F46E5;
+    color: #FFFFFF;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.save-settings-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: #4338CA;
+}
+
+.save-settings-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.settings-save-status {
+    min-height: 20px;
+    color: var(--text-light);
+    font-size: .78rem;
+}
+
+.settings-save-status.success {
+    color: #16A34A;
+}
+
+.settings-save-status.error {
+    color: #DC2626;
+}
+
+
+/* ===================================
+   DARK MODE
+=================================== */
+
+[data-theme="dark"] .settings-group-head {
+    background: rgba(99, 102, 241, .06);
+}
+
+[data-theme="dark"] .setting-slider {
+    background: #475569;
+}
+
+[data-theme="dark"] .setting-switch input:checked + .setting-slider {
+    background: #6366F1;
+}
+
+
+/* ===================================
+   RESPONSIVE
+=================================== */
+
+@media (max-width: 700px) {
+
+    .admin-panel-head {
+        flex-direction: column;
+    }
+
+    .setting-row {
+        gap: 16px;
+    }
+
+    .settings-actions {
+        justify-content: stretch;
+    }
+
+    .save-settings-btn {
+        width: 100%;
+    }
+}
+/* ===================================
+   SETTINGS SAVE STATUS
+=================================== */
+
+.settings-save-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.settings-save-status:empty {
+    display: none;
+}
+
+.settings-save-status.success {
+    display: inline-flex;
+    color: #15803D;
+    background: rgba(22, 163, 74, 0.10);
+    border: 1px solid rgba(22, 163, 74, 0.20);
+}
+
+.settings-save-status.error {
+    display: inline-flex;
+    color: #B91C1C;
+    background: rgba(220, 38, 38, 0.10);
+    border: 1px solid rgba(220, 38, 38, 0.20);
+}
+
+[data-theme="dark"] .settings-save-status.success {
+    color: #86EFAC;
+    background: rgba(22, 163, 74, 0.15);
+}
+
+[data-theme="dark"] .settings-save-status.error {
+    color: #FCA5A5;
+    background: rgba(220, 38, 38, 0.15);
+}
+/* ===================================
+   SETTINGS FEEDBACK MODAL
+=================================== */
+
+.settings-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+.settings-modal-overlay[hidden] {
+    display: none !important;
+}
+
+
+/* Modal box */
+
+.settings-modal {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 36px 32px 30px;
+
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 70px rgba(15, 23, 42, 0.25);
+
+    text-align: center;
+
+    animation: settingsModalIn 0.22s ease;
+}
+
+
+/* Icon */
+
+.settings-modal-icon {
+    width: 72px;
+    height: 72px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 1.8rem;
+}
+
+
+/* Success */
+
+.settings-modal.success .settings-modal-icon {
+    color: #16A34A;
+    background: rgba(22, 163, 74, 0.12);
+}
+
+
+/* Error */
+
+.settings-modal.error .settings-modal-icon {
+    color: #DC2626;
+    background: rgba(220, 38, 38, 0.12);
+}
+
+
+/* Heading */
+
+.settings-modal h3 {
+    margin: 0 0 10px;
+
+    color: var(--text);
+
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+
+/* Description */
+
+.settings-modal p {
+    margin: 0 0 25px;
+
+    color: var(--text-light);
+
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+
+/* Button */
+
+.settings-modal-button {
+    min-width: 130px;
+
+    padding: 10px 24px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #4F46E5;
+    color: #FFFFFF;
+
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.settings-modal-button:hover {
+    background: #4338CA;
+    transform: translateY(-1px);
+}
+
+.settings-modal-button:active {
+    transform: translateY(0);
+}
+
+
+/* Error button */
+
+.settings-modal.error .settings-modal-button {
+    background: #DC2626;
+}
+
+.settings-modal.error .settings-modal-button:hover {
+    background: #B91C1C;
+}
+
+
+/* Animation */
+
+@keyframes settingsModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* Dark mode */
+
+[data-theme="dark"] .settings-modal-overlay {
+    background: rgba(2, 6, 23, 0.65);
+}
+
+[data-theme="dark"] .settings-modal {
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.55);
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .settings-modal {
+        max-width: 360px;
+        padding: 30px 22px 24px;
+        border-radius: 18px;
+    }
+
+    .settings-modal-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 1.55rem;
+    }
+
+    .settings-modal h3 {
+        font-size: 1.1rem;
+    }
+}

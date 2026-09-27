@@ -14,6 +14,7 @@ const User = require("../models/User");
 const EmailVerification = require("../models/EmailVerification");
 const { sendEmail } = require("../services/emailService");
 const { createAuditLog } = require("../services/auditService");
+const { getSettingValue } = require("../services/settingsService");
 
 const router = express.Router();
 
@@ -79,6 +80,13 @@ router.get("/check-username", usernameCheckLimiter, async (req, res) => {
 
 router.post("/register", registrationLimiter, async (req, res) => {
   try {
+    const registrationEnabled = await getSettingValue("registrationEnabled");
+
+    if (!registrationEnabled) {
+      return res.status(403).json({
+        message: "New user registration is currently disabled.",
+      });
+    }
     const { fullName, username, email, password } = req.body;
 
     /* ---------- Required fields ---------- */

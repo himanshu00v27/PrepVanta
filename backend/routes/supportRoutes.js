@@ -2,6 +2,7 @@ const express = require("express");
 const Ticket = require("../models/Ticket");
 const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
+const { getSettingValue } = require("../services/settingsService");
 
 const router = express.Router();
 
@@ -11,6 +12,13 @@ const router = express.Router();
 =================================== */
 router.post("/tickets", authMiddleware, async (req, res) => {
   try {
+    const supportEnabled = await getSettingValue("supportEnabled");
+
+    if (!supportEnabled) {
+      return res.status(403).json({
+        message: "New support ticket submissions are currently disabled.",
+      });
+    }
     const { subject, description, category, priority } = req.body;
 
     if (!subject || !description) {

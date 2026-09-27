@@ -1,17 +1,25 @@
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 /*
  * General API rate limiter
+ *
+ * Development:
+ * 1000 requests per 15 minutes per IP
+ *
+ * Production:
  * 100 requests per 15 minutes per IP
  */
 const generalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 100,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message: 'Too many requests. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+
+  limit: process.env.NODE_ENV === "production" ? 100 : 1000,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many requests. Please try again later.",
+  },
 });
 
 /*
@@ -19,13 +27,15 @@ const generalLimiter = rateLimit({
  * 10 login attempts per 15 minutes per IP
  */
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 10,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message: 'Too many login attempts. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many login attempts. Please try again later.",
+  },
 });
 
 /*
@@ -33,14 +43,15 @@ const loginLimiter = rateLimit({
  * 5 requests per 15 minutes per IP
  */
 const passwordResetLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 5,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message:
-            'Too many password reset requests. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many password reset requests. Please try again later.",
+  },
 });
 
 /*
@@ -48,14 +59,15 @@ const passwordResetLimiter = rateLimit({
  * 5 registration requests per 15 minutes per IP
  */
 const registrationLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 5,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message:
-            'Too many registration attempts. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many registration attempts. Please try again later.",
+  },
 });
 
 /*
@@ -63,14 +75,15 @@ const registrationLimiter = rateLimit({
  * 5 verification requests per 15 minutes per IP
  */
 const otpVerificationLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 5,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message:
-            'Too many OTP verification attempts. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many OTP verification attempts. Please try again later.",
+  },
 });
 
 /*
@@ -78,21 +91,22 @@ const otpVerificationLimiter = rateLimit({
  * 30 requests per 15 minutes per IP
  */
 const usernameCheckLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 30,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: {
-        message:
-            'Too many username checks. Please try again later.'
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  message: {
+    message: "Too many username checks. Please try again later.",
+  },
 });
 
 module.exports = {
-    generalLimiter,
-    loginLimiter,
-    passwordResetLimiter,
-    registrationLimiter,
-    otpVerificationLimiter,
-    usernameCheckLimiter
+  generalLimiter,
+  loginLimiter,
+  passwordResetLimiter,
+  registrationLimiter,
+  otpVerificationLimiter,
+  usernameCheckLimiter,
 };

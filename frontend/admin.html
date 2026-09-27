@@ -9,37 +9,61 @@
 
     <title>Admin Panel | PrepVanta</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <!-- Google Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
 
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
+    <!-- CSS -->
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 
 <body>
 
+    <!-- ===================================
+         SIDEBAR OVERLAY
+    =================================== -->
+
     <div class="overlay" id="overlay"></div>
+
+
+    <!-- ===================================
+         SIDEBAR
+    =================================== -->
 
     <aside class="sidebar" id="sidebar">
 
         <div class="sidebar-header">
+
             <h2>
-                <img src="assets/img/logo-icon.png"
+                <img
+                    src="assets/img/logo-icon.png"
                     alt="PrepVanta logo"
-                    class="logo-icon">
+                    class="logo-icon"
+                >
+
                 <span class="logo-text">
                     <span class="prep">Prep</span><span class="vanta">Vanta</span>
                 </span>
             </h2>
+
         </div>
+
 
         <div class="sidebar-section">
 
@@ -52,6 +76,7 @@
 
         </div>
 
+
         <div class="sidebar-section">
 
             <h4>Administration</h4>
@@ -63,6 +88,7 @@
 
         </div>
 
+
         <div class="sidebar-section">
 
             <h4>Account</h4>
@@ -72,8 +98,11 @@
                 My Dashboard
             </a>
 
-            <a href="#" class="logout-link"
-                onclick="prepvantaLogout(); return false;">
+            <a
+                href="#"
+                class="logout-link"
+                onclick="prepvantaLogout(); return false;"
+            >
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
@@ -81,6 +110,11 @@
         </div>
 
     </aside>
+
+
+    <!-- ===================================
+         NAVBAR
+    =================================== -->
 
     <nav class="navbar">
 
@@ -93,15 +127,21 @@
                 </button>
 
                 <a href="index.html" class="logo">
-                    <img src="assets/img/logo-icon.png"
+
+                    <img
+                        src="assets/img/logo-icon.png"
                         alt="PrepVanta logo"
-                        class="logo-icon">
+                        class="logo-icon"
+                    >
+
                     <span class="logo-text">
                         <span class="prep">Prep</span><span class="vanta">Vanta</span>
                     </span>
+
                 </a>
 
             </div>
+
 
             <div class="nav-links">
 
@@ -113,15 +153,18 @@
 
             </div>
 
+
             <div class="nav-right">
 
                 <button class="theme-toggle">
                     <i class="fa-solid fa-moon"></i>
                 </button>
 
-                <a href="dashboard.html"
+                <a
+                    href="dashboard.html"
                     class="profile-btn"
-                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;"
+                >
                     <i class="fa-solid fa-user"></i>
                 </a>
 
@@ -131,14 +174,30 @@
 
     </nav>
 
+
+    <!-- ===================================
+         ADMIN DASHBOARD
+    =================================== -->
+
     <section class="dashboard-page">
 
         <div class="container">
 
+
+            <!-- PAGE HEADER -->
+
             <div class="dash-head">
+
                 <h1>Admin Panel</h1>
-                <p>Manage and monitor PrepVanta administration.</p>
+
+                <p>
+                    Manage and monitor PrepVanta administration.
+                </p>
+
             </div>
+
+
+            <!-- ADMIN PROFILE -->
 
             <div class="profile-card">
 
@@ -151,58 +210,95 @@
                     <h2>Administrator Access</h2>
 
                     <div class="profile-meta">
+
                         <span>
                             <i class="fa-solid fa-circle-check"></i>
                             Admin role verified
                         </span>
+
                     </div>
 
                 </div>
 
             </div>
 
+
+            <!-- ===================================
+                 ADMIN GRID
+            =================================== -->
+
             <div class="dash-grid">
+
+
+                <!-- ===================================
+                     USER MANAGEMENT
+                =================================== -->
 
                 <div class="panel-card admin-users-panel">
 
-    <div class="admin-panel-head">
-        <div>
-            <h3>
-                <i class="fa-solid fa-users"></i>
-                User Management
-            </h3>
+                    <div class="admin-panel-head">
 
-            <p>
-                Search users and manage account access.
-            </p>
-        </div>
+                        <div>
 
-        <span class="admin-user-count" id="adminUserCount">
-            0 users
-        </span>
-    </div>
+                            <h3>
+                                <i class="fa-solid fa-users"></i>
+                                User Management
+                            </h3>
 
-    <div class="admin-user-search">
-        <i class="fa-solid fa-magnifying-glass"></i>
+                            <p>
+                                Search users and manage account access.
+                            </p>
 
-        <input
-            type="search"
-            id="adminUserSearch"
-            placeholder="Search name, username, email or user ID..."
-            autocomplete="off"
-        >
-    </div>
+                        </div>
 
-    <div class="admin-users-list" id="adminUsersList">
+                        <span
+                            class="admin-user-count"
+                            id="adminUserCount"
+                        >
+                            0 users
+                        </span>
 
-        <div class="admin-users-state">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            <p>Loading users...</p>
-        </div>
+                    </div>
 
-    </div>
 
-</div>
+                    <div class="admin-user-search">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            type="search"
+                            id="adminUserSearch"
+                            placeholder="Search name, username, email or user ID..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div
+                        class="admin-users-list"
+                        id="adminUsersList"
+                    >
+
+                        <div class="admin-users-state">
+
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+
+                            <p>
+                                Loading users...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ===================================
+                     AUDIT LOGS
+                =================================== -->
+
                 <div class="panel-card">
 
                     <h3>
@@ -216,15 +312,350 @@
 
                 </div>
 
+
+                <!-- ===================================
+                     PLATFORM SETTINGS
+                =================================== -->
+
+                <div class="panel-card admin-settings-panel">
+
+
+                    <!-- SETTINGS HEADER -->
+
+                    <div class="admin-panel-head">
+
+                        <div>
+
+                            <h3>
+                                <i class="fa-solid fa-sliders"></i>
+                                Platform Settings
+                            </h3>
+
+                            <p>
+                                Control platform availability, features and announcements.
+                            </p>
+
+                        </div>
+
+                        <span
+                            class="settings-save-status"
+                            id="settingsSaveStatus"
+                        ></span>
+
+                    </div>
+
+
+                    <div class="settings-groups">
+
+
+                        <!-- ===================================
+                             GENERAL SETTINGS
+                        =================================== -->
+
+                        <div class="settings-group">
+
+                            <div class="settings-group-head">
+
+                                <h4>General</h4>
+
+                                <p>
+                                    Control general platform availability.
+                                </p>
+
+                            </div>
+
+
+                            <!-- MAINTENANCE MODE -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        Maintenance Mode
+                                    </strong>
+
+                                    <span>
+                                        Temporarily restrict PrepVanta access for normal users.
+                                        Administrators retain access.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="maintenanceMode"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- REGISTRATION -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        User Registration
+                                    </strong>
+
+                                    <span>
+                                        Allow new users to create PrepVanta accounts.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="registrationEnabled"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ===================================
+                             FEATURE SETTINGS
+                        =================================== -->
+
+                        <div class="settings-group">
+
+                            <div class="settings-group-head">
+
+                                <h4>Features</h4>
+
+                                <p>
+                                    Enable or disable individual PrepVanta services.
+                                </p>
+
+                            </div>
+
+
+                            <!-- COMPILER -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        Compiler
+                                    </strong>
+
+                                    <span>
+                                        Allow users to execute code using the PrepVanta compiler.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="compilerEnabled"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- SUPPORT -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        Help Desk
+                                    </strong>
+
+                                    <span>
+                                        Allow users to create new support tickets.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="supportEnabled"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- USER SEARCH -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        User Search
+                                    </strong>
+
+                                    <span>
+                                        Allow users to search for other PrepVanta users.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="userSearchEnabled"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ===================================
+                             PLATFORM ANNOUNCEMENT
+                        =================================== -->
+
+                        <div class="settings-group">
+
+                            <div class="settings-group-head">
+
+                                <h4>
+                                    Platform Announcement
+                                </h4>
+
+                                <p>
+                                    Display an announcement across PrepVanta.
+                                </p>
+
+                            </div>
+
+
+                            <!-- ANNOUNCEMENT ENABLED -->
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <strong>
+                                        Show Announcement
+                                    </strong>
+
+                                    <span>
+                                        Display the announcement message to PrepVanta users.
+                                    </span>
+
+                                </div>
+
+                                <label class="setting-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="announcementEnabled"
+                                    >
+
+                                    <span class="setting-slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- ANNOUNCEMENT MESSAGE -->
+
+                            <div class="announcement-editor">
+
+                                <label for="announcementMessage">
+                                    Announcement Message
+                                </label>
+
+                                <textarea
+                                    id="announcementMessage"
+                                    maxlength="500"
+                                    placeholder="Enter a platform announcement..."
+                                ></textarea>
+
+                                <div class="announcement-editor-footer">
+
+                                    <span id="announcementCharacterCount">
+                                        0 / 500
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ===================================
+                         SAVE SETTINGS
+                    =================================== -->
+
+                    <div class="settings-actions">
+
+                        <button
+                            type="button"
+                            class="save-settings-btn"
+                            id="saveSettingsBtn"
+                        >
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+
+                            Save Settings
+
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
+
+
+            <!-- ===================================
+                 ADMIN API STATUS
+            =================================== -->
 
             <div class="dash-cta">
 
                 <div>
-                    <h3>Admin API Status</h3>
+
+                    <h3>
+                        Admin API Status
+                    </h3>
+
                     <p id="adminStatus">
                         Checking administrator authorization...
                     </p>
+
                 </div>
 
             </div>
@@ -232,6 +663,11 @@
         </div>
 
     </section>
+
+
+    <!-- ===================================
+         FOOTER
+    =================================== -->
 
     <footer>
 
@@ -244,6 +680,39 @@
         </div>
 
     </footer>
+
+    <!-- Platform Settings Feedback Modal -->
+    <div class="settings-modal-overlay" id="settingsModal" hidden>
+        <div
+            class="settings-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settingsModalTitle"
+        >
+            <div class="settings-modal-icon" id="settingsModalIcon">
+                <i class="fa-solid fa-check"></i>
+            </div>
+
+            <h3 id="settingsModalTitle">
+                Settings saved successfully!
+            </h3>
+
+            <p id="settingsModalMessage">
+                Your platform settings have been updated.
+            </p>
+
+            <button
+                type="button"
+                class="settings-modal-button"
+                id="settingsModalButton"
+            >
+                OK
+            </button>
+        </div>
+    </div>
+    <!-- ===================================
+         JAVASCRIPT
+    =================================== -->
 
     <script src="js/sidebar.js"></script>
     <script src="js/theme.js"></script>
