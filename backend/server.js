@@ -1,14 +1,15 @@
-const { generalLimiter } = require('./middleware/rateLimiters');
-require('dotenv').config();
+const { generalLimiter } = require("./middleware/rateLimiters");
+require("dotenv").config();
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
-const authRoutes = require('./routes/authRoutes');
-const testRoutes = require('./routes/testRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const companyRoutes = require('./routes/companyRoutes');
+const authRoutes = require("./routes/authRoutes");
+const testRoutes = require("./routes/testRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const companyRoutes = require("./routes/companyRoutes");
+const supportRoutes = require("./routes/supportRoutes");
 
 const app = express();
 
@@ -19,31 +20,33 @@ app.use(generalLimiter);
 /* =========================
    HEALTH CHECK
 ========================= */
-app.get('/api/health', (req, res) => {
-    res.json({
-        message: 'PrepVanta backend is running'
-    });
+app.get("/api/health", (req, res) => {
+  res.json({
+    message: "PrepVanta backend is running",
+  });
 });
 
 /* =========================
    AUTH ROUTES
 ========================= */
-app.use('/api/auth', authRoutes);
-app.use('/api/test', testRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/companies', companyRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/test", testRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/companies", companyRoutes);
+app.use("/api/support", supportRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('MongoDB connected successfully');
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
 
-        app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error('MongoDB connection error:', error.message);
-        process.exit(1);
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
+  });
