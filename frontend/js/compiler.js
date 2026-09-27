@@ -1,72 +1,249 @@
 /* ===================================
-   PREPVANTA COMPILER SCRIPT
+   PREPVANTA COMPILER
 =================================== */
 
-const langSelect = document.getElementById("langSelect");
-const codeArea = document.getElementById("codeArea");
-const consoleArea = document.getElementById("consoleArea");
-const runBtn = document.getElementById("runBtn");
+(function () {
+  const API_BASE = "http://localhost:5000/api/compiler";
 
-const samples = {
-    javascript: `function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nfor (let i = 0; i < 8; i++) {\n  console.log(fibonacci(i));\n}`,
-    python: `def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)\n\nfor i in range(8):\n    print(fibonacci(i))`,
-    java: `public class Main {\n    static int fibonacci(int n) {\n        if (n <= 1) return n;\n        return fibonacci(n - 1) + fibonacci(n - 2);\n    }\n    public static void main(String[] args) {\n        for (int i = 0; i < 8; i++) {\n            System.out.println(fibonacci(i));\n        }\n    }\n}`,
-    c: `#include <stdio.h>\n\nint fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nint main() {\n    for (int i = 0; i < 8; i++) {\n        printf("%d\\n", fibonacci(i));\n    }\n    return 0;\n}`,
-    cpp: `#include <iostream>\nusing namespace std;\n\nint fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nint main() {\n    for (int i = 0; i < 8; i++) cout << fibonacci(i) << endl;\n    return 0;\n}`,
-    sql: `SELECT student_name, score\nFROM mock_test_results\nWHERE score >= 80\nORDER BY score DESC;`
-};
+  const langSelect = document.getElementById("langSelect");
+  const codeArea = document.getElementById("codeArea");
+  const inputArea = document.getElementById("inputArea");
+  const consoleArea = document.getElementById("consoleArea");
+  const runBtn = document.getElementById("runBtn");
 
-function loadSample(lang) {
-    codeArea.value = samples[lang] || "// start typing...";
-}
+  const executionMeta = document.getElementById("executionMeta");
+  const executionStatus = document.getElementById("executionStatus");
+  const executionTime = document.getElementById("executionTime");
+  const executionMemory = document.getElementById("executionMemory");
 
-if (langSelect) {
+  if (!langSelect || !codeArea || !inputArea || !consoleArea || !runBtn) {
+    console.error("Compiler UI could not be initialized.");
+    return;
+  }
+
+  /* ===================================
+       STARTER CODE
+    =================================== */
+
+  const samples = {
+    javascript: `console.log("Hello from PrepVanta");`,
+
+    python: `print("Hello from PrepVanta")`,
+
+    java: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello from PrepVanta");
+    }
+}`,
+
+    c: `#include <stdio.h>
+
+int main() {
+    printf("Hello from PrepVanta\\n");
+    return 0;
+}`,
+
+    cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello from PrepVanta" << endl;
+    return 0;
+}`,
+
+    sql: `SELECT 'Hello from PrepVanta' AS message;`,
+  };
+
+  /* ===================================
+       EDITOR
+    =================================== */
+
+  function loadSample(language) {
+    codeArea.value = samples[language] || "// Write your code here";
+  }
+
+  loadSample(langSelect.value);
+
+  langSelect.addEventListener("change", function () {
     loadSample(langSelect.value);
-    langSelect.addEventListener("change", () => loadSample(langSelect.value));
-}
+    clearOutput();
+  });
 
-function printLine(text, cls) {
-    const span = document.createElement("div");
-    if (cls) span.className = cls;
-    span.textContent = text;
-    consoleArea.appendChild(span);
-}
+  /* ===================================
+       OUTPUT HELPERS
+    =================================== */
 
-if (runBtn) {
-    runBtn.addEventListener("click", () => {
+  function clearOutput() {
+    consoleArea.innerHTML = "";
 
-        consoleArea.innerHTML = "";
-        const lang = langSelect.value;
+    executionMeta.hidden = true;
+    executionStatus.textContent = "--";
+    executionTime.textContent = "--";
+    executionMemory.textContent = "--";
+  }
 
-        printLine(`▶ Running ${langSelect.options[langSelect.selectedIndex].text}...`, "muted");
+  function printOutput(text, className = "") {
+    const line = document.createElement("div");
 
-        if (lang === "javascript") {
-            const logs = [];
-            const originalLog = console.log;
-            console.log = (...args) => logs.push(args.join(" "));
-            try {
-                new Function(codeArea.value)();
-                logs.forEach(l => printLine(l, "ok"));
-                printLine("\nProcess finished with exit code 0", "muted");
-            } catch (err) {
-                printLine(String(err), "err");
-            } finally {
-                console.log = originalLog;
-            }
-            return;
-        }
+    if (className) {
+      line.className = className;
+    }
 
-        setTimeout(() => {
-            if (lang === "sql") {
-                printLine("student_name | score", "ok");
-                printLine("-------------------", "muted");
-                printLine("Riya Sharma   | 96", "ok");
-                printLine("Aman Verma    | 88", "ok");
-            } else {
-                printLine("0\n1\n1\n2\n3\n5\n8\n13", "ok");
-                printLine("\nProcess finished with exit code 0", "muted");
-                printLine("(simulated — connect a code-execution API for real compilation)", "muted");
-            }
-        }, 400);
-    });
-}
+    line.textContent = text;
+    consoleArea.appendChild(line);
+  }
+
+  function setRunningState(running) {
+    runBtn.disabled = running;
+
+    if (running) {
+      runBtn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+    } else {
+      runBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run Code';
+    }
+  }
+
+  function showExecutionMeta(run) {
+    executionMeta.hidden = false;
+
+    executionStatus.textContent = run.status || "unknown";
+
+    executionTime.textContent =
+      typeof run.executionTime === "number" ? `${run.executionTime}s` : "--";
+
+    executionMemory.textContent =
+      typeof run.memoryUsed === "number" ? `${run.memoryUsed} KB` : "--";
+  }
+
+  /* ===================================
+       AUTHENTICATION
+    =================================== */
+
+  function getToken() {
+    return localStorage.getItem("prepvanta-token");
+  }
+
+  /* ===================================
+       RUN CODE
+    =================================== */
+
+  async function runCode() {
+    const token = getToken();
+
+    if (!token) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const language = langSelect.value;
+    const code = codeArea.value;
+    const input = inputArea.value;
+
+    if (!code.trim()) {
+      clearOutput();
+      printOutput("Please enter some code before running.", "err");
+      return;
+    }
+
+    clearOutput();
+    setRunningState(true);
+
+    printOutput(
+      `Running ${langSelect.options[langSelect.selectedIndex].text}...`,
+      "muted",
+    );
+
+    try {
+      const response = await fetch(`${API_BASE}/run`, {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          language,
+          code,
+          input,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        localStorage.removeItem("prepvanta-token");
+        localStorage.removeItem("prepvanta-user");
+
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (response.status === 403) {
+        throw new Error(data.message || "Your account cannot execute code.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to execute code.");
+      }
+
+      const run = data.run;
+
+      if (!run) {
+        throw new Error("Invalid response from the compiler.");
+      }
+
+      consoleArea.innerHTML = "";
+
+      if (run.output) {
+        printOutput(run.output, "ok");
+      }
+
+      if (run.error) {
+        printOutput(run.error, "err");
+      }
+
+      if (!run.output && !run.error) {
+        printOutput("Program finished without producing output.", "muted");
+      }
+
+      showExecutionMeta(run);
+    } catch (error) {
+      console.error("Compiler error:", error);
+
+      consoleArea.innerHTML = "";
+
+      printOutput(error.message || "Unable to execute code.", "err");
+    } finally {
+      setRunningState(false);
+    }
+  }
+
+  /* ===================================
+       EVENTS
+    =================================== */
+
+  runBtn.addEventListener("click", runCode);
+
+  codeArea.addEventListener("keydown", function (event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+
+      const start = codeArea.selectionStart;
+      const end = codeArea.selectionEnd;
+
+      codeArea.value =
+        codeArea.value.substring(0, start) +
+        "    " +
+        codeArea.value.substring(end);
+
+      codeArea.selectionStart = codeArea.selectionEnd = start + 4;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      runCode();
+    }
+  });
+})();

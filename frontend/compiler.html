@@ -4,17 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="js/auth-guard.js"></script>
 
     <title>Compiler | PrepVanta</title>
 
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
     <!-- Font Awesome -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -40,7 +45,14 @@
 
         <div class="sidebar-header">
             <h2>
-                <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                <img
+                    src="assets/img/logo-icon.png"
+                    alt="PrepVanta logo"
+                    class="logo-icon"
+                >
+                <span class="logo-text">
+                    <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                </span>
             </h2>
         </div>
 
@@ -127,7 +139,11 @@
                 Login
             </a>
 
-            <a href="#" class="logout-link" onclick="prepvantaLogout(); return false;">
+            <a
+                href="#"
+                class="logout-link"
+                onclick="prepvantaLogout(); return false;"
+            >
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
@@ -137,7 +153,6 @@
     </aside>
 
     <!-- Navbar -->
-
     <nav class="navbar">
 
         <div class="container nav-container">
@@ -149,7 +164,14 @@
                 </button>
 
                 <a href="index.html" class="logo">
-                    <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                    <img
+                        src="assets/img/logo-icon.png"
+                        alt="PrepVanta logo"
+                        class="logo-icon"
+                    >
+                    <span class="logo-text">
+                        <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                    </span>
                 </a>
 
             </div>
@@ -167,8 +189,14 @@
             <div class="nav-right">
 
                 <div class="search-box">
-                    <form onsubmit="event.preventDefault(); const q=this.q.value.trim(); location.href='topics.html'+(q?('?q='+encodeURIComponent(q)):'');">
-                        <input type="text" name="q" placeholder="Search topics...">
+                    <form
+                        onsubmit="event.preventDefault(); const q=this.q.value.trim(); location.href='topics.html'+(q?('?q='+encodeURIComponent(q)):'');"
+                    >
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="Search topics..."
+                        >
                         <i class="fa-solid fa-search"></i>
                     </form>
                 </div>
@@ -177,7 +205,11 @@
                     <i class="fa-solid fa-moon"></i>
                 </button>
 
-                <a href="dashboard.html" class="profile-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                <a
+                    href="dashboard.html"
+                    class="profile-btn"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;"
+                >
                     <i class="fa-solid fa-user"></i>
                 </a>
 
@@ -187,15 +219,28 @@
 
     </nav>
 
+    <!-- Compiler -->
     <section class="compiler-page">
+
         <div class="container">
+
             <h1>Compiler</h1>
-            <p class="sub">Write, run and debug code for multiple languages, right in your browser.</p>
+
+            <p class="sub">
+                Write, run and debug code in multiple programming languages.
+            </p>
 
             <div class="compiler-shell">
+
+                <!-- Code Pane -->
                 <div class="compiler-pane">
+
                     <div class="compiler-toolbar">
-                        <select id="langSelect">
+
+                        <select
+                            id="langSelect"
+                            aria-label="Programming language"
+                        >
                             <option value="javascript">JavaScript</option>
                             <option value="python">Python</option>
                             <option value="java">Java</option>
@@ -203,25 +248,112 @@
                             <option value="cpp">C++</option>
                             <option value="sql">SQL</option>
                         </select>
+
                     </div>
-                    <textarea id="codeArea" class="code-area" spellcheck="false"></textarea>
+
+                    <textarea
+                        id="codeArea"
+                        class="code-area"
+                        spellcheck="false"
+                        aria-label="Code editor"
+                    ></textarea>
+
+                    <!-- Custom Input -->
+                    <div class="compiler-input-section">
+
+                        <div class="compiler-input-header">
+
+                            <strong>
+                                <i class="fa-solid fa-keyboard"></i>
+                                Custom Input
+                            </strong>
+
+                            <span>Optional</span>
+
+                        </div>
+
+                        <textarea
+                            id="inputArea"
+                            class="input-area"
+                            spellcheck="false"
+                            placeholder="Enter program input here..."
+                            aria-label="Custom input"
+                        ></textarea>
+
+                    </div>
+
                 </div>
+
+                <!-- Output Pane -->
                 <div class="compiler-pane">
+
                     <div class="compiler-toolbar">
-                        <strong>Console</strong>
-                        <button id="runBtn" class="run-btn">▶ Run Code</button>
+
+                        <strong>
+                            <i class="fa-solid fa-terminal"></i>
+                            Output
+                        </strong>
+
+                        <button
+                            id="runBtn"
+                            class="run-btn"
+                            type="button"
+                        >
+                            <i class="fa-solid fa-play"></i>
+                            Run Code
+                        </button>
+
                     </div>
-                    <div id="consoleArea" class="console-area"><span class="muted">Output will appear here once you run your code.</span></div>
+
+                    <div id="consoleArea" class="console-area" aria-live="polite"><span class="muted">Output will appear here once you run your code.</span></div>
+                    <!-- Execution Information -->
+                    <div
+                        class="execution-meta"
+                        id="executionMeta"
+                        hidden
+                    >
+
+                        <span>
+                            <strong>Status:</strong>
+                            <span id="executionStatus">--</span>
+                        </span>
+
+                        <span>
+                            <strong>Time:</strong>
+                            <span id="executionTime">--</span>
+                        </span>
+
+                        <span>
+                            <strong>Memory:</strong>
+                            <span id="executionMemory">--</span>
+                        </span>
+
+                    </div>
+
                 </div>
+
             </div>
 
             <div class="compiler-note">
-                <h3>A note on execution</h3>
-                <p>JavaScript runs directly in your browser. Other languages currently show simulated output — connect this pane to a code-execution API on the backend to compile and run them for real.</p>
+
+                <h3>
+                    <i class="fa-solid fa-code"></i>
+                    PrepVanta Compiler
+                </h3>
+
+                <p>
+                    Write and execute code in JavaScript, Python, Java,
+                    C, C++ and SQL. Use Custom Input when your program
+                    needs input during execution.
+                </p>
+
             </div>
+
         </div>
+
     </section>
 
+    <!-- Footer -->
     <footer>
 
         <div class="container">
@@ -231,7 +363,14 @@
                 <div>
 
                     <h2 class="footer-logo">
-                        <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                        <img
+                            src="assets/img/logo-icon.png"
+                            alt="PrepVanta logo"
+                            class="logo-icon"
+                        >
+                        <span class="logo-text">
+                            <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                        </span>
                     </h2>
 
                     <p>
@@ -276,20 +415,19 @@
             </div>
 
             <div class="copyright">
-
                 © 2026 PrepVanta. All Rights Reserved.
-
             </div>
 
         </div>
 
     </footer>
 
-<script src="js/sidebar.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/main.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/compiler.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/compiler.js"></script>
+
 </body>
 
 </html>

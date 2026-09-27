@@ -1,155 +1,413 @@
 /* ===================================
-   COMPILER PAGE
+   PREPVANTA COMPILER PAGE
 =================================== */
 
-.compiler-page{
-    padding:60px 0 100px;
+.compiler-page {
+    padding: 60px 0 100px;
 }
 
-.compiler-page h1{
-    font-size:2.2rem;
-    margin-bottom:8px;
+.compiler-page h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
 }
 
-.compiler-page > .container > p.sub{
-    color:var(--text-light);
-    margin-bottom:30px;
+.compiler-page > .container > p.sub {
+    color: var(--text-light);
+    margin-bottom: 30px;
 }
 
-.compiler-shell{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    border-radius:24px;
-    overflow:hidden;
-    box-shadow:0 16px 40px rgba(31,41,55,.16);
-    min-height:520px;
-    border:2px solid rgba(79,70,229,.35);
+
+/* ===================================
+   COMPILER SHELL
+=================================== */
+
+.compiler-shell {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(31, 41, 55, .16);
+    min-height: 560px;
+    border: 2px solid rgba(79, 70, 229, .35);
 }
 
-.compiler-pane{
-    background:var(--card);
-    display:flex;
-    flex-direction:column;
+.compiler-pane {
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
-.compiler-pane + .compiler-pane{
-    border-left:2px solid rgba(79,70,229,.25);
+.compiler-pane + .compiler-pane {
+    border-left: 2px solid rgba(79, 70, 229, .25);
 }
 
-.compiler-toolbar{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:14px 20px;
-    border-bottom:2px solid rgba(79,70,229,.25);
-    background:#EEF2FF;
+
+/* ===================================
+   TOOLBAR
+=================================== */
+
+.compiler-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 62px;
+    padding: 14px 20px;
+    border-bottom: 2px solid rgba(79, 70, 229, .25);
+    background: #EEF2FF;
 }
 
-.compiler-toolbar select{
-    padding:8px 14px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    font-family:'Courier New',monospace;
-    background:var(--card);
-    color:var(--text);
+.compiler-toolbar strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .95rem;
 }
 
-.compiler-toolbar .run-btn{
-    margin-left:auto;
-    background:var(--danger);
-    color:white;
-    border:none;
-    padding:9px 20px;
-    border-radius:10px;
-    font-weight:700;
-    cursor:pointer;
-    font-size:.85rem;
-    transition:.2s;
+.compiler-toolbar select {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: 'Courier New', monospace;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
 }
 
-.compiler-toolbar .run-btn:hover{
-    background:#B91C1C;
+.compiler-toolbar select:focus {
+    outline: 2px solid rgba(79, 70, 229, .25);
+    border-color: #4F46E5;
 }
 
-.code-area{
-    flex:1;
-    background:#F1F5F9;
-    color:#1E293B;
-    font-family:'Courier New',monospace;
-    font-size:.9rem;
-    padding:20px;
-    border:none;
-    resize:none;
-    line-height:1.6;
+
+/* ===================================
+   RUN BUTTON
+=================================== */
+
+.compiler-toolbar .run-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    background: var(--danger);
+    color: white;
+
+    border: none;
+    padding: 9px 20px;
+    border-radius: 10px;
+
+    font-weight: 700;
+    font-size: .85rem;
+
+    cursor: pointer;
+    transition: .2s;
 }
 
-.code-area:focus{
-    outline:none;
+.compiler-toolbar .run-btn:hover:not(:disabled) {
+    background: #B91C1C;
+    transform: translateY(-1px);
 }
 
-.console-area{
-    flex:1;
-    font-family:'Courier New',monospace;
-    font-size:.85rem;
-    padding:20px;
-    white-space:pre-wrap;
-    overflow-y:auto;
-    color:var(--text);
-    background:var(--card);
+.compiler-toolbar .run-btn:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    transform: none;
 }
 
-.console-area .ok{color:#16A34A;}
-.console-area .err{color:#DC2626;}
-.console-area .muted{color:var(--text-light);}
 
-.compiler-note{
-    background:var(--card);
-    padding:22px 26px;
-    border-radius:20px;
-    box-shadow:var(--shadow);
-    margin-top:22px;
-    border:1px solid var(--border);
+/* ===================================
+   CODE EDITOR
+=================================== */
+
+.code-area {
+    flex: 1;
+    min-height: 350px;
+
+    padding: 20px;
+    border: none;
+    resize: none;
+
+    background: #F1F5F9;
+    color: #1E293B;
+
+    font-family: 'Courier New', monospace;
+    font-size: .9rem;
+    line-height: 1.6;
+
+    tab-size: 4;
 }
 
-.compiler-note h3{
-    font-size:.95rem;
-    margin-bottom:8px;
+.code-area:focus {
+    outline: none;
 }
 
-.compiler-note p{
-    color:var(--text-light);
-    font-size:.87rem;
-    line-height:1.6;
+
+/* ===================================
+   CUSTOM INPUT
+=================================== */
+
+.compiler-input-section {
+    border-top: 2px solid rgba(79, 70, 229, .18);
+    background: var(--card);
 }
 
-[data-theme="dark"] .compiler-toolbar{
-    background:var(--bg);
+.compiler-input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+    padding: 10px 16px;
+
+    border-bottom: 1px solid var(--border);
 }
 
-[data-theme="dark"] .code-area{
-    background:#0B1220;
-    color:#E2E8F0;
+.compiler-input-header strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    font-size: .82rem;
 }
 
-[data-theme="dark"] .compiler-shell{
-    border-color:rgba(99,102,241,.45);
-    box-shadow:0 16px 40px rgba(0,0,0,.55);
+.compiler-input-header span {
+    color: var(--text-light);
+    font-size: .75rem;
 }
 
-[data-theme="dark"] .compiler-pane + .compiler-pane{
-    border-left-color:rgba(99,102,241,.3);
+.input-area {
+    display: block;
+    width: 100%;
+
+    min-height: 100px;
+    max-height: 180px;
+
+    padding: 14px 16px;
+
+    border: none;
+    resize: vertical;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: 'Courier New', monospace;
+    font-size: .85rem;
+    line-height: 1.5;
 }
 
-[data-theme="dark"] .compiler-toolbar{
-    border-bottom-color:rgba(99,102,241,.3);
+.input-area:focus {
+    outline: none;
+    background: rgba(79, 70, 229, .03);
 }
 
-@media(max-width:900px){
-    .compiler-shell{
-        grid-template-columns:1fr;
+.input-area::placeholder {
+    color: var(--text-light);
+}
+
+
+/* ===================================
+   OUTPUT CONSOLE
+=================================== */
+
+.console-area {
+    flex: 1;
+    min-height: 420px;
+
+    padding: 20px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: 'Courier New', monospace;
+    font-size: .85rem;
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+    word-break: normal;
+
+    overflow-x: auto;
+    overflow-y: auto;
+
+    text-align: left;
+}
+
+.console-area > div,
+.console-area > span {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.console-area .ok {
+    color: #16A34A;
+}
+
+.console-area .err {
+    color: #DC2626;
+}
+
+.console-area .muted {
+    color: var(--text-light);
+}
+
+
+/* ===================================
+   EXECUTION METADATA
+=================================== */
+
+.execution-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 20px;
+
+    padding: 12px 18px;
+
+    border-top: 1px solid var(--border);
+
+    background: rgba(79, 70, 229, .04);
+    color: var(--text-light);
+
+    font-size: .78rem;
+}
+
+.execution-meta[hidden] {
+    display: none;
+}
+
+.execution-meta strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+#executionStatus {
+    font-weight: 700;
+}
+
+
+/* ===================================
+   COMPILER NOTE
+=================================== */
+
+.compiler-note {
+    margin-top: 22px;
+
+    padding: 22px 26px;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    box-shadow: var(--shadow);
+}
+
+.compiler-note h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 8px;
+
+    font-size: .95rem;
+}
+
+.compiler-note p {
+    color: var(--text-light);
+
+    font-size: .87rem;
+    line-height: 1.6;
+}
+
+
+/* ===================================
+   DARK MODE
+=================================== */
+
+[data-theme="dark"] .compiler-toolbar {
+    background: var(--bg);
+    border-bottom-color: rgba(99, 102, 241, .3);
+}
+
+[data-theme="dark"] .code-area {
+    background: #0B1220;
+    color: #E2E8F0;
+}
+
+[data-theme="dark"] .compiler-shell {
+    border-color: rgba(99, 102, 241, .45);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .55);
+}
+
+[data-theme="dark"] .compiler-pane + .compiler-pane {
+    border-left-color: rgba(99, 102, 241, .3);
+}
+
+[data-theme="dark"] .compiler-input-section {
+    border-top-color: rgba(99, 102, 241, .3);
+}
+
+[data-theme="dark"] .input-area:focus {
+    background: rgba(99, 102, 241, .05);
+}
+
+[data-theme="dark"] .execution-meta {
+    background: rgba(99, 102, 241, .06);
+}
+
+
+/* ===================================
+   RESPONSIVE - TABLET
+=================================== */
+
+@media (max-width: 900px) {
+
+    .compiler-shell {
+        grid-template-columns: 1fr;
     }
-    .compiler-pane + .compiler-pane{
-        border-left:none;
-        border-top:2px solid var(--border);
+
+    .compiler-pane + .compiler-pane {
+        border-left: none;
+        border-top: 2px solid var(--border);
+    }
+
+    .code-area {
+        min-height: 320px;
+    }
+
+    .console-area {
+        min-height: 300px;
+    }
+}
+
+
+/* ===================================
+   RESPONSIVE - MOBILE
+=================================== */
+
+@media (max-width: 600px) {
+
+    .compiler-page {
+        padding: 40px 0 70px;
+    }
+
+    .compiler-page h1 {
+        font-size: 1.8rem;
+    }
+
+    .compiler-toolbar {
+        padding: 12px 14px;
+    }
+
+    .compiler-toolbar .run-btn {
+        padding: 9px 14px;
+    }
+
+    .execution-meta {
+        gap: 10px 18px;
     }
 }
