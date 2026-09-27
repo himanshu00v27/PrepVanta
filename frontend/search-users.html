@@ -191,20 +191,46 @@
         <div class="container">
             <div class="page-head">
                 <h1>Find Users</h1>
-                <p>Search PrepVanta by username or an 8-digit user ID.</p>
+                <p>Search PrepVanta by name, username, or user ID.</p>
             </div>
 
             <div class="contact-form-card" style="margin-bottom:30px;max-width:100%;padding:22px 26px;">
                 <input type="text" id="userSearchInput" placeholder="e.g. ananya_i or 7K2QX9M4"
                     style="width:100%;padding:13px 16px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);outline:none;">
             </div>
+<div class="user-grid" id="userResults">
 
-            <div class="user-grid" id="userResults">
-                <div class="user-result"><span class="avatar">AI</span><div><div class="u-name">Ananya Iyer</div><div class="u-meta">@ananya_i &middot; 7K2QX9M4</div></div></div>
-                <div class="user-result"><span class="avatar">RS</span><div><div class="u-name">Riya Sharma</div><div class="u-meta">@riya_s &middot; 9M4PL2Q7</div></div></div>
-                <div class="user-result"><span class="avatar">AV</span><div><div class="u-name">Aman Verma</div><div class="u-meta">@aman_v &middot; 3T8ZN5Y2</div></div></div>
-                <div class="user-result"><span class="avatar">KP</span><div><div class="u-name">Karan Patel</div><div class="u-meta">@karan_p &middot; Q4R7X2W9</div></div></div>
-            </div>
+    <div class="user-search-state">
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <p>
+            Search for a PrepVanta user by name, username, or user ID.
+        </p>
+    </div>
+
+</div>
+
+           <!-- User Profile Modal -->
+<div class="user-profile-modal" id="userProfileModal" hidden>
+
+    <div class="user-profile-backdrop" id="userProfileBackdrop"></div>
+
+    <div class="user-profile-card">
+
+        <button
+            type="button"
+            class="user-profile-close"
+            id="userProfileClose"
+            aria-label="Close profile"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div id="userProfileContent"></div>
+
+    </div>
+
+</div>
         </div>
     </section>
 

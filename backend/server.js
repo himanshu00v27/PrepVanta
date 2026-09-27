@@ -10,6 +10,7 @@ const testRoutes = require("./routes/testRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const supportRoutes = require("./routes/supportRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/test", testRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
