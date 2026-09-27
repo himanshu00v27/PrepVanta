@@ -30,10 +30,33 @@ const companySchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    difficulty: {
+      type: String,
+      trim: true,
+    },
+
+    focusTopics: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Company", companySchema);
