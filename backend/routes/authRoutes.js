@@ -314,10 +314,12 @@ router.post("/verify-otp", otpVerificationLimiter, async (req, res) => {
 
       await createAuditLog({
         username: verification.username,
-        action: "OTP_VERIFICATION",
+        role: "user",
+        category: "registration",
+        action: "OTP_VERIFICATION_FAILED",
         status: "failure",
         ipAddress: req.ip,
-        details: "Invalid OTP entered",
+        details: "Invalid registration OTP entered",
       });
 
       return res.status(401).json({
@@ -332,10 +334,12 @@ router.post("/verify-otp", otpVerificationLimiter, async (req, res) => {
     await verification.save();
     await createAuditLog({
       username: verification.username,
+      role: "user",
+      category: "registration",
       action: "OTP_VERIFICATION",
       status: "success",
       ipAddress: req.ip,
-      details: "OTP verification successful",
+      details: "Registration OTP verification successful",
     });
 
     /* ---------- Double-check uniqueness ---------- */
@@ -368,6 +372,8 @@ router.post("/verify-otp", otpVerificationLimiter, async (req, res) => {
     await createAuditLog({
       userId: user.userId,
       username: user.username,
+      role: user.role,
+      category: "registration",
       action: "REGISTRATION",
       status: "success",
       ipAddress: req.ip,
@@ -426,7 +432,9 @@ router.post("/login", loginLimiter, async (req, res) => {
 
     if (!user) {
       await createAuditLog({
-        action: "LOGIN",
+        role: "system",
+        category: "authentication",
+        action: "LOGIN_FAILED",
         status: "failure",
         ipAddress: req.ip,
         details: `Failed login attempt for email: ${normalizedEmail}`,
@@ -452,7 +460,9 @@ router.post("/login", loginLimiter, async (req, res) => {
       await createAuditLog({
         userId: user.userId,
         username: user.username,
-        action: "LOGIN",
+        role: user.role,
+        category: "authentication",
+        action: "LOGIN_FAILED",
         status: "failure",
         ipAddress: req.ip,
         details: "Incorrect password",
@@ -479,10 +489,15 @@ router.post("/login", loginLimiter, async (req, res) => {
     await createAuditLog({
       userId: user.userId,
       username: user.username,
+      role: user.role,
+      category: "authentication",
       action: "LOGIN",
       status: "success",
       ipAddress: req.ip,
-      details: "User logged in successfully",
+      details:
+        user.role === "admin"
+          ? "Administrator logged in successfully"
+          : "User logged in successfully",
     });
 
     /* ---------- Send response ---------- */
@@ -677,7 +692,9 @@ router.post("/reset-password", passwordResetLimiter, async (req, res) => {
 
       await createAuditLog({
         username: verification.username,
-        action: "PASSWORD_RESET",
+        role: "user",
+        category: "password_recovery",
+        action: "PASSWORD_RESET_FAILED",
         status: "failure",
         ipAddress: req.ip,
         details: "Invalid OTP entered during password reset",
@@ -706,7 +723,9 @@ router.post("/reset-password", passwordResetLimiter, async (req, res) => {
     await createAuditLog({
       userId: user.userId,
       username: user.username,
-      action: "PASSWORD_RESET",
+      role: user.role,
+      category: "password_recovery",
+      action: "PASSWORD_RESET_COMPLETED",
       status: "success",
       ipAddress: req.ip,
       details: "Password reset successfully",

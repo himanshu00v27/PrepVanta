@@ -1,5 +1,9 @@
 const SUPPORT_API = "http://localhost:5000/api/support";
 
+/* ===================================
+   ELEMENTS
+=================================== */
+
 const ticketList = document.getElementById("ticketList");
 const statusFilter = document.getElementById("ticketStatusFilter");
 
@@ -18,14 +22,9 @@ const ticketFormMessage = document.getElementById("ticketFormMessage");
 const replyForm = document.getElementById("ticketReplyForm");
 const replyMessage = document.getElementById("ticketReplyMessage");
 const replyStatus = document.getElementById("replyStatus");
-const adminTicketControls = document.getElementById("adminTicketControls");
-const adminTicketStatus = document.getElementById("adminTicketStatus");
 
 let tickets = [];
 let selectedTicketId = null;
-const currentUser = JSON.parse(localStorage.getItem("prepvanta-user") || "{}");
-
-const isAdmin = currentUser.role === "admin";
 
 /* ===================================
    AUTH
@@ -33,6 +32,14 @@ const isAdmin = currentUser.role === "admin";
 
 function getToken() {
   return localStorage.getItem("prepvanta-token");
+}
+
+function getCurrentUser() {
+  try {
+    return JSON.parse(localStorage.getItem("prepvanta-user") || "{}");
+  } catch (error) {
+    return {};
+  }
 }
 
 function authHeaders(includeContentType = false) {
@@ -50,43 +57,76 @@ function authHeaders(includeContentType = false) {
 }
 
 /* ===================================
-   LOAD TICKETS
+   LOAD MY TICKETS
 =================================== */
 
 async function loadTickets() {
+  if (!ticketList) {
+    return;
+  }
+
   try {
     ticketList.innerHTML = `
-            <div class="ticket-empty">
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                <p>Loading your tickets...</p>
-            </div>
-        `;
+      <div class="ticket-empty">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <p>Loading your tickets...</p>
+      </div>
+    `;
 
-    const ticketsUrl = isAdmin
-      ? `${SUPPORT_API}/admin/tickets`
-      : `${SUPPORT_API}/tickets`;
-
-    const response = await fetch(ticketsUrl, {
+    /*
+     * IMPORTANT:
+     *
+     * Help Desk is the requester-facing interface for EVERY
+     * authenticated account, including administrators.
+     *
+     * Therefore it ALWAYS uses the normal user-scoped endpoint.
+     * The backend restricts this endpoint to req.user._id.
+     *
+     * Administrative ticket management belongs exclusively in
+     * Admin Support Management.
+     */
+    const response = await fetch(`${SUPPORT_API}/tickets`, {
+      method: "GET",
       headers: authHeaders(),
     });
 
+    const data = await response.json().catch(() => null);
+
     if (!response.ok) {
-      throw new Error("Unable to load tickets");
+      throw new Error(data?.message || "Unable to load your support tickets.");
     }
 
-    tickets = await response.json();
+    tickets = Array.isArray(data) ? data : [];
+
+    /*
+     * If the currently selected ticket no longer exists in the
+     * requester's own ticket collection, clear the selection.
+     */
+    if (
+      selectedTicketId &&
+      !tickets.some((ticket) => ticket._id === selectedTicketId)
+    ) {
+      selectedTicketId = null;
+      resetTicketDetail();
+    }
 
     updateSummary();
     renderTicketList();
   } catch (error) {
     console.error("Ticket loading error:", error);
 
+    tickets = [];
+
+    updateSummary();
+
     ticketList.innerHTML = `
-            <div class="ticket-empty">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <p>Unable to load your support tickets.</p>
-            </div>
-        `;
+      <div class="ticket-empty">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <p>${escapeHtml(
+          error.message || "Unable to load your support tickets.",
+        )}</p>
+      </div>
+    `;
   }
 }
 
@@ -95,19 +135,32 @@ async function loadTickets() {
 =================================== */
 
 function updateSummary() {
-  document.getElementById("openTicketCount").textContent = tickets.filter(
-    (ticket) => ticket.status === "open",
-  ).length;
+  const openCount = document.getElementById("openTicketCount");
+  const progressCount = document.getElementById("progressTicketCount");
+  const resolvedCount = document.getElementById("resolvedTicketCount");
+  const totalCount = document.getElementById("totalTicketCount");
 
-  document.getElementById("progressTicketCount").textContent = tickets.filter(
-    (ticket) => ticket.status === "in_progress",
-  ).length;
+  if (openCount) {
+    openCount.textContent = tickets.filter(
+      (ticket) => ticket.status === "open",
+    ).length;
+  }
 
-  document.getElementById("resolvedTicketCount").textContent = tickets.filter(
-    (ticket) => ticket.status === "resolved",
-  ).length;
+  if (progressCount) {
+    progressCount.textContent = tickets.filter(
+      (ticket) => ticket.status === "in_progress",
+    ).length;
+  }
 
-  document.getElementById("totalTicketCount").textContent = tickets.length;
+  if (resolvedCount) {
+    resolvedCount.textContent = tickets.filter(
+      (ticket) => ticket.status === "resolved",
+    ).length;
+  }
+
+  if (totalCount) {
+    totalCount.textContent = tickets.length;
+  }
 }
 
 /* ===================================
@@ -115,6 +168,10 @@ function updateSummary() {
 =================================== */
 
 function renderTicketList() {
+  if (!ticketList || !statusFilter) {
+    return;
+  }
+
   const filter = statusFilter.value;
 
   const filteredTickets =
@@ -124,11 +181,11 @@ function renderTicketList() {
 
   if (!filteredTickets.length) {
     ticketList.innerHTML = `
-            <div class="ticket-empty">
-                <i class="fa-regular fa-folder-open"></i>
-                <p>No tickets found.</p>
-            </div>
-        `;
+      <div class="ticket-empty">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>No tickets found.</p>
+      </div>
+    `;
 
     return;
   }
@@ -138,47 +195,47 @@ function renderTicketList() {
       const active = ticket._id === selectedTicketId ? "active" : "";
 
       return `
-                <div
-                    class="ticket-list-item ${active}"
-                    data-ticket-id="${escapeHtml(ticket._id)}"
-                >
+        <div
+          class="ticket-list-item ${active}"
+          data-ticket-id="${escapeHtml(ticket._id)}"
+        >
 
-                    <div class="ticket-item-top">
+          <div class="ticket-item-top">
 
-                        <h3>
-                            ${escapeHtml(ticket.subject)}
-                        </h3>
+            <h3>
+              ${escapeHtml(ticket.subject)}
+            </h3>
 
-                        <span class="ticket-item-date">
-                            ${formatDate(ticket.updatedAt)}
-                        </span>
+            <span class="ticket-item-date">
+              ${formatDate(ticket.updatedAt)}
+            </span>
 
-                    </div>
+          </div>
 
-                    <p class="ticket-item-description">
-                        ${escapeHtml(ticket.description)}
-                    </p>
+          <p class="ticket-item-description">
+            ${escapeHtml(ticket.description)}
+          </p>
 
-                    <div class="ticket-item-meta">
+          <div class="ticket-item-meta">
 
-                        <span
-                            class="ticket-status status-${escapeHtml(ticket.status)}"
-                        >
-                            ${formatStatus(ticket.status)}
-                        </span>
+            <span
+              class="ticket-status status-${escapeHtml(ticket.status)}"
+            >
+              ${escapeHtml(formatStatus(ticket.status))}
+            </span>
 
-                        <span class="ticket-badge">
-                            ${escapeHtml(ticket.category)}
-                        </span>
+            <span class="ticket-badge">
+              ${escapeHtml(ticket.category)}
+            </span>
 
-                        <span class="ticket-badge">
-                            ${escapeHtml(ticket.priority)}
-                        </span>
+            <span class="ticket-badge">
+              ${escapeHtml(ticket.priority)}
+            </span>
 
-                    </div>
+          </div>
 
-                </div>
-            `;
+        </div>
+      `;
     })
     .join("");
 
@@ -190,31 +247,96 @@ function renderTicketList() {
 }
 
 /* ===================================
-   OPEN TICKET
+   OPEN MY TICKET
 =================================== */
 
 async function openTicket(ticketId) {
-  try {
-    const ticketUrl = isAdmin
-      ? `${SUPPORT_API}/admin/tickets/${ticketId}`
-      : `${SUPPORT_API}/tickets/${ticketId}`;
+  if (!ticketId) {
+    return;
+  }
 
-    const response = await fetch(ticketUrl, {
-      headers: authHeaders(),
-    });
+  try {
+    /*
+     * ALWAYS use the requester endpoint.
+     *
+     * Even when the logged-in account is an administrator,
+     * Help Desk may only open a ticket owned by that account.
+     */
+    const response = await fetch(
+      `${SUPPORT_API}/tickets/${encodeURIComponent(ticketId)}`,
+      {
+        method: "GET",
+        headers: authHeaders(),
+      },
+    );
+
+    const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error("Unable to load ticket");
+      throw new Error(data.message || "Unable to load ticket.");
     }
 
-    const ticket = await response.json();
-
-    selectedTicketId = ticket._id;
+    selectedTicketId = data._id;
 
     renderTicketList();
-    renderTicketDetail(ticket);
+    renderTicketDetail(data);
   } catch (error) {
     console.error("Ticket detail error:", error);
+
+    /*
+     * A 404 may occur if somebody attempts to access a ticket
+     * that does not belong to the current account.
+     */
+    selectedTicketId = null;
+
+    resetTicketDetail();
+
+    if (ticketDetailEmpty) {
+      ticketDetailEmpty.innerHTML = `
+        <div class="empty-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3>Unable to open ticket</h3>
+
+        <p>
+          ${escapeHtml(error.message || "This ticket could not be accessed.")}
+        </p>
+      `;
+    }
+
+    renderTicketList();
+  }
+}
+
+/* ===================================
+   RESET TICKET DETAIL
+=================================== */
+
+function resetTicketDetail() {
+  if (ticketDetail) {
+    ticketDetail.hidden = true;
+  }
+
+  if (ticketDetailEmpty) {
+    ticketDetailEmpty.hidden = false;
+
+    ticketDetailEmpty.innerHTML = `
+      <div class="empty-icon">
+        <i class="fa-regular fa-message"></i>
+      </div>
+
+      <h3>Select a ticket</h3>
+
+      <p>
+        Choose a ticket from the list to view its details
+        and conversation.
+      </p>
+    `;
+  }
+
+  if (replyStatus) {
+    replyStatus.textContent = "";
   }
 }
 
@@ -223,47 +345,72 @@ async function openTicket(ticketId) {
 =================================== */
 
 function renderTicketDetail(ticket) {
+  if (!ticketDetail || !ticketDetailEmpty) {
+    return;
+  }
+
   ticketDetailEmpty.hidden = true;
   ticketDetail.hidden = false;
 
-  document.getElementById("detailSubject").textContent = ticket.subject;
-
-  document.getElementById("detailDescription").textContent = ticket.description;
-
-  document.getElementById("detailCategory").textContent = ticket.category;
-
-  document.getElementById("detailPriority").textContent =
-    `${ticket.priority} priority`;
-
-  document.getElementById("detailCreatedAt").textContent =
-    `Created ${formatDateTime(ticket.createdAt)}`;
-
+  const subjectElement = document.getElementById("detailSubject");
+  const descriptionElement = document.getElementById("detailDescription");
+  const categoryElement = document.getElementById("detailCategory");
+  const priorityElement = document.getElementById("detailPriority");
+  const createdElement = document.getElementById("detailCreatedAt");
   const statusElement = document.getElementById("detailStatus");
 
-  statusElement.textContent = formatStatus(ticket.status);
-
-  statusElement.className = `ticket-status status-${ticket.status}`;
-
-  if (isAdmin) {
-    adminTicketControls.hidden = false;
-    adminTicketStatus.value = ticket.status;
-  } else {
-    adminTicketControls.hidden = true;
+  if (subjectElement) {
+    subjectElement.textContent = ticket.subject || "";
   }
+
+  if (descriptionElement) {
+    descriptionElement.textContent = ticket.description || "";
+  }
+
+  if (categoryElement) {
+    categoryElement.textContent = ticket.category || "";
+  }
+
+  if (priorityElement) {
+    priorityElement.textContent = `${ticket.priority || "medium"} priority`;
+  }
+
+  if (createdElement) {
+    createdElement.textContent = `Created ${formatDateTime(ticket.createdAt)}`;
+  }
+
+  if (statusElement) {
+    statusElement.textContent = formatStatus(ticket.status);
+
+    statusElement.className = `ticket-status status-${ticket.status || "open"}`;
+  }
+
+  /*
+   * Requesters cannot change ticket status from Help Desk.
+   *
+   * Resolved and closed tickets are read-only.
+   */
   const repliesLocked =
     ticket.status === "resolved" || ticket.status === "closed";
 
-  if (repliesLocked) {
-    replyMessage.disabled = true;
-    replyMessage.placeholder =
-      "This ticket is resolved. Reopen the ticket to continue the conversation.";
+  const replyButton = replyForm
+    ? replyForm.querySelector('button[type="submit"]')
+    : null;
 
-    replyForm.querySelector('button[type="submit"]').disabled = true;
-  } else {
-    replyMessage.disabled = false;
-    replyMessage.placeholder = "Write a reply...";
+  if (replyMessage) {
+    replyMessage.disabled = repliesLocked;
 
-    replyForm.querySelector('button[type="submit"]').disabled = false;
+    replyMessage.placeholder = repliesLocked
+      ? "This ticket is resolved or closed. Replies are no longer available."
+      : "Write a reply...";
+  }
+
+  if (replyButton) {
+    replyButton.disabled = repliesLocked;
+  }
+
+  if (replyStatus) {
+    replyStatus.textContent = "";
   }
 
   renderMessages(ticket.messages || []);
@@ -276,235 +423,296 @@ function renderTicketDetail(ticket) {
 function renderMessages(messages) {
   const messageList = document.getElementById("messageList");
 
-  if (!messages.length) {
+  if (!messageList) {
+    return;
+  }
+
+  if (!Array.isArray(messages) || !messages.length) {
     messageList.innerHTML = `
-            <div class="ticket-empty">
-                <p>No replies yet.</p>
-            </div>
-        `;
+      <div class="ticket-empty">
+        <p>No replies yet.</p>
+      </div>
+    `;
 
     return;
   }
+
+  const currentUser = getCurrentUser();
 
   messageList.innerHTML = messages
     .map((message) => {
       const sender = message.sender || {};
 
       /*
-       * Admin messages appear on the support side.
-       * Normal user messages appear on the user side.
+       * senderType is now the authoritative source for deciding
+       * which side of the support conversation produced a message.
+       *
+       * requester = ticket owner using Help Desk
+       * support   = administrator using Admin Support Management
+       *
+       * Account role must NOT be used for this because an
+       * administrator can also be a ticket requester.
        */
-      const currentUser = JSON.parse(
-        localStorage.getItem("prepvanta-user") || "{}",
-      );
+      let senderType = message.senderType;
 
-      const isCurrentUser = sender.userId === currentUser.userId;
+      /*
+       * Historical compatibility:
+       *
+       * Older messages were created before senderType existed.
+       * For those messages only, fall back to the old sender
+       * information so historical conversations remain readable.
+       */
+      if (senderType !== "requester" && senderType !== "support") {
+        const senderMatchesCurrentUser =
+          String(sender.userId || sender._id || "") ===
+          String(currentUser.userId || currentUser._id || "");
 
-      const senderName = isCurrentUser
-        ? "You"
-        : sender.role === "admin"
-          ? "PrepVanta Support"
-          : sender.fullName || "User";
+        if (senderMatchesCurrentUser) {
+          senderType = "requester";
+        } else if (sender.role === "admin") {
+          senderType = "support";
+        } else {
+          senderType = "requester";
+        }
+      }
+
+      const isRequester = senderType === "requester";
+
+      const senderName = isRequester ? "You" : "PrepVanta Support";
+
       return `
-                <div class="ticket-message ${isCurrentUser ? "user" : "support"}">
+        <div
+          class="ticket-message ${isRequester ? "user" : "support"}"
+        >
 
-                    <div class="message-bubble">
-                        ${escapeHtml(message.message)}
-                    </div>
+          <div class="message-bubble">
+            ${escapeHtml(message.message || "")}
+          </div>
 
-                    <div class="message-meta">
-                        ${escapeHtml(senderName)}
-                        ·
-                        ${formatDateTime(message.createdAt)}
-                    </div>
+          <div class="message-meta">
+            ${escapeHtml(senderName)}
+            &middot;
+            ${formatDateTime(message.createdAt)}
+          </div>
 
-                </div>
-            `;
+        </div>
+      `;
     })
     .join("");
 
   messageList.scrollTop = messageList.scrollHeight;
 }
-
 /* ===================================
    CREATE TICKET
 =================================== */
 
-ticketForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+if (ticketForm) {
+  ticketForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  const subject = document.getElementById("ticketSubject").value.trim();
+    const subject = document.getElementById("ticketSubject").value.trim();
 
-  const description = document.getElementById("ticketDescription").value.trim();
+    const description = document
+      .getElementById("ticketDescription")
+      .value.trim();
 
-  const category = document.getElementById("ticketCategory").value;
+    const category = document.getElementById("ticketCategory").value;
+    const priority = document.getElementById("ticketPriority").value;
 
-  const priority = document.getElementById("ticketPriority").value;
+    if (!subject || !description) {
+      if (ticketFormMessage) {
+        ticketFormMessage.textContent = "Subject and description are required.";
+      }
 
-  if (!subject || !description) {
-    ticketFormMessage.textContent = "Subject and description are required.";
-
-    return;
-  }
-
-  try {
-    ticketFormMessage.textContent = "Submitting ticket...";
-
-    const response = await fetch(`${SUPPORT_API}/tickets`, {
-      method: "POST",
-
-      headers: authHeaders(true),
-
-      body: JSON.stringify({
-        subject,
-        description,
-        category,
-        priority,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Unable to create ticket");
+      return;
     }
 
-    ticketForm.reset();
+    try {
+      if (ticketFormMessage) {
+        ticketFormMessage.textContent = "Submitting ticket...";
+      }
 
-    closeModal();
+      /*
+       * Administrators use exactly the same requester endpoint
+       * here as normal users.
+       */
+      const response = await fetch(`${SUPPORT_API}/tickets`, {
+        method: "POST",
 
-    await loadTickets();
-
-    if (data.ticket?._id) {
-      await openTicket(data.ticket._id);
-    }
-  } catch (error) {
-    ticketFormMessage.textContent = error.message;
-  }
-});
-
-/* ===================================
-   SEND USER REPLY
-=================================== */
-
-replyForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (!selectedTicketId) {
-    return;
-  }
-
-  const message = replyMessage.value.trim();
-
-  if (!message) {
-    return;
-  }
-
-  try {
-    replyStatus.textContent = "Sending...";
-
-    const replyUrl = isAdmin
-      ? `${SUPPORT_API}/admin/tickets/${selectedTicketId}/messages`
-      : `${SUPPORT_API}/tickets/${selectedTicketId}/messages`;
-
-    const response = await fetch(replyUrl, {
-      method: "POST",
-
-      headers: authHeaders(true),
-
-      body: JSON.stringify({
-        message,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Unable to send reply");
-    }
-
-    replyMessage.value = "";
-    replyStatus.textContent = "";
-
-    await loadTickets();
-    await openTicket(selectedTicketId);
-  } catch (error) {
-    replyStatus.textContent = error.message;
-  }
-});
-
-/* ===================================
-   ADMIN UPDATE TICKET STATUS
-=================================== */
-
-adminTicketStatus.addEventListener("change", async () => {
-  if (!isAdmin || !selectedTicketId) {
-    return;
-  }
-
-  const status = adminTicketStatus.value;
-
-  try {
-    adminTicketStatus.disabled = true;
-
-    const response = await fetch(
-      `${SUPPORT_API}/admin/tickets/${selectedTicketId}/status`,
-      {
-        method: "PATCH",
         headers: authHeaders(true),
+
         body: JSON.stringify({
-          status,
+          subject,
+          description,
+          category,
+          priority,
         }),
-      },
-    );
+      });
 
-    const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      throw new Error(data.message || "Unable to update ticket status");
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to create ticket.");
+      }
+
+      ticketForm.reset();
+
+      closeModal();
+
+      await loadTickets();
+
+      if (data.ticket?._id) {
+        await openTicket(data.ticket._id);
+      }
+    } catch (error) {
+      if (ticketFormMessage) {
+        ticketFormMessage.textContent =
+          error.message || "Unable to create ticket.";
+      }
+    }
+  });
+}
+
+/* ===================================
+   SEND REQUESTER REPLY
+=================================== */
+
+if (replyForm) {
+  replyForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!selectedTicketId || !replyMessage) {
+      return;
     }
 
-    await loadTickets();
-    await openTicket(selectedTicketId);
-  } catch (error) {
-    console.error("Ticket status update error:", error);
-  } finally {
-    adminTicketStatus.disabled = false;
-  }
-});
+    const message = replyMessage.value.trim();
+
+    if (!message) {
+      return;
+    }
+
+    const submitButton = replyForm.querySelector('button[type="submit"]');
+
+    try {
+      if (replyStatus) {
+        replyStatus.textContent = "Sending...";
+      }
+
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      /*
+       * ALWAYS use the requester message endpoint.
+       *
+       * The backend verifies that selectedTicketId belongs to
+       * req.user._id before accepting the message.
+       *
+       * Admin replies to other people's tickets belong exclusively
+       * in Admin Support Management.
+       */
+      const response = await fetch(
+        `${SUPPORT_API}/tickets/${encodeURIComponent(
+          selectedTicketId,
+        )}/messages`,
+        {
+          method: "POST",
+
+          headers: authHeaders(true),
+
+          body: JSON.stringify({
+            message,
+          }),
+        },
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to send reply.");
+      }
+
+      replyMessage.value = "";
+
+      if (replyStatus) {
+        replyStatus.textContent = "";
+      }
+
+      const ticketId = selectedTicketId;
+
+      await loadTickets();
+
+      await openTicket(ticketId);
+    } catch (error) {
+      if (replyStatus) {
+        replyStatus.textContent = error.message || "Unable to send reply.";
+      }
+
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+  });
+}
 
 /* ===================================
    MODAL
 =================================== */
 
 function openModal() {
+  if (!ticketModal) {
+    return;
+  }
+
   ticketModal.classList.add("active");
   ticketModal.setAttribute("aria-hidden", "false");
 
   document.body.style.overflow = "hidden";
 
-  document.getElementById("ticketSubject").focus();
+  const subjectInput = document.getElementById("ticketSubject");
+
+  if (subjectInput) {
+    subjectInput.focus();
+  }
 }
 
 function closeModal() {
+  if (!ticketModal) {
+    return;
+  }
+
   ticketModal.classList.remove("active");
   ticketModal.setAttribute("aria-hidden", "true");
 
   document.body.style.overflow = "";
 
-  ticketFormMessage.textContent = "";
+  if (ticketFormMessage) {
+    ticketFormMessage.textContent = "";
+  }
 }
 
-newTicketBtn.addEventListener("click", openModal);
+if (newTicketBtn) {
+  newTicketBtn.addEventListener("click", openModal);
+}
 
-closeTicketModal.addEventListener("click", closeModal);
+if (closeTicketModal) {
+  closeTicketModal.addEventListener("click", closeModal);
+}
 
-cancelTicketBtn.addEventListener("click", closeModal);
+if (cancelTicketBtn) {
+  cancelTicketBtn.addEventListener("click", closeModal);
+}
 
-ticketModalBackdrop.addEventListener("click", closeModal);
+if (ticketModalBackdrop) {
+  ticketModalBackdrop.addEventListener("click", closeModal);
+}
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && ticketModal.classList.contains("active")) {
+  if (
+    event.key === "Escape" &&
+    ticketModal &&
+    ticketModal.classList.contains("active")
+  ) {
     closeModal();
   }
 });
@@ -513,13 +721,19 @@ document.addEventListener("keydown", (event) => {
    FILTER
 =================================== */
 
-statusFilter.addEventListener("change", renderTicketList);
+if (statusFilter) {
+  statusFilter.addEventListener("change", renderTicketList);
+}
 
 /* ===================================
    HELPERS
 =================================== */
 
 function formatStatus(status) {
+  if (!status) {
+    return "Unknown";
+  }
+
   if (status === "in_progress") {
     return "In Progress";
   }

@@ -49,6 +49,26 @@ const ticketSchema = new mongoose.Schema(
           required: true,
         },
 
+        /*
+         * Identifies which side of the support conversation
+         * produced this message.
+         *
+         * requester:
+         * Sent through the normal Help Desk by the ticket owner.
+         *
+         * support:
+         * Sent by an administrator through Admin Support Management.
+         *
+         * This is intentionally separate from the sender's account role.
+         * An administrator can also be a requester when using Help Desk.
+         */
+        senderType: {
+          type: String,
+          enum: ["requester", "support"],
+          default: "requester",
+          required: true,
+        },
+
         message: {
           type: String,
           required: true,
@@ -70,7 +90,7 @@ const ticketSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Ticket", ticketSchema);

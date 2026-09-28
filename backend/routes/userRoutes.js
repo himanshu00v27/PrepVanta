@@ -57,7 +57,7 @@ router.get("/search", authMiddleware, async (req, res) => {
     const profiles = await Profile.find({
       user: { $in: userIds },
     })
-      .select("user name bio skills")
+      .select("user name bio skills isPublic")
       .lean();
 
     const profileMap = new Map(

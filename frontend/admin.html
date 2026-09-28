@@ -220,6 +220,159 @@
 
                 </div>
 
+                       </div>
+
+
+            <!-- ===================================
+                 PLATFORM OVERVIEW
+            =================================== -->
+
+            <div class="admin-overview">
+
+                <div class="admin-overview-head">
+
+                    <div>
+                        <h2>Platform Overview</h2>
+                        <p>
+                            Live administrative statistics for PrepVanta.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="admin-refresh-btn"
+                        id="adminDashboardRefresh"
+                    >
+                        <i class="fa-solid fa-rotate-right"></i>
+                        Refresh
+                    </button>
+
+                </div>
+
+
+                <div class="admin-stats-grid" id="adminStatsGrid">
+
+                    <!-- TOTAL USERS -->
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-icon users">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+
+                        <div class="admin-stat-content">
+
+                            <span class="admin-stat-label">
+                                Total Users
+                            </span>
+
+                            <strong
+                                class="admin-stat-value"
+                                id="dashboardTotalUsers"
+                            >
+                                --
+                            </strong>
+
+                            <span class="admin-stat-detail">
+                                <span id="dashboardActiveUsers">--</span>
+                                active
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COMPANIES -->
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-icon companies">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+
+                        <div class="admin-stat-content">
+
+                            <span class="admin-stat-label">
+                                Companies
+                            </span>
+
+                            <strong
+                                class="admin-stat-value"
+                                id="dashboardTotalCompanies"
+                            >
+                                --
+                            </strong>
+
+                            <span class="admin-stat-detail">
+                                <span id="dashboardPublishedCompanies">--</span>
+                                published
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUPPORT TICKETS -->
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-icon support">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+
+                        <div class="admin-stat-content">
+
+                            <span class="admin-stat-label">
+                                Support Tickets
+                            </span>
+
+                            <strong
+                                class="admin-stat-value"
+                                id="dashboardTotalTickets"
+                            >
+                                --
+                            </strong>
+
+                            <span class="admin-stat-detail">
+                                <span id="dashboardOpenTickets">--</span>
+                                open
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COMPILER RUNS -->
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-icon compiler">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div class="admin-stat-content">
+
+                            <span class="admin-stat-label">
+                                Compiler Runs
+                            </span>
+
+                            <strong
+                                class="admin-stat-value"
+                                id="dashboardCompilerRuns"
+                            >
+                                --
+                            </strong>
+
+                            <span class="admin-stat-detail">
+                                <span id="dashboardSuccessfulRuns">--</span>
+                                successful
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
 
@@ -228,7 +381,6 @@
             =================================== -->
 
             <div class="dash-grid">
-
 
                 <!-- ===================================
                      USER MANAGEMENT
@@ -294,24 +446,1080 @@
 
                 </div>
 
-
-                <!-- ===================================
-                     AUDIT LOGS
+                                <!-- ===================================
+                     COMPANY MANAGEMENT
                 =================================== -->
 
-                <div class="panel-card">
+                <div class="panel-card admin-companies-panel">
 
-                    <h3>
-                        <i class="fa-solid fa-file-shield"></i>
-                        Audit Logs
-                    </h3>
+                    <div class="admin-panel-head">
 
-                    <p>
-                        Review security and authentication activity.
-                    </p>
+                        <div>
+
+                            <h3>
+                                <i class="fa-solid fa-building"></i>
+                                Company Management
+                            </h3>
+
+                            <p>
+                                Create, edit, publish and manage company preparation profiles.
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="admin-company-add-btn"
+                            id="adminCompanyAddBtn"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                            Add Company
+                        </button>
+
+                    </div>
+
+
+                    <!-- COMPANY TOOLBAR -->
+
+                    <div class="admin-company-toolbar">
+
+                        <div class="admin-company-search">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="search"
+                                id="adminCompanySearch"
+                                placeholder="Search company, industry or topic..."
+                                autocomplete="off"
+                            >
+
+                        </div>
+
+
+                        <select
+                            id="adminCompanyStatusFilter"
+                            class="admin-company-filter"
+                            aria-label="Filter companies by status"
+                        >
+                            <option value="">
+                                All statuses
+                            </option>
+
+                            <option value="published">
+                                Published
+                            </option>
+
+                            <option value="draft">
+                                Draft
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- COMPANY SUMMARY -->
+
+                    <div class="admin-company-summary">
+
+                        <span id="adminCompanyCount">
+                            0 companies
+                        </span>
+
+                    </div>
+
+
+                    <!-- COMPANY LIST -->
+
+                    <div
+                        class="admin-company-list"
+                        id="adminCompanyList"
+                    >
+
+                        <div class="admin-company-state">
+
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+
+                            <p>
+                                Loading companies...
+                            </p>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
+
+                <!-- ===================================
+                     COMPANY EDITOR MODAL
+                =================================== -->
+
+                <div
+                    class="admin-company-modal-overlay"
+                    id="adminCompanyModal"
+                    hidden
+                >
+
+                    <div
+                        class="admin-company-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="adminCompanyModalTitle"
+                    >
+
+                        <div class="admin-company-modal-head">
+
+                            <div>
+
+                                <span class="admin-company-modal-label">
+                                    Company Profile
+                                </span>
+
+                                <h3 id="adminCompanyModalTitle">
+                                    Add Company
+                                </h3>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="admin-company-modal-close"
+                                id="adminCompanyModalClose"
+                                aria-label="Close company editor"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                        </div>
+
+
+                        <form id="adminCompanyForm">
+
+                            <input
+                                type="hidden"
+                                id="adminCompanyMongoId"
+                            >
+
+
+                            <div class="admin-company-form-grid">
+
+
+                                <!-- NAME -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyName">
+                                        Company Name
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="adminCompanyName"
+                                        maxlength="150"
+                                        placeholder="Example: PrepVanta Technologies"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- SLUG -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanySlug">
+                                        Slug
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="adminCompanySlug"
+                                        maxlength="150"
+                                        placeholder="example-company"
+                                        required
+                                    >
+
+                                    <small>
+                                        Used in the company page URL.
+                                    </small>
+
+                                </div>
+
+
+                                <!-- INDUSTRY -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyIndustry">
+                                        Industry
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="adminCompanyIndustry"
+                                        maxlength="120"
+                                        placeholder="Example: Technology"
+                                    >
+
+                                </div>
+
+
+                                <!-- DIFFICULTY -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyDifficulty">
+                                        Difficulty
+                                    </label>
+
+                                    <select id="adminCompanyDifficulty">
+
+                                        <option value="">
+                                            Not specified
+                                        </option>
+
+                                        <option value="Easy">
+                                            Easy
+                                        </option>
+
+                                        <option value="Medium">
+                                            Medium
+                                        </option>
+
+                                        <option value="Hard">
+                                            Hard
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- WEBSITE -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyWebsite">
+                                        Company Website
+                                    </label>
+
+                                    <input
+                                        type="url"
+                                        id="adminCompanyWebsite"
+                                        placeholder="https://example.com"
+                                    >
+
+                                </div>
+
+
+                                <!-- PRACTICE LINK -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyPracticeLink">
+                                        Practice Link
+                                    </label>
+
+                                    <input
+                                        type="url"
+                                        id="adminCompanyPracticeLink"
+                                        placeholder="https://example.com/practice"
+                                    >
+
+                                </div>
+
+
+                                <!-- STATUS -->
+
+                                <div class="admin-company-field">
+
+                                    <label for="adminCompanyStatus">
+                                        Publication Status
+                                    </label>
+
+                                    <select id="adminCompanyStatus">
+
+                                        <option value="draft">
+                                            Draft
+                                        </option>
+
+                                        <option value="published">
+                                            Published
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- FOCUS TOPICS -->
+
+                                <div class="admin-company-field admin-company-field-full">
+
+                                    <label for="adminCompanyFocusTopics">
+                                        Focus Topics
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="adminCompanyFocusTopics"
+                                        placeholder="Arrays, Dynamic Programming, System Design"
+                                    >
+
+                                    <small>
+                                        Separate multiple topics with commas.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- FORM ERROR -->
+
+                            <div
+                                class="admin-company-form-status"
+                                id="adminCompanyFormStatus"
+                                aria-live="polite"
+                            ></div>
+
+
+                            <!-- ACTIONS -->
+
+                            <div class="admin-company-form-actions">
+
+                                <button
+                                    type="button"
+                                    class="admin-company-cancel-btn"
+                                    id="adminCompanyCancelBtn"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    class="admin-company-save-btn"
+                                    id="adminCompanySaveBtn"
+                                >
+                                    <i class="fa-solid fa-floppy-disk"></i>
+
+                                    <span id="adminCompanySaveText">
+                                        Create Company
+                                    </span>
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                                <!-- ===================================
+                     ADMIN SUPPORT MANAGEMENT
+                =================================== -->
+
+                <div class="panel-card admin-support-panel">
+
+                    <div class="admin-panel-head">
+
+                        <div>
+
+                            <h3>
+                                <i class="fa-solid fa-headset"></i>
+                                Support Management
+                            </h3>
+
+                            <p>
+                                Review and manage support requests submitted by users and administrators.
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="admin-support-refresh-btn"
+                            id="adminSupportRefreshBtn"
+                        >
+                            <i class="fa-solid fa-rotate-right"></i>
+                            Refresh
+                        </button>
+
+                    </div>
+
+
+                    <!-- SUPPORT SUMMARY -->
+
+                    <div class="admin-support-stats">
+
+                        <div class="admin-support-stat">
+
+                            <span class="admin-support-stat-label">
+                                Total
+                            </span>
+
+                            <strong id="adminSupportTotal">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div class="admin-support-stat">
+
+                            <span class="admin-support-stat-label">
+                                Open
+                            </span>
+
+                            <strong id="adminSupportOpen">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div class="admin-support-stat">
+
+                            <span class="admin-support-stat-label">
+                                In Progress
+                            </span>
+
+                            <strong id="adminSupportInProgress">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div class="admin-support-stat">
+
+                            <span class="admin-support-stat-label">
+                                Resolved
+                            </span>
+
+                            <strong id="adminSupportResolved">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div class="admin-support-stat">
+
+                            <span class="admin-support-stat-label">
+                                Closed
+                            </span>
+
+                            <strong id="adminSupportClosed">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUPPORT TOOLBAR -->
+
+                    <div class="admin-support-toolbar">
+
+                        <div class="admin-support-search">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="search"
+                                id="adminSupportSearch"
+                                placeholder="Search subject, requester, username or user ID..."
+                                autocomplete="off"
+                            >
+
+                        </div>
+
+
+                        <select
+                            id="adminSupportStatusFilter"
+                            class="admin-support-filter"
+                            aria-label="Filter support tickets by status"
+                        >
+
+                            <option value="">
+                                All statuses
+                            </option>
+
+                            <option value="open">
+                                Open
+                            </option>
+
+                            <option value="in_progress">
+                                In Progress
+                            </option>
+
+                            <option value="resolved">
+                                Resolved
+                            </option>
+
+                            <option value="closed">
+                                Closed
+                            </option>
+
+                        </select>
+
+
+                        <select
+                            id="adminSupportPriorityFilter"
+                            class="admin-support-filter"
+                            aria-label="Filter support tickets by priority"
+                        >
+
+                            <option value="">
+                                All priorities
+                            </option>
+
+                            <option value="low">
+                                Low
+                            </option>
+
+                            <option value="medium">
+                                Medium
+                            </option>
+
+                            <option value="high">
+                                High
+                            </option>
+
+                        </select>
+
+
+                        <select
+                            id="adminSupportRoleFilter"
+                            class="admin-support-filter"
+                            aria-label="Filter support tickets by requester role"
+                        >
+
+                            <option value="">
+                                All requesters
+                            </option>
+
+                            <option value="user">
+                                Users
+                            </option>
+
+                            <option value="admin">
+                                Administrators
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SUPPORT RESULT COUNT -->
+
+                    <div class="admin-support-summary">
+
+                        <span id="adminSupportCount">
+                            0 tickets
+                        </span>
+
+                    </div>
+
+
+                    <!-- SUPPORT TICKET LIST -->
+
+                    <div
+                        class="admin-support-list"
+                        id="adminSupportList"
+                    >
+
+                        <div class="admin-support-state">
+
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+
+                            <p>
+                                Loading support tickets...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ===================================
+                     ADMIN SUPPORT TICKET MODAL
+                =================================== -->
+
+                <div
+                    class="admin-support-modal-overlay"
+                    id="adminSupportModal"
+                    hidden
+                >
+
+                    <div
+                        class="admin-support-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="adminSupportModalTitle"
+                    >
+
+                        <!-- MODAL HEADER -->
+
+                        <div class="admin-support-modal-head">
+
+                            <div>
+
+                                <span class="admin-support-modal-label">
+                                    Support Ticket
+                                </span>
+
+                                <h3 id="adminSupportModalTitle">
+                                    Ticket Details
+                                </h3>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="admin-support-modal-close"
+                                id="adminSupportModalClose"
+                                aria-label="Close support ticket"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                        </div>
+
+
+                        <!-- REQUESTER -->
+
+                        <div class="admin-support-requester">
+
+                            <div class="admin-support-requester-head">
+
+                                <span>
+                                    Requester
+                                </span>
+
+                                <span
+                                    class="admin-support-role-badge"
+                                    id="adminSupportRequesterRole"
+                                >
+                                    USER
+                                </span>
+
+                            </div>
+
+
+                            <div class="admin-support-requester-grid">
+
+                                <div>
+                                    <span>Name</span>
+                                    <strong id="adminSupportRequesterName">
+                                        --
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Username</span>
+                                    <strong id="adminSupportRequesterUsername">
+                                        --
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>User ID</span>
+                                    <strong id="adminSupportRequesterUserId">
+                                        --
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Email</span>
+                                    <strong id="adminSupportRequesterEmail">
+                                        --
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TICKET INFORMATION -->
+
+                        <div class="admin-support-ticket-info">
+
+                            <div>
+                                <span>Category</span>
+                                <strong id="adminSupportTicketCategory">
+                                    --
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Priority</span>
+                                <strong id="adminSupportTicketPriority">
+                                    --
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Created</span>
+                                <strong id="adminSupportTicketCreated">
+                                    --
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS CONTROL -->
+
+                        <div class="admin-support-status-control">
+
+                            <label for="adminSupportTicketStatus">
+                                Ticket Status
+                            </label>
+
+                            <select id="adminSupportTicketStatus">
+
+                                <option value="open">
+                                    Open
+                                </option>
+
+                                <option value="in_progress">
+                                    In Progress
+                                </option>
+
+                                <option value="resolved">
+                                    Resolved
+                                </option>
+
+                                <option value="closed">
+                                    Closed
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <div class="admin-support-description">
+
+                            <span class="admin-support-section-title">
+                                Description
+                            </span>
+
+                            <p id="adminSupportTicketDescription">
+                                --
+                            </p>
+
+                        </div>
+
+
+                        <!-- CONVERSATION -->
+
+                        <div class="admin-support-conversation">
+
+                            <span class="admin-support-section-title">
+                                Conversation
+                            </span>
+
+                            <div
+                                class="admin-support-messages"
+                                id="adminSupportMessages"
+                            >
+
+                                <div class="admin-support-state">
+
+                                    <i class="fa-solid fa-comments"></i>
+
+                                    <p>
+                                        No messages yet.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ADMIN REPLY -->
+
+                        <div class="admin-support-reply">
+
+                            <label for="adminSupportReply">
+                                Reply as PrepVanta Support
+                            </label>
+
+                            <textarea
+                                id="adminSupportReply"
+                                maxlength="2000"
+                                placeholder="Write a response to the requester..."
+                            ></textarea>
+
+                            <div class="admin-support-reply-footer">
+
+                                <span
+                                    class="admin-support-form-status"
+                                    id="adminSupportFormStatus"
+                                    aria-live="polite"
+                                ></span>
+
+                                <button
+                                    type="button"
+                                    class="admin-support-send-btn"
+                                    id="adminSupportSendBtn"
+                                >
+                                    <i class="fa-solid fa-paper-plane"></i>
+
+                                    <span id="adminSupportSendText">
+                                        Send Reply
+                                    </span>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+               <!-- ===================================
+     AUDIT LOGS
+=================================== -->
+
+<div class="panel-card admin-audit-panel">
+
+    <!-- AUDIT HEADER -->
+
+    <div class="admin-panel-head audit-panel-head">
+
+        <div>
+
+            <h3>
+                <i class="fa-solid fa-file-shield"></i>
+                Audit Logs
+            </h3>
+
+            <p>
+                Review categorized administrative, account and security activity.
+            </p>
+
+        </div>
+
+        <span class="audit-result-count" id="auditResultCount">
+            Loading...
+        </span>
+
+    </div>
+
+
+    <!-- AUDIT CATEGORY TABS -->
+
+    <div class="audit-category-tabs" id="auditCategoryTabs">
+
+        <button
+            type="button"
+            class="audit-category-btn active"
+            data-category=""
+        >
+            All
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="authentication"
+        >
+            Authentication
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="registration"
+        >
+            Registration
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="password_recovery"
+        >
+            Password Recovery
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="user_administration"
+        >
+            User Administration
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="company_management"
+        >
+            Companies
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="support_management"
+        >
+            Support
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="platform_settings"
+        >
+            Platform Settings
+        </button>
+
+        <button
+            type="button"
+            class="audit-category-btn"
+            data-category="administrator"
+        >
+            Administrator
+        </button>
+
+    </div>
+
+
+    <!-- AUDIT FILTERS -->
+
+    <div class="audit-toolbar">
+
+        <div class="audit-search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="search"
+                id="auditSearch"
+                placeholder="Search user, action, target or details..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <select
+            id="auditStatusFilter"
+            class="audit-filter-select"
+            aria-label="Filter audit logs by status"
+        >
+            <option value="">All statuses</option>
+            <option value="success">Success</option>
+            <option value="failure">Failure</option>
+        </select>
+
+
+        <select
+            id="auditRoleFilter"
+            class="audit-filter-select"
+            aria-label="Filter audit logs by actor role"
+        >
+            <option value="">All actors</option>
+            <option value="admin">Administrators</option>
+            <option value="user">Users</option>
+            <option value="system">System</option>
+        </select>
+
+
+        <button
+            type="button"
+            class="audit-refresh-btn"
+            id="auditRefreshBtn"
+            title="Refresh audit logs"
+        >
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+        </button>
+
+    </div>
+
+
+    <!-- AUDIT LIST -->
+
+    <div
+        class="audit-log-list"
+        id="auditLogList"
+        aria-live="polite"
+    >
+
+        <div class="audit-empty-state">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <p>Loading audit activity...</p>
+
+        </div>
+
+    </div>
+
+
+    <!-- AUDIT PAGINATION -->
+
+    <div class="audit-pagination">
+
+        <button
+            type="button"
+            class="audit-page-btn"
+            id="auditPreviousBtn"
+            disabled
+        >
+            <i class="fa-solid fa-chevron-left"></i>
+            Previous
+        </button>
+
+
+        <div class="audit-page-info">
+
+            <span id="auditPageText">
+                Page 1
+            </span>
+
+            <small id="auditRecordRange">
+                —
+            </small>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="audit-page-btn"
+            id="auditNextBtn"
+            disabled
+        >
+            Next
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+    </div>
+
+</div>
 
                 <!-- ===================================
                      PLATFORM SETTINGS
