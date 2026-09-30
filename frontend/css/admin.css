@@ -3475,25 +3475,72 @@
 [data-theme="dark"] #adminSupportTicketStatus,
 [data-theme="dark"] #adminSupportReply,
 [data-theme="dark"] .admin-support-refresh-btn {
-    background: var(--card-bg);
+    background: #1e293b;
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-support-stat-label,
+[data-theme="dark"] .admin-support-ticket-meta,
+[data-theme="dark"] .admin-support-count,
+[data-theme="dark"] .admin-support-requester span,
+[data-theme="dark"] .admin-support-ticket-details span,
+[data-theme="dark"] .admin-support-message-meta,
+[data-theme="dark"] .admin-support-field label {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .admin-support-stat strong,
+[data-theme="dark"] .admin-support-ticket-main h4,
+[data-theme="dark"] .admin-support-modal-title h3,
+[data-theme="dark"] .admin-support-requester strong,
+[data-theme="dark"] .admin-support-ticket-details strong,
+[data-theme="dark"] #adminSupportTicketDescription,
+[data-theme="dark"] .admin-support-message p {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-support-search i {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .admin-support-search input::placeholder,
+[data-theme="dark"] #adminSupportReply::placeholder {
+    color: #64748b;
 }
 
 [data-theme="dark"] .admin-support-requester {
-    background: rgba(37, 99, 235, 0.07);
+    background: rgba(37, 99, 235, 0.1);
+    border-color: #475569;
 }
 
 [data-theme="dark"] #adminSupportTicketDescription {
-    background: rgba(255, 255, 255, 0.035);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #475569;
+}
+
+[data-theme="dark"] .admin-support-messages {
+    border-color: #475569;
 }
 
 [data-theme="dark"] .admin-support-message.user {
-    background: rgba(255, 255, 255, 0.035);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #475569;
 }
 
 [data-theme="dark"] .admin-support-message.admin {
-    background: rgba(37, 99, 235, 0.1);
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
 }
 
+[data-theme="dark"] .admin-support-modal-close {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .admin-support-modal-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+}
 
 /* ===================================
    SUPPORT RESPONSIVE
