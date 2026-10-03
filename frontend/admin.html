@@ -447,6 +447,66 @@
                 </div>
 
                                 <!-- ===================================
+                     ADMIN USER PROFILE MODAL
+                =================================== -->
+
+                <div
+                    class="admin-user-profile-overlay"
+                    id="adminUserProfileModal"
+                    hidden
+                >
+
+                    <div
+                        class="admin-user-profile-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="adminUserProfileTitle"
+                    >
+
+                        <div class="admin-user-profile-head">
+
+                            <div>
+                                <span class="admin-user-profile-label">
+                                    User Profile
+                                </span>
+
+                                <h3 id="adminUserProfileTitle">
+                                    Profile Details
+                                </h3>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="admin-user-profile-close"
+                                id="adminUserProfileClose"
+                                aria-label="Close user profile"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="admin-user-profile-body"
+                            id="adminUserProfileBody"
+                        >
+                            <div class="admin-users-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <p>Loading profile...</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ===================================
+                     COMPANY MANAGEMENT
+                =================================== -->
+
+                                <!-- ===================================
                      COMPANY MANAGEMENT
                 =================================== -->
 
@@ -1847,26 +1907,6 @@
 
             </div>
 
-
-            <!-- ===================================
-                 ADMIN API STATUS
-            =================================== -->
-
-            <div class="dash-cta">
-
-                <div>
-
-                    <h3>
-                        Admin API Status
-                    </h3>
-
-                    <p id="adminStatus">
-                        Checking administrator authorization...
-                    </p>
-
-                </div>
-
-            </div>
 
         </div>
 
