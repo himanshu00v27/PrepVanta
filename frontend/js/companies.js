@@ -64,7 +64,7 @@ function renderCompanies(companies) {
 
       const practiceLink =
         company.practiceLink ||
-        `company.html?company=${encodeURIComponent(company.slug)}`;
+        `practice-set.html?cat=company&name=${encodeURIComponent(company.name)}`;
 
       return `
                 <div class="company-card">
