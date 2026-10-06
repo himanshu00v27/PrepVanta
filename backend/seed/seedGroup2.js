@@ -129,6 +129,63 @@ async function seedGroup2() {
     }
 
     console.log(`Topics ready: ${createdTopics.size}`);
+    // --------------------------------------------------
+    // Migrate existing demo percentage question
+    // --------------------------------------------------
+    const percentagesTopic = createdTopics.get("aptitude:Percentages");
+
+    if (!percentagesTopic) {
+      throw new Error("Percentages topic was not created.");
+    }
+
+    const percentageQuestion = await Question.findOneAndUpdate(
+      {
+        title: "What is 25% of 200?",
+      },
+      {
+        category: "Aptitude",
+        topic: percentagesTopic._id,
+        status: "published",
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (percentageQuestion) {
+      console.log(
+        `Question migrated to Percentages: ${percentageQuestion.title}`,
+      );
+    } else {
+      console.log(
+        "Existing percentage demo question was not found; skipping migration.",
+      );
+    }
+
+    // --------------------------------------------------
+    // Migrate existing demo practice set
+    // --------------------------------------------------
+    const demoPracticeSet = await PracticeSet.findOneAndUpdate(
+      {
+        title: "Demo Aptitude Practice",
+      },
+      {
+        title: "Percentages Practice",
+        topic: percentagesTopic._id,
+        status: "published",
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (demoPracticeSet) {
+      console.log(`Practice set migrated: ${demoPracticeSet.title}`);
+    } else {
+      console.log(
+        "Existing demo practice set was not found; skipping migration.",
+      );
+    }
   } catch (error) {
     console.error("Group 2 seed failed:");
     console.error(error);
