@@ -7,6 +7,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 
 const Question = require("../models/Question");
 const Topic = require("../models/Topic");
+const PracticeSet = require("../models/PracticeSet");
 
 // --------------------------------------------------
 // Get questions
@@ -130,10 +131,9 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
       status,
     } = req.body;
 
-    if (!title || !description || !type || !category || !topic || !difficulty) {
+    if (!title || !type || !category || !topic || !difficulty) {
       return res.status(400).json({
-        message:
-          "Title, description, type, category, topic and difficulty are required",
+        message: "Title, type, category, topic and difficulty are required",
       });
     }
 
@@ -274,16 +274,27 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 // --------------------------------------------------
 // Delete question - ADMIN ONLY
 // --------------------------------------------------
-
 router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const question = await Question.findByIdAndDelete(req.params.id);
+    const question = await Question.findById(req.params.id);
 
     if (!question) {
       return res.status(404).json({
         message: "Question not found",
       });
     }
+
+    const linkedPracticeSet = await PracticeSet.findOne({
+      questions: question._id,
+    }).select("_id title");
+
+    if (linkedPracticeSet) {
+      return res.status(409).json({
+        message: `Cannot delete this question because it is used in the practice set "${linkedPracticeSet.title}". Remove it from the practice set first.`,
+      });
+    }
+
+    await Question.findByIdAndDelete(question._id);
 
     res.json({
       message: "Question deleted successfully",

@@ -10,7 +10,6 @@ const questionSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true,
       trim: true,
     },
 
@@ -80,7 +79,7 @@ const questionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Question", questionSchema);

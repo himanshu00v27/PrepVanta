@@ -3002,6 +3002,159 @@
   if (adminSupportSendBtn) {
     adminSupportSendBtn.addEventListener("click", sendAdminSupportReply);
   }
+  /* ===================================
+   ADMIN ACTION MESSAGE MODAL
+=================================== */
+
+  const adminActionModal = document.getElementById("adminActionModal");
+  const adminActionModalTitle = document.getElementById(
+    "adminActionModalTitle",
+  );
+  const adminActionModalMessage = document.getElementById(
+    "adminActionModalMessage",
+  );
+  const adminActionModalIcon = document.getElementById("adminActionModalIcon");
+  const adminActionModalCancelBtn = document.getElementById(
+    "adminActionModalCancelBtn",
+  );
+  const adminActionModalConfirmBtn = document.getElementById(
+    "adminActionModalConfirmBtn",
+  );
+
+  function showAdminMessage({
+    title = "Message",
+    message = "",
+    type = "success",
+    confirmText = "OK",
+  }) {
+    return new Promise((resolve) => {
+      if (
+        !adminActionModal ||
+        !adminActionModalTitle ||
+        !adminActionModalMessage ||
+        !adminActionModalIcon ||
+        !adminActionModalConfirmBtn ||
+        !adminActionModalCancelBtn
+      ) {
+        resolve(true);
+        return;
+      }
+
+      const modalBox = adminActionModal.querySelector(".admin-action-modal");
+
+      if (modalBox) {
+        modalBox.dataset.type = type;
+      }
+
+      adminActionModalTitle.textContent = title;
+      adminActionModalMessage.textContent = message;
+      adminActionModalConfirmBtn.textContent = confirmText;
+
+      adminActionModalCancelBtn.hidden = true;
+
+      if (type === "error") {
+        adminActionModalIcon.innerHTML =
+          '<i class="fa-solid fa-circle-xmark"></i>';
+      } else if (type === "warning") {
+        adminActionModalIcon.innerHTML =
+          '<i class="fa-solid fa-triangle-exclamation"></i>';
+      } else {
+        adminActionModalIcon.innerHTML =
+          '<i class="fa-solid fa-circle-check"></i>';
+      }
+
+      adminActionModal.hidden = false;
+
+      const handleConfirm = () => {
+        adminActionModal.hidden = true;
+
+        adminActionModalConfirmBtn.removeEventListener("click", handleConfirm);
+
+        resolve(true);
+      };
+
+      adminActionModalConfirmBtn.addEventListener("click", handleConfirm, {
+        once: true,
+      });
+    });
+  }
+
+  function showAdminConfirm({
+    title = "Confirm Action",
+    message = "",
+    confirmText = "Confirm",
+  }) {
+    return new Promise((resolve) => {
+      if (
+        !adminActionModal ||
+        !adminActionModalTitle ||
+        !adminActionModalMessage ||
+        !adminActionModalIcon ||
+        !adminActionModalConfirmBtn ||
+        !adminActionModalCancelBtn
+      ) {
+        resolve(false);
+        return;
+      }
+
+      const modalBox = adminActionModal.querySelector(".admin-action-modal");
+
+      if (modalBox) {
+        modalBox.dataset.type = "warning";
+      }
+
+      adminActionModalTitle.textContent = title;
+      adminActionModalMessage.textContent = message;
+
+      adminActionModalIcon.innerHTML =
+        '<i class="fa-solid fa-triangle-exclamation"></i>';
+
+      adminActionModalConfirmBtn.textContent = confirmText;
+      adminActionModalCancelBtn.hidden = false;
+
+      adminActionModal.hidden = false;
+
+      let finished = false;
+
+      const cleanup = () => {
+        adminActionModalConfirmBtn.removeEventListener("click", handleConfirm);
+
+        adminActionModalCancelBtn.removeEventListener("click", handleCancel);
+      };
+
+      const handleConfirm = () => {
+        if (finished) {
+          return;
+        }
+
+        finished = true;
+        cleanup();
+
+        adminActionModal.hidden = true;
+        adminActionModalCancelBtn.hidden = true;
+
+        resolve(true);
+      };
+
+      const handleCancel = () => {
+        if (finished) {
+          return;
+        }
+
+        finished = true;
+        cleanup();
+
+        adminActionModal.hidden = true;
+        adminActionModalCancelBtn.hidden = true;
+
+        resolve(false);
+      };
+
+      adminActionModalConfirmBtn.addEventListener("click", handleConfirm);
+
+      adminActionModalCancelBtn.addEventListener("click", handleCancel);
+    });
+  }
 
   /* ===================================
      GROUP 2 - QUESTION MANAGEMENT
@@ -3028,7 +3181,68 @@
   const adminRefreshQuestionsBtn = document.getElementById(
     "adminRefreshQuestionsBtn",
   );
+  const adminAddQuestionBtn = document.getElementById("adminAddQuestionBtn");
 
+  const adminQuestionModal = document.getElementById("adminQuestionModal");
+
+  const adminQuestionModalClose = document.getElementById(
+    "adminQuestionModalClose",
+  );
+
+  const adminQuestionCancelBtn = document.getElementById(
+    "adminQuestionCancelBtn",
+  );
+
+  const adminQuestionForm = document.getElementById("adminQuestionForm");
+
+  const adminQuestionMongoId = document.getElementById("adminQuestionMongoId");
+
+  const adminQuestionModalTitle = document.getElementById(
+    "adminQuestionModalTitle",
+  );
+
+  const adminQuestionFormCategory = document.getElementById(
+    "adminQuestionFormCategory",
+  );
+
+  const adminQuestionFormTopic = document.getElementById(
+    "adminQuestionFormTopic",
+  );
+
+  const adminQuestionFormType = document.getElementById(
+    "adminQuestionFormType",
+  );
+
+  const adminQuestionOptionsField = document.getElementById(
+    "adminQuestionOptionsField",
+  );
+  const adminQuestionTitle = document.getElementById("adminQuestionTitle");
+
+  const adminQuestionDescription = document.getElementById(
+    "adminQuestionDescription",
+  );
+
+  const adminQuestionFormDifficulty = document.getElementById(
+    "adminQuestionFormDifficulty",
+  );
+
+  const adminQuestionFormStatus = document.getElementById(
+    "adminQuestionFormStatus",
+  );
+
+  const adminQuestionOptions = document.getElementById("adminQuestionOptions");
+
+  const adminQuestionAnswer = document.getElementById("adminQuestionAnswer");
+
+  const adminQuestionExplanation = document.getElementById(
+    "adminQuestionExplanation",
+  );
+
+  const adminQuestionSolution = document.getElementById(
+    "adminQuestionSolution",
+  );
+
+  const adminQuestionSaveBtn = document.getElementById("adminQuestionSaveBtn");
   let adminQuestions = [];
   let adminTopics = [];
   let adminQuestionsCurrentPage = 1;
@@ -3071,6 +3285,300 @@
 
     if (filteredTopics.some((topic) => topic._id === selectedValue)) {
       adminQuestionTopic.value = selectedValue;
+    }
+  }
+  function populateAdminQuestionFormTopics() {
+    if (!adminQuestionFormTopic) {
+      return;
+    }
+
+    const selectedCategory = adminQuestionFormCategory
+      ? adminQuestionFormCategory.value
+      : "";
+
+    const filteredTopics = selectedCategory
+      ? adminTopics.filter((topic) => topic.category === selectedCategory)
+      : adminTopics;
+
+    adminQuestionFormTopic.innerHTML = `
+      <option value="">Select topic</option>
+      ${filteredTopics
+        .map(
+          (topic) => `
+            <option value="${escapeAdminQuestionHtml(topic._id)}">
+              ${escapeAdminQuestionHtml(topic.name)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+  }
+
+  function closeAdminQuestionModal() {
+    if (!adminQuestionModal) {
+      return;
+    }
+
+    adminQuestionModal.hidden = true;
+  }
+
+  function openAddQuestionModal() {
+    if (!adminQuestionModal || !adminQuestionForm) {
+      return;
+    }
+
+    adminQuestionForm.reset();
+
+    if (adminQuestionMongoId) {
+      adminQuestionMongoId.value = "";
+    }
+
+    if (adminQuestionModalTitle) {
+      adminQuestionModalTitle.textContent = "Add Question";
+    }
+
+    populateAdminQuestionFormTopics();
+
+    if (adminQuestionOptionsField) {
+      adminQuestionOptionsField.hidden = false;
+    }
+
+    adminQuestionModal.hidden = false;
+  }
+  function openEditQuestionModal(question) {
+    if (!question || !adminQuestionModal || !adminQuestionForm) {
+      return;
+    }
+
+    adminQuestionForm.reset();
+
+    if (adminQuestionMongoId) {
+      adminQuestionMongoId.value = question._id || "";
+    }
+
+    if (adminQuestionModalTitle) {
+      adminQuestionModalTitle.textContent = "Edit Question";
+    }
+
+    if (adminQuestionTitle) {
+      adminQuestionTitle.value = question.title || "";
+    }
+
+    if (adminQuestionDescription) {
+      adminQuestionDescription.value = question.description || "";
+    }
+
+    if (adminQuestionFormCategory) {
+      adminQuestionFormCategory.value = question.category || "";
+    }
+
+    populateAdminQuestionFormTopics();
+
+    const topicId =
+      question.topic && typeof question.topic === "object"
+        ? question.topic._id
+        : question.topic;
+
+    if (adminQuestionFormTopic) {
+      adminQuestionFormTopic.value = topicId || "";
+    }
+
+    if (adminQuestionFormType) {
+      adminQuestionFormType.value = question.type || "objective";
+    }
+
+    if (adminQuestionFormDifficulty) {
+      adminQuestionFormDifficulty.value = question.difficulty || "";
+    }
+
+    if (adminQuestionFormStatus) {
+      adminQuestionFormStatus.value = question.status || "draft";
+    }
+
+    if (adminQuestionOptions) {
+      adminQuestionOptions.value = Array.isArray(question.options)
+        ? question.options
+            .map((option) => option.text || "")
+            .filter(Boolean)
+            .join("\n")
+        : "";
+    }
+
+    if (adminQuestionAnswer) {
+      adminQuestionAnswer.value = question.answer || "";
+    }
+
+    if (adminQuestionExplanation) {
+      adminQuestionExplanation.value = question.explanation || "";
+    }
+
+    if (adminQuestionSolution) {
+      adminQuestionSolution.value = question.solution || "";
+    }
+
+    if (adminQuestionOptionsField) {
+      adminQuestionOptionsField.hidden = question.type !== "objective";
+    }
+
+    adminQuestionModal.hidden = false;
+  }
+  async function saveAdminQuestion(event) {
+    event.preventDefault();
+    const mongoId = String(adminQuestionMongoId?.value || "").trim();
+    const editing = Boolean(mongoId);
+
+    const title = String(adminQuestionTitle?.value || "").trim();
+    const description = String(adminQuestionDescription?.value || "").trim();
+
+    const category = String(adminQuestionFormCategory?.value || "").trim();
+
+    const topic = String(adminQuestionFormTopic?.value || "").trim();
+
+    const type = String(adminQuestionFormType?.value || "").trim();
+
+    const difficulty = String(adminQuestionFormDifficulty?.value || "").trim();
+
+    const status = String(adminQuestionFormStatus?.value || "draft").trim();
+
+    const answer = String(adminQuestionAnswer?.value || "").trim();
+
+    const explanation = String(adminQuestionExplanation?.value || "").trim();
+
+    const solution = String(adminQuestionSolution?.value || "").trim();
+
+    if (!title || !category || !topic || !type || !difficulty) {
+      await showAdminMessage({
+        title: "Missing Information",
+        message: "Please complete all required question fields.",
+        type: "warning",
+      });
+      return;
+    }
+    let options = [];
+
+    if (type === "objective") {
+      const optionTexts = String(adminQuestionOptions?.value || "")
+        .split("\n")
+        .map((option) => option.trim())
+        .filter(Boolean);
+
+      if (optionTexts.length < 2) {
+        await showAdminMessage({
+          title: "More Options Required",
+          message: "Objective questions require at least two options.",
+          type: "warning",
+        });
+        return;
+      }
+
+      if (!answer) {
+        await showAdminMessage({
+          title: "Correct Answer Required",
+          message: "Please enter the correct answer.",
+          type: "warning",
+        });
+        return;
+      }
+
+      const matchingAnswer = optionTexts.some(
+        (option) => option.toLowerCase() === answer.toLowerCase(),
+      );
+
+      if (!matchingAnswer) {
+        await showAdminMessage({
+          title: "Answer Does Not Match",
+          message:
+            "The correct answer must exactly match one of the objective options.",
+          type: "warning",
+        });
+        return;
+      }
+
+      options = optionTexts.map((option) => ({
+        text: option,
+        isCorrect: option.toLowerCase() === answer.toLowerCase(),
+      }));
+    }
+
+    const payload = {
+      title,
+      description,
+      category,
+      topic,
+      type,
+      difficulty,
+      status,
+      options,
+      answer,
+      explanation,
+      solution,
+    };
+
+    try {
+      if (adminQuestionSaveBtn) {
+        adminQuestionSaveBtn.disabled = true;
+        adminQuestionSaveBtn.textContent = "Saving...";
+      }
+
+      const url = editing
+        ? `http://localhost:5000/api/questions/${encodeURIComponent(mongoId)}`
+        : "http://localhost:5000/api/questions";
+
+      const response = await fetch(url, {
+        method: editing ? "PUT" : "POST",
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            (editing
+              ? "Failed to update question."
+              : "Failed to create question."),
+        );
+      }
+
+      closeAdminQuestionModal();
+
+      adminQuestionsCurrentPage = 1;
+
+      await loadAdminQuestions();
+
+      await showAdminMessage({
+        title: editing ? "Question Updated" : "Question Created",
+        message: editing
+          ? "Question updated successfully."
+          : "Question created successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Save question error:", error);
+
+      await showAdminMessage({
+        title: editing ? "Update Failed" : "Creation Failed",
+        message:
+          error.message ||
+          (editing
+            ? "Failed to update question."
+            : "Failed to create question."),
+        type: "error",
+      });
+    } finally {
+      if (adminQuestionSaveBtn) {
+        adminQuestionSaveBtn.disabled = false;
+        adminQuestionSaveBtn.innerHTML = `
+        <i class="fa-solid fa-floppy-disk"></i>
+        Save Question
+      `;
+      }
     }
   }
 
@@ -3192,9 +3700,15 @@
                 ${escapeAdminQuestionHtml(question.title)}
               </strong>
 
-              <p>
-                ${escapeAdminQuestionHtml(question.description)}
-              </p>
+              ${
+                question.description
+                  ? `
+      <p>
+        ${escapeAdminQuestionHtml(question.description)}
+      </p>
+    `
+                  : ""
+              }
 
               <div class="admin-question-meta">
 
@@ -3219,6 +3733,27 @@
                 </span>
 
               </div>
+                          </div>
+
+            <div class="admin-question-actions">
+
+              <button
+                type="button"
+                class="btn btn-secondary admin-question-edit-btn"
+                data-question-id="${escapeAdminQuestionHtml(question._id)}"
+              >
+                <i class="fa-solid fa-pen"></i>
+                Edit
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-danger admin-question-delete-btn"
+                data-question-id="${escapeAdminQuestionHtml(question._id)}"
+              >
+                <i class="fa-solid fa-trash"></i>
+                Delete
+              </button>
 
             </div>
 
@@ -3286,6 +3821,141 @@
         </div>
       `;
     }
+  }
+  if (adminQuestionList) {
+    adminQuestionList.addEventListener("click", async (event) => {
+      const editButton = event.target.closest(".admin-question-edit-btn");
+
+      const deleteButton = event.target.closest(".admin-question-delete-btn");
+
+      if (editButton) {
+        const questionId = editButton.dataset.questionId;
+
+        const question = adminQuestions.find(
+          (item) => String(item._id) === String(questionId),
+        );
+
+        if (!question) {
+          await showAdminMessage({
+            title: "Question Not Found",
+            message: "Unable to find this question.",
+            type: "error",
+          });
+          return;
+        }
+
+        openEditQuestionModal(question);
+        return;
+      }
+
+      if (deleteButton) {
+        const questionId = deleteButton.dataset.questionId;
+
+        const question = adminQuestions.find(
+          (item) => String(item._id) === String(questionId),
+        );
+
+        if (!question) {
+          await showAdminMessage({
+            title: "Question Not Found",
+            message: "Unable to find this question.",
+            type: "error",
+          });
+          return;
+        }
+
+        const confirmed = await showAdminConfirm({
+          title: "Delete Question?",
+          message: `Are you sure you want to delete "${question.title}"? This action cannot be undone.`,
+          confirmText: "Delete",
+        });
+
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          deleteButton.disabled = true;
+          deleteButton.textContent = "Deleting...";
+
+          const response = await fetch(
+            `http://localhost:5000/api/questions/${encodeURIComponent(questionId)}`,
+            {
+              method: "DELETE",
+
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to delete question.");
+          }
+
+          await loadAdminQuestions();
+
+          await showAdminMessage({
+            title: "Question Deleted",
+            message: data.message || "Question deleted successfully.",
+            type: "success",
+          });
+        } catch (error) {
+          console.error("Delete question error:", error);
+
+          await showAdminMessage({
+            title: "Unable to Delete Question",
+            message: error.message || "Failed to delete question.",
+            type: "error",
+          });
+
+          deleteButton.disabled = false;
+          deleteButton.innerHTML = `
+          <i class="fa-solid fa-trash"></i>
+          Delete
+        `;
+        }
+      }
+    });
+  }
+  if (adminQuestionForm) {
+    adminQuestionForm.addEventListener("submit", saveAdminQuestion);
+  }
+  if (adminAddQuestionBtn) {
+    adminAddQuestionBtn.addEventListener("click", () => {
+      openAddQuestionModal();
+    });
+  }
+
+  if (adminQuestionModalClose) {
+    adminQuestionModalClose.addEventListener("click", () => {
+      closeAdminQuestionModal();
+    });
+  }
+
+  if (adminQuestionCancelBtn) {
+    adminQuestionCancelBtn.addEventListener("click", () => {
+      closeAdminQuestionModal();
+    });
+  }
+
+  if (adminQuestionFormCategory) {
+    adminQuestionFormCategory.addEventListener("change", () => {
+      populateAdminQuestionFormTopics();
+    });
+  }
+
+  if (adminQuestionFormType) {
+    adminQuestionFormType.addEventListener("change", () => {
+      if (!adminQuestionOptionsField) {
+        return;
+      }
+
+      adminQuestionOptionsField.hidden =
+        adminQuestionFormType.value !== "objective";
+    });
   }
 
   if (adminQuestionSearch) {

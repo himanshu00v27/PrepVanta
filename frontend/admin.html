@@ -1022,6 +1022,300 @@
 
                 </div>
 
+                <!-- ===================================
+     GROUP 2 - QUESTION EDITOR MODAL
+=================================== -->
+
+<div
+    class="admin-company-modal-overlay"
+    id="adminQuestionModal"
+    hidden
+>
+    <div
+        class="admin-company-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminQuestionModalTitle"
+    >
+        <div class="admin-company-modal-head">
+
+            <div>
+                <span class="admin-company-modal-label">
+                    Question Editor
+                </span>
+
+                <h3 id="adminQuestionModalTitle">
+                    Add Question
+                </h3>
+            </div>
+
+            <button
+                type="button"
+                class="admin-company-modal-close"
+                id="adminQuestionModalClose"
+                aria-label="Close question editor"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        <form id="adminQuestionForm">
+
+            <input
+                type="hidden"
+                id="adminQuestionMongoId"
+            >
+
+            <div class="admin-company-form-grid">
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminQuestionTitle">
+                        Question Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminQuestionTitle"
+                        maxlength="200"
+                        placeholder="Example: What is 25% of 200?"
+                        required
+                    >
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminQuestionDescription">
+    Question Description <span class="optional-label">(Optional)</span>
+</label>
+
+                    <textarea
+                        id="adminQuestionDescription"
+                        rows="4"
+                        placeholder="Enter the complete question..."
+                    ></textarea>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminQuestionFormCategory">
+                        Category
+                    </label>
+
+                    <select id="adminQuestionFormCategory" required>
+                        <option value="">
+                            Select category
+                        </option>
+                        <option value="Aptitude">
+                            Aptitude
+                        </option>
+                        <option value="Reasoning">
+                            Reasoning
+                        </option>
+                        <option value="Technical">
+                            Technical
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminQuestionFormTopic">
+                        Topic
+                    </label>
+
+                    <select id="adminQuestionFormTopic" required>
+                        <option value="">
+                            Select topic
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminQuestionFormType">
+                        Question Type
+                    </label>
+
+                    <select id="adminQuestionFormType" required>
+                        <option value="objective">
+                            Objective
+                        </option>
+                        <option value="subjective">
+                            Subjective
+                        </option>
+                        <option value="coding">
+                            Coding
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminQuestionFormDifficulty">
+                        Difficulty
+                    </label>
+
+                    <select id="adminQuestionFormDifficulty" required>
+                        <option value="easy">
+                            Easy
+                        </option>
+                        <option value="medium">
+                            Medium
+                        </option>
+                        <option value="hard">
+                            Hard
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminQuestionFormStatus">
+                        Publication Status
+                    </label>
+
+                    <select id="adminQuestionFormStatus">
+                        <option value="draft">
+                            Draft
+                        </option>
+                        <option value="published">
+                            Published
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                    class="admin-company-field admin-company-field-full"
+                    id="adminQuestionOptionsField"
+                >
+                    <label for="adminQuestionOptions">
+                        Objective Options
+                    </label>
+
+                    <textarea
+                        id="adminQuestionOptions"
+                        rows="5"
+                        placeholder="Enter one option per line"
+                    ></textarea>
+
+                    <small>
+                        For objective questions, enter at least two options.
+                    </small>
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminQuestionAnswer">
+                        Answer
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminQuestionAnswer"
+                        placeholder="Enter the correct answer"
+                    >
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminQuestionExplanation">
+                        Explanation<span class="optional-label">(Optional)</span>
+                    </label>
+
+                    <textarea
+                        id="adminQuestionExplanation"
+                        rows="4"
+                        placeholder="Explain why the answer is correct..."
+                    ></textarea>
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminQuestionSolution">
+                        Solution
+                    </label>
+
+                    <textarea
+                        id="adminQuestionSolution"
+                        rows="4"
+                        placeholder="Optional detailed solution..."
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="admin-company-form-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="adminQuestionCancelBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="adminQuestionSaveBtn"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Question
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+<!-- ===================================
+     ADMIN ACTION MESSAGE MODAL
+=================================== -->
+
+<div
+    class="admin-action-modal-overlay"
+    id="adminActionModal"
+    hidden
+>
+    <div
+        class="admin-action-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminActionModalTitle"
+    >
+
+        <div
+            class="admin-action-modal-icon"
+            id="adminActionModalIcon"
+        >
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+        <h3 id="adminActionModalTitle">
+            Success
+        </h3>
+
+        <p id="adminActionModalMessage">
+            Action completed successfully.
+        </p>
+
+        <div class="admin-action-modal-actions">
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="adminActionModalCancelBtn"
+                hidden
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="adminActionModalConfirmBtn"
+            >
+                OK
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
                                 <!-- ===================================
                      ADMIN SUPPORT MANAGEMENT
                 =================================== -->

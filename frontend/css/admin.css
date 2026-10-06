@@ -3741,3 +3741,333 @@
         flex-direction: column;
     }
 }
+/* ===================================
+   QUESTION MANAGEMENT - DARK THEME
+=================================== */
+
+[data-theme="dark"] .admin-question-item {
+    background: #111827;
+    border-color: #334155;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-question-main strong {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-question-main p {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .admin-question-meta span {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+}
+
+[data-theme="dark"] .admin-question-filters input,
+[data-theme="dark"] .admin-question-filters select {
+    background: #111827;
+    border-color: #334155;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .admin-question-filters input::placeholder {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .admin-question-filters select option {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] #adminQuestionsPageInfo {
+    color: #cbd5e1;
+}
+/* ===================================
+   GROUP 2 - QUESTION EDITOR
+=================================== */
+
+#adminQuestionModal .admin-company-modal {
+    width: min(820px, 96vw);
+    max-height: 90vh;
+}
+
+#adminQuestionForm {
+    padding: 20px 24px 24px;
+}
+
+#adminQuestionForm .admin-company-form-grid {
+    gap: 14px 18px;
+}
+
+#adminQuestionForm .admin-company-field {
+    gap: 6px;
+}
+
+#adminQuestionForm .admin-company-field input,
+#adminQuestionForm .admin-company-field select,
+#adminQuestionForm .admin-company-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #172033;
+
+    font: inherit;
+    outline: none;
+}
+
+#adminQuestionForm .admin-company-field input,
+#adminQuestionForm .admin-company-field select {
+    min-height: 42px;
+    padding: 0 12px;
+}
+
+#adminQuestionForm .admin-company-field textarea {
+    min-height: 78px;
+    padding: 10px 12px;
+
+    line-height: 1.45;
+    resize: vertical;
+}
+
+#adminQuestionForm .admin-company-field input:focus,
+#adminQuestionForm .admin-company-field select:focus,
+#adminQuestionForm .admin-company-field textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#adminQuestionDescription {
+    min-height: 90px;
+}
+
+#adminQuestionOptions,
+#adminQuestionExplanation,
+#adminQuestionSolution {
+    min-height: 75px;
+}
+
+#adminQuestionOptionsField[hidden] {
+    display: none !important;
+}
+
+#adminQuestionForm .admin-company-form-actions {
+    position: sticky;
+    bottom: 0;
+
+    margin-top: 18px;
+    padding: 16px 0 0;
+
+    background: #ffffff;
+}
+
+[data-theme="dark"] #adminQuestionForm .admin-company-field input,
+[data-theme="dark"] #adminQuestionForm .admin-company-field select,
+[data-theme="dark"] #adminQuestionForm .admin-company-field textarea,
+[data-theme="dark"] #adminQuestionForm .admin-company-form-actions {
+    background: #111827;
+    border-color: #334155;
+    color: #e5e7eb;
+}
+
+@media (max-width: 700px) {
+    #adminQuestionModal .admin-company-modal {
+        width: 100%;
+    }
+
+    #adminQuestionForm {
+        padding: 18px;
+    }
+
+    #adminQuestionForm .admin-company-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #adminQuestionForm .admin-company-field-full {
+        grid-column: auto;
+    }
+}
+/* ===================================
+   ADMIN ACTION MESSAGE MODAL
+=================================== */
+
+.admin-action-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(4px);
+}
+
+.admin-action-modal-overlay[hidden] {
+    display: none !important;
+}
+
+.admin-action-modal {
+    width: min(430px, 100%);
+    padding: 30px 28px 26px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+
+    background: #ffffff;
+    color: #172033;
+
+    text-align: center;
+
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.2),
+        0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.admin-action-modal-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 16px;
+
+    border-radius: 50%;
+
+    background: #dcfce7;
+    color: #16a34a;
+
+    font-size: 26px;
+}
+
+.admin-action-modal h3 {
+    margin: 0 0 10px;
+
+    color: #172033;
+
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.admin-action-modal p {
+    margin: 0;
+
+    color: #64748b;
+
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.admin-action-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+
+    margin-top: 24px;
+}
+
+.admin-action-modal-actions button {
+    min-width: 105px;
+}
+
+/* Success */
+
+.admin-action-modal[data-type="success"]
+.admin-action-modal-icon {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* Error */
+
+.admin-action-modal[data-type="error"]
+.admin-action-modal-icon {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Warning / confirmation */
+
+.admin-action-modal[data-type="warning"]
+.admin-action-modal-icon {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+
+/* ===================================
+   ADMIN ACTION MODAL - DARK THEME
+=================================== */
+
+[data-theme="dark"] .admin-action-modal-overlay {
+    background: rgba(2, 6, 23, 0.72);
+}
+
+[data-theme="dark"] .admin-action-modal {
+    background: #111827;
+    border-color: #334155;
+    color: #e5e7eb;
+
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.45),
+        0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .admin-action-modal h3 {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-action-modal p {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"]
+.admin-action-modal[data-type="success"]
+.admin-action-modal-icon {
+    background: rgba(22, 163, 74, 0.16);
+    color: #4ade80;
+}
+
+[data-theme="dark"]
+.admin-action-modal[data-type="error"]
+.admin-action-modal-icon {
+    background: rgba(220, 38, 38, 0.16);
+    color: #f87171;
+}
+
+[data-theme="dark"]
+.admin-action-modal[data-type="warning"]
+.admin-action-modal-icon {
+    background: rgba(217, 119, 6, 0.16);
+    color: #fbbf24;
+}
+
+
+/* ===================================
+   ADMIN ACTION MODAL - MOBILE
+=================================== */
+
+@media (max-width: 520px) {
+    .admin-action-modal {
+        padding: 26px 20px 22px;
+        border-radius: 15px;
+    }
+
+    .admin-action-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .admin-action-modal-actions button {
+        width: 100%;
+    }
+}
