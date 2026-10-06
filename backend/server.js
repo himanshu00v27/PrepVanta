@@ -22,6 +22,7 @@ const questionsRoutes = require("./routes/questionsRoutes");
 const practiceRoutes = require("./routes/practiceRoutes");
 const attemptRoutes = require("./routes/attemptRoutes");
 const progressRoutes = require("./routes/progressRoutes");
+const topicRoutes = require("./routes/topicRoutes");
 const app = express();
 
 app.use(cors());
@@ -33,9 +34,9 @@ app.use(generalLimiter);
 ========================= */
 
 app.get("/api/health", (req, res) => {
-    res.json({
-        message: "PrepVanta backend is running",
-    });
+  res.json({
+    message: "PrepVanta backend is running",
+  });
 });
 
 /* =========================
@@ -60,18 +61,19 @@ app.use("/api/questions", questionsRoutes);
 app.use("/api/practice", practiceRoutes);
 app.use("/api/attempts", attemptRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/topics", topicRoutes);
 const PORT = process.env.PORT || 5000;
 
 mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log("MongoDB connected successfully");
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
 
-        app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error("MongoDB connection error:", error.message);
-        process.exit(1);
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
+  });

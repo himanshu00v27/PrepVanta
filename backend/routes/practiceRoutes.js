@@ -3,17 +3,35 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 const PracticeSet = require("../models/PracticeSet");
 const Question = require("../models/Question");
 const Topic = require("../models/Topic");
 
-// Get all published practice sets
+// --------------------------------------------------
+// Get practice sets
+// Normal users: published only
+// Admins: may request ?status=draft / published
+// --------------------------------------------------
+
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const practiceSets = await PracticeSet.find({
-      status: "published",
-    })
+    const filter = {};
+
+    if (req.user.role === "admin") {
+      if (req.query.status) {
+        filter.status = req.query.status;
+      }
+    } else {
+      filter.status = "published";
+    }
+
+    if (req.query.topic) {
+      filter.topic = req.query.topic;
+    }
+
+    const practiceSets = await PracticeSet.find(filter)
       .populate("questions")
       .populate("topic")
       .sort({ createdAt: -1 });
@@ -28,9 +46,12 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Resolve a published practice set from frontend category + topic name
+// --------------------------------------------------
+// Resolve practice set using frontend category + topic
 // Example:
 // /api/practice/resolve/topic?category=aptitude&name=Percentages
+// --------------------------------------------------
+
 router.get("/resolve/topic", authMiddleware, async (req, res) => {
   try {
     const { category, name } = req.query;
@@ -67,7 +88,12 @@ router.get("/resolve/topic", authMiddleware, async (req, res) => {
       topic: topic._id,
       status: "published",
     })
-      .populate("questions")
+      .populate({
+        path: "questions",
+        match: {
+          status: "published",
+        },
+      })
       .populate("topic");
 
     if (!practiceSet) {
@@ -86,7 +112,10 @@ router.get("/resolve/topic", authMiddleware, async (req, res) => {
   }
 });
 
+// --------------------------------------------------
 // Get single practice set
+// --------------------------------------------------
+
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const practiceSet = await PracticeSet.findById(req.params.id)
@@ -94,6 +123,12 @@ router.get("/:id", authMiddleware, async (req, res) => {
       .populate("topic");
 
     if (!practiceSet) {
+      return res.status(404).json({
+        message: "Practice set not found",
+      });
+    }
+
+    if (req.user.role !== "admin" && practiceSet.status !== "published") {
       return res.status(404).json({
         message: "Practice set not found",
       });
@@ -109,8 +144,11 @@ router.get("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// Create practice set
-router.post("/", authMiddleware, async (req, res) => {
+// --------------------------------------------------
+// Create practice set - ADMIN ONLY
+// --------------------------------------------------
+
+router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { title, description, topic, questions, duration, status } = req.body;
 
@@ -128,23 +166,26 @@ router.post("/", authMiddleware, async (req, res) => {
       });
     }
 
-    if (questions && questions.length > 0) {
-      const validQuestions = await Question.countDocuments({
-        _id: { $in: questions },
-      });
+    const questionIds = Array.isArray(questions) ? questions : [];
 
-      if (validQuestions !== questions.length) {
+    if (questionIds.length > 0) {
+      const validQuestions = await Question.find({
+        _id: {
+          $in: questionIds,
+        },
+      }).select("_id topic");
+
+      if (validQuestions.length !== questionIds.length) {
         return res.status(400).json({
           message: "One or more questions are invalid",
         });
       }
 
-      const questionsInTopic = await Question.countDocuments({
-        _id: { $in: questions },
-        topic: validTopic._id,
-      });
+      const hasWrongTopic = validQuestions.some(
+        (question) => String(question.topic) !== String(validTopic._id),
+      );
 
-      if (questionsInTopic !== questions.length) {
+      if (hasWrongTopic) {
         return res.status(400).json({
           message:
             "All questions in a practice set must belong to the selected topic",
@@ -155,8 +196,8 @@ router.post("/", authMiddleware, async (req, res) => {
     const practiceSet = new PracticeSet({
       title,
       description,
-      topic,
-      questions: questions || [],
+      topic: validTopic._id,
+      questions: questionIds,
       duration,
       status: status || "draft",
       createdBy: req.user._id,
@@ -181,83 +222,63 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Update practice set
-router.put("/:id", authMiddleware, async (req, res) => {
+// --------------------------------------------------
+// Update practice set - ADMIN ONLY
+// --------------------------------------------------
+
+router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { topic, questions } = req.body;
+    const existingPracticeSet = await PracticeSet.findById(req.params.id);
 
-    let selectedTopicId = topic;
-
-    if (topic) {
-      const validTopic = await Topic.findById(topic);
-
-      if (!validTopic) {
-        return res.status(400).json({
-          message: "Invalid topic",
-        });
-      }
-
-      selectedTopicId = validTopic._id;
+    if (!existingPracticeSet) {
+      return res.status(404).json({
+        message: "Practice set not found",
+      });
     }
 
-    if (questions && questions.length > 0) {
-      const validQuestions = await Question.countDocuments({
-        _id: { $in: questions },
-      });
+    const selectedTopicId = req.body.topic || existingPracticeSet.topic;
 
-      if (validQuestions !== questions.length) {
+    const validTopic = await Topic.findById(selectedTopicId);
+
+    if (!validTopic) {
+      return res.status(400).json({
+        message: "Invalid topic",
+      });
+    }
+
+    const selectedQuestions =
+      req.body.questions !== undefined
+        ? req.body.questions
+        : existingPracticeSet.questions;
+
+    if (!Array.isArray(selectedQuestions)) {
+      return res.status(400).json({
+        message: "Questions must be an array",
+      });
+    }
+
+    if (selectedQuestions.length > 0) {
+      const validQuestions = await Question.find({
+        _id: {
+          $in: selectedQuestions,
+        },
+      }).select("_id topic");
+
+      if (validQuestions.length !== selectedQuestions.length) {
         return res.status(400).json({
           message: "One or more questions are invalid",
         });
       }
 
-      if (!selectedTopicId) {
-        const existingPracticeSet = await PracticeSet.findById(req.params.id);
+      const hasWrongTopic = validQuestions.some(
+        (question) => String(question.topic) !== String(validTopic._id),
+      );
 
-        if (!existingPracticeSet) {
-          return res.status(404).json({
-            message: "Practice set not found",
-          });
-        }
-
-        selectedTopicId = existingPracticeSet.topic;
-      }
-
-      const questionsInTopic = await Question.countDocuments({
-        _id: { $in: questions },
-        topic: selectedTopicId,
-      });
-
-      if (questionsInTopic !== questions.length) {
+      if (hasWrongTopic) {
         return res.status(400).json({
           message:
             "All questions in a practice set must belong to the selected topic",
         });
-      }
-    }
-
-    // If only the topic is changed, verify existing questions
-    // still belong to the new topic.
-    if (topic && questions === undefined) {
-      const existingPracticeSet = await PracticeSet.findById(req.params.id);
-
-      if (!existingPracticeSet) {
-        return res.status(404).json({
-          message: "Practice set not found",
-        });
-      }
-
-      if (existingPracticeSet.questions.length > 0) {
-        const questionsInTopic = await Question.countDocuments({
-          _id: { $in: existingPracticeSet.questions },
-          topic: selectedTopicId,
-        });
-
-        if (questionsInTopic !== existingPracticeSet.questions.length) {
-          return res.status(400).json({
-            message: "Existing questions do not belong to the selected topic",
-          });
-        }
       }
     }
 
@@ -272,12 +293,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
       .populate("questions")
       .populate("topic");
 
-    if (!practiceSet) {
-      return res.status(404).json({
-        message: "Practice set not found",
-      });
-    }
-
     res.json(practiceSet);
   } catch (error) {
     console.error("Error updating practice set:", error);
@@ -289,8 +304,11 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// Delete practice set
-router.delete("/:id", authMiddleware, async (req, res) => {
+// --------------------------------------------------
+// Delete practice set - ADMIN ONLY
+// --------------------------------------------------
+
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const practiceSet = await PracticeSet.findByIdAndDelete(req.params.id);
 
