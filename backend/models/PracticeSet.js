@@ -13,6 +13,12 @@ const practiceSetSchema = new mongoose.Schema(
       trim: true,
     },
 
+    topic: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Topic",
+      required: true,
+    },
+
     questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -40,7 +46,7 @@ const practiceSetSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("PracticeSet", practiceSetSchema);
