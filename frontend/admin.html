@@ -551,6 +551,209 @@
 
                 </div>
 
+                <!-- ==========================================
+     GROUP 2 - QUESTION MANAGEMENT
+========================================== -->
+
+<div class="panel-card admin-questions-panel" style="width: 100%; max-width: none;">
+
+    <div class="panel-header">
+
+        <div>
+            <h3>
+                <i class="fa-solid fa-circle-question"></i>
+                Question Management
+            </h3>
+
+            <p class="panel-subtitle">
+                Create, edit, publish and manage practice questions.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            id="adminAddQuestionBtn"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Add Question
+        </button>
+
+    </div>
+
+    <!-- Filters -->
+
+    <div class="admin-question-filters">
+
+        <div class="form-group">
+
+            <label for="adminQuestionSearch">
+                Search
+            </label>
+
+            <input
+                type="text"
+                id="adminQuestionSearch"
+                placeholder="Search questions..."
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="adminQuestionCategory">
+                Category
+            </label>
+
+            <select id="adminQuestionCategory">
+
+                <option value="">
+                    All Categories
+                </option>
+
+                <option value="Aptitude">
+                    Aptitude
+                </option>
+
+                <option value="Reasoning">
+                    Reasoning
+                </option>
+
+                <option value="Technical">
+                    Technical
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="adminQuestionTopic">
+                Topic
+            </label>
+
+            <select id="adminQuestionTopic">
+
+                <option value="">
+                    All Topics
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="adminQuestionDifficulty">
+                Difficulty
+            </label>
+
+            <select id="adminQuestionDifficulty">
+
+                <option value="">
+                    All Difficulties
+                </option>
+
+                <option value="easy">
+                    Easy
+                </option>
+
+                <option value="medium">
+                    Medium
+                </option>
+
+                <option value="hard">
+                    Hard
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="adminQuestionStatus">
+                Status
+            </label>
+
+            <select id="adminQuestionStatus">
+
+                <option value="">
+                    All Statuses
+                </option>
+
+                <option value="published">
+                    Published
+                </option>
+
+                <option value="draft">
+                    Draft
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <!-- Question count -->
+
+    <div class="admin-question-summary">
+
+        <span id="adminQuestionCount">
+            0 questions
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminRefreshQuestionsBtn"
+        >
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+        </button>
+
+    </div>
+
+    <!-- Questions list -->
+
+    <div
+        class="admin-question-list"
+        id="adminQuestionList"
+    >
+
+        <div class="admin-empty-state">
+            Loading questions...
+        </div>
+
+    </div>
+    <div class="admin-question-pagination">
+    <button
+        type="button"
+        class="btn btn-secondary"
+        id="adminQuestionsPrevBtn"
+    >
+        <i class="fa-solid fa-chevron-left"></i>
+        Previous
+    </button>
+
+    <span id="adminQuestionsPageInfo">
+        Page 1
+    </span>
+
+    <button
+        type="button"
+        class="btn btn-secondary"
+        id="adminQuestionsNextBtn"
+    >
+        Next
+        <i class="fa-solid fa-chevron-right"></i>
+    </button>
+</div>
+
+</div>
+
 
                 <!-- ===================================
                      COMPANY EDITOR MODAL

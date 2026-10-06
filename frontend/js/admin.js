@@ -3004,18 +3004,367 @@
   }
 
   /* ===================================
+     GROUP 2 - QUESTION MANAGEMENT
+  =================================== */
+
+  const adminQuestionList = document.getElementById("adminQuestionList");
+
+  const adminQuestionCount = document.getElementById("adminQuestionCount");
+
+  const adminQuestionSearch = document.getElementById("adminQuestionSearch");
+
+  const adminQuestionCategory = document.getElementById(
+    "adminQuestionCategory",
+  );
+
+  const adminQuestionTopic = document.getElementById("adminQuestionTopic");
+
+  const adminQuestionDifficulty = document.getElementById(
+    "adminQuestionDifficulty",
+  );
+
+  const adminQuestionStatus = document.getElementById("adminQuestionStatus");
+
+  const adminRefreshQuestionsBtn = document.getElementById(
+    "adminRefreshQuestionsBtn",
+  );
+
+  let adminQuestions = [];
+  let adminTopics = [];
+  let adminQuestionsCurrentPage = 1;
+  const ADMIN_QUESTIONS_PER_PAGE = 5;
+
+  function escapeAdminQuestionHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function populateAdminQuestionTopics() {
+    if (!adminQuestionTopic) {
+      return;
+    }
+
+    const selectedValue = adminQuestionTopic.value;
+
+    const category = adminQuestionCategory ? adminQuestionCategory.value : "";
+
+    const filteredTopics = category
+      ? adminTopics.filter((topic) => topic.category === category)
+      : adminTopics;
+
+    adminQuestionTopic.innerHTML = `
+      <option value="">All Topics</option>
+      ${filteredTopics
+        .map(
+          (topic) => `
+            <option value="${escapeAdminQuestionHtml(topic._id)}">
+              ${escapeAdminQuestionHtml(topic.name)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (filteredTopics.some((topic) => topic._id === selectedValue)) {
+      adminQuestionTopic.value = selectedValue;
+    }
+  }
+
+  function renderAdminQuestions() {
+    if (!adminQuestionList || !adminQuestionCount) {
+      return;
+    }
+
+    const search = adminQuestionSearch
+      ? adminQuestionSearch.value.trim().toLowerCase()
+      : "";
+
+    const category = adminQuestionCategory ? adminQuestionCategory.value : "";
+
+    const topicId = adminQuestionTopic ? adminQuestionTopic.value : "";
+
+    const difficulty = adminQuestionDifficulty
+      ? adminQuestionDifficulty.value
+      : "";
+
+    const status = adminQuestionStatus ? adminQuestionStatus.value : "";
+
+    const filteredQuestions = adminQuestions.filter((question) => {
+      const matchesSearch =
+        !search ||
+        String(question.title || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(question.description || "")
+          .toLowerCase()
+          .includes(search);
+
+      const matchesCategory = !category || question.category === category;
+
+      const questionTopicId =
+        question.topic && typeof question.topic === "object"
+          ? question.topic._id
+          : question.topic;
+
+      const matchesTopic = !topicId || questionTopicId === topicId;
+
+      const matchesDifficulty =
+        !difficulty || question.difficulty === difficulty;
+
+      const matchesStatus = !status || question.status === status;
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesTopic &&
+        matchesDifficulty &&
+        matchesStatus
+      );
+    });
+
+    adminQuestionCount.textContent = `${filteredQuestions.length} question${
+      filteredQuestions.length === 1 ? "" : "s"
+    }`;
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredQuestions.length / ADMIN_QUESTIONS_PER_PAGE),
+    );
+
+    if (adminQuestionsCurrentPage > totalPages) {
+      adminQuestionsCurrentPage = totalPages;
+    }
+
+    const startIndex =
+      (adminQuestionsCurrentPage - 1) * ADMIN_QUESTIONS_PER_PAGE;
+
+    const paginatedQuestions = filteredQuestions.slice(
+      startIndex,
+      startIndex + ADMIN_QUESTIONS_PER_PAGE,
+    );
+
+    const pageInfo = document.getElementById("adminQuestionsPageInfo");
+
+    const prevBtn = document.getElementById("adminQuestionsPrevBtn");
+
+    const nextBtn = document.getElementById("adminQuestionsNextBtn");
+
+    if (pageInfo) {
+      pageInfo.textContent = `Page ${adminQuestionsCurrentPage} of ${totalPages}`;
+    }
+
+    if (prevBtn) {
+      prevBtn.disabled = adminQuestionsCurrentPage <= 1;
+    }
+
+    if (nextBtn) {
+      nextBtn.disabled =
+        adminQuestionsCurrentPage >= totalPages ||
+        filteredQuestions.length === 0;
+    }
+
+    if (filteredQuestions.length === 0) {
+      adminQuestionList.innerHTML = `
+        <div class="admin-empty-state">
+          No questions found.
+        </div>
+      `;
+
+      return;
+    }
+
+    adminQuestionList.innerHTML = paginatedQuestions
+      .map((question) => {
+        const topicName =
+          question.topic && typeof question.topic === "object"
+            ? question.topic.name
+            : "Unknown topic";
+
+        return `
+          <div class="admin-question-item">
+
+            <div class="admin-question-main">
+
+              <strong>
+                ${escapeAdminQuestionHtml(question.title)}
+              </strong>
+
+              <p>
+                ${escapeAdminQuestionHtml(question.description)}
+              </p>
+
+              <div class="admin-question-meta">
+
+                <span>
+                  ${escapeAdminQuestionHtml(question.category)}
+                </span>
+
+                <span>
+                  ${escapeAdminQuestionHtml(topicName)}
+                </span>
+
+                <span>
+                  ${escapeAdminQuestionHtml(question.difficulty)}
+                </span>
+
+                <span>
+                  ${escapeAdminQuestionHtml(question.type)}
+                </span>
+
+                <span>
+                  ${escapeAdminQuestionHtml(question.status)}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  async function loadAdminQuestionTopics() {
+    if (!adminQuestionTopic) {
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/topics", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to load topics");
+      }
+
+      adminTopics = await response.json();
+
+      populateAdminQuestionTopics();
+    } catch (error) {
+      console.error("Admin question topics error:", error);
+    }
+  }
+
+  async function loadAdminQuestions() {
+    if (!adminQuestionList) {
+      return;
+    }
+
+    adminQuestionList.innerHTML = `
+      <div class="admin-empty-state">
+        Loading questions...
+      </div>
+    `;
+
+    try {
+      const response = await fetch("http://localhost:5000/api/questions", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to load questions");
+      }
+
+      adminQuestions = await response.json();
+
+      renderAdminQuestions();
+    } catch (error) {
+      console.error("Admin questions error:", error);
+
+      adminQuestionList.innerHTML = `
+        <div class="admin-empty-state">
+          Unable to load questions.
+        </div>
+      `;
+    }
+  }
+
+  if (adminQuestionSearch) {
+    adminQuestionSearch.addEventListener("input", () => {
+      adminQuestionsCurrentPage = 1;
+      renderAdminQuestions();
+    });
+  }
+
+  if (adminQuestionCategory) {
+    adminQuestionCategory.addEventListener("change", () => {
+      adminQuestionsCurrentPage = 1;
+      populateAdminQuestionTopics();
+      renderAdminQuestions();
+    });
+  }
+
+  if (adminQuestionTopic) {
+    adminQuestionTopic.addEventListener("change", () => {
+      adminQuestionsCurrentPage = 1;
+      renderAdminQuestions();
+    });
+  }
+
+  if (adminQuestionDifficulty) {
+    adminQuestionDifficulty.addEventListener("change", () => {
+      adminQuestionsCurrentPage = 1;
+      renderAdminQuestions();
+    });
+  }
+
+  if (adminQuestionStatus) {
+    adminQuestionStatus.addEventListener("change", () => {
+      adminQuestionsCurrentPage = 1;
+      renderAdminQuestions();
+    });
+  }
+  const adminQuestionsPrevBtn = document.getElementById(
+    "adminQuestionsPrevBtn",
+  );
+
+  const adminQuestionsNextBtn = document.getElementById(
+    "adminQuestionsNextBtn",
+  );
+
+  if (adminQuestionsPrevBtn) {
+    adminQuestionsPrevBtn.addEventListener("click", () => {
+      if (adminQuestionsCurrentPage > 1) {
+        adminQuestionsCurrentPage -= 1;
+        renderAdminQuestions();
+      }
+    });
+  }
+
+  if (adminQuestionsNextBtn) {
+    adminQuestionsNextBtn.addEventListener("click", () => {
+      adminQuestionsCurrentPage += 1;
+      renderAdminQuestions();
+    });
+  }
+
+  if (adminRefreshQuestionsBtn) {
+    adminRefreshQuestionsBtn.addEventListener("click", async () => {
+      await loadAdminQuestionTopics();
+      await loadAdminQuestions();
+    });
+  }
+
+  /* ===================================
      INITIAL LOAD
   =================================== */
 
   loadAdminDashboard();
-
   loadAdminUsers();
-
   loadAdminCompanies();
-
   loadPlatformSettings();
-
   loadAdminSupportTickets();
-
   loadAuditLogs();
+
+  loadAdminQuestionTopics();
+  loadAdminQuestions();
 })();
