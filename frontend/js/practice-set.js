@@ -1,251 +1,627 @@
-/* ===================================
-   PREPVANTA PRACTICE-SET SCRIPT
-
-   Shared by Reasoning, Aptitude, Topics, Companies AND Interview
-   mock tests. Reads ?cat= and ?name= from the URL.
-
-   - cat=interview  -> flat mock-test style: a single objective
-     question list with a timer feel, no tabs (mock tests are
-     meant to simulate one continuous timed test).
-   - everything else -> three tabs: Objective / Subjective / Coding,
-     so a learner can practice a topic in whichever mode they want.
-
-   >>> BACKEND INTEGRATION POINT <<<
-   All SAMPLE_* arrays below are hardcoded placeholders. Once your
-   backend/database is ready, replace loadQuestions() so it fetches
-   real questions for the given (cat, name) pair instead, e.g.:
-
-       async function loadQuestions(cat, name) {
-           const res = await fetch(`/api/questions?cat=${cat}&topic=${encodeURIComponent(name)}`);
-           return res.json();
-       }
-
-   and call it from init() instead of using the SAMPLE_* arrays directly.
-=================================== */
-
-const CAT_LABELS = {
-    reasoning: { label: "Reasoning", href: "reasoning.html" },
-    aptitude: { label: "Aptitude", href: "aptitude.html" },
-    topics: { label: "Topics", href: "topics.html" },
-    company: { label: "Companies", href: "companies.html" },
-    interview: { label: "Interview Practice", href: "interview.html" }
-};
-
-const SAMPLE_OBJECTIVE = [
-    {
-        q: "This is a sample objective question for {topic}. Replace SAMPLE_OBJECTIVE in js/practice-set.js with real data from your backend.",
-        options: ["Option A", "Option B", "Option C", "Option D"],
-        correct: 0
-    },
-    {
-        q: "This is a second placeholder question for {topic}, just to preview how the practice UI will look once real content is loaded.",
-        options: ["Option A", "Option B", "Option C", "Option D"],
-        correct: 1
-    },
-    {
-        q: "A third sample question for {topic} — swap this whole array out once your question bank/database is connected.",
-        options: ["Option A", "Option B", "Option C", "Option D"],
-        correct: 2
-    }
-];
-
-const SAMPLE_SUBJECTIVE = [
-    {
-        q: "Explain the core idea behind {topic} in your own words, as if teaching it to someone new.",
-        answer: "Sample answer — replace SAMPLE_SUBJECTIVE in js/practice-set.js with real question/answer pairs from your backend."
-    },
-    {
-        q: "Walk through a real-world scenario where {topic} would come up in a technical interview.",
-        answer: "Sample answer — this is placeholder text shown when the learner clicks \"Show Answer\"."
-    }
-];
-
-const SAMPLE_CODING = [
-    {
-        q: "Write a program that applies {topic} to solve a short, representative coding problem.",
-        hint: "Expected complexity: O(n) time, O(1) additional space."
-    },
-    {
-        q: "A second coding exercise built around {topic}.",
-        hint: "Hint: think about the most efficient approach before writing any code."
-    }
-];
-
 function getParams() {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get("cat") || "topics";
-    const name = params.get("name") || "General Practice";
-    return { cat, name };
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("cat") || "topics";
+    const name = params.get("name") || "General Practice";
+    return { cat, name };
 }
-
-function renderBreadcrumb(cat, name) {
-    const info = CAT_LABELS[cat] || CAT_LABELS.topics;
-    const el = document.getElementById("psetBreadcrumb");
-    if (el) {
-        el.innerHTML = `
-            <a href="index.html">Home</a>
-            <i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i>
-            <a href="${info.href}">${info.label}</a>
-            <i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i>
-            <span class="current">${name}</span>
-        `;
-    }
+/* =========================
+   LOAD PRACTICE SET
+========================= */
+async function loadPracticeSet(practiceSetId) {
+    const token = localStorage.getItem("prepvanta-token");
+    if (!token) {
+        throw new Error("Authentication token not found. Please login first.");
+    }
+    const response = await fetch(
+        `http://localhost:5000/api/practice/${practiceSetId}`,
+        {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        }
+    );
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+            error.message || "Failed to load practice set."
+        );
+    }
+    return response.json();
 }
-
-function renderHead(cat, name) {
-    const info = CAT_LABELS[cat] || CAT_LABELS.topics;
-    document.title = `${name} | PrepVanta`;
-
-    const titleEl = document.getElementById("psetTitle");
-    const subEl = document.getElementById("psetSubtitle");
-
-    if (titleEl) titleEl.textContent = name;
-    if (subEl) {
-        if (cat === "interview") {
-            subEl.textContent = `A timed mock test — ${name}.`;
-        } else if (cat === "company") {
-            subEl.textContent = `Practice questions and patterns for ${name}'s hiring process.`;
-        } else {
-            subEl.textContent = `Practice questions for ${name} — ${info.label.toLowerCase()} section.`;
-        }
-    }
+async function resolvePracticeSetId() {
+    const params = new URLSearchParams(window.location.search);
+    const directId = params.get("id");
+    if (directId) {
+        return directId;
+    }
+    const cat = params.get("cat");
+    const name = params.get("name");
+    if (!cat || !name) {
+        throw new Error(
+            "Practice set ID or category/topic information is missing from URL."
+        );
+    }
+    const token = localStorage.getItem("prepvanta-token");
+    if (!token) {
+        throw new Error(
+            "Authentication token not found. Please login first."
+        );
+    }
+    const response = await fetch(
+        "http://localhost:5000/api/practice",
+        {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        }
+    );
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+            error.message || "Failed to find practice set."
+        );
+    }
+    const data = await response.json();
+    const practiceSets = Array.isArray(data)
+        ? data
+        : data.practiceSets || data.data || [];
+    if (practiceSets.length === 0) {
+        throw new Error(
+            `No published practice sets found for "${name}".`
+        );
+    }
+    const requestedName = name.trim().toLowerCase();
+    let matchedSet = practiceSets.find((set) => {
+        const title = String(set.title || "")
+            .trim()
+            .toLowerCase();
+        return title === requestedName;
+    });
+    if (!matchedSet) {
+        matchedSet = practiceSets.find((set) => {
+            const title = String(set.title || "")
+                .trim()
+                .toLowerCase();
+            return (
+                title.includes(requestedName) ||
+                requestedName.includes(title)
+            );
+        });
+    }
+    if (!matchedSet && practiceSets.length === 1) {
+        matchedSet = practiceSets[0];
+    }
+    if (!matchedSet) {
+        throw new Error(
+            `No practice set found for "${name}".`
+        );
+    }
+    const resolvedId =
+        matchedSet._id ||
+        matchedSet.id;
+    if (!resolvedId) {
+        throw new Error(
+            "Practice set ID was not returned by backend."
+        );
+    }
+  console.log("Resolved practice set ID:", resolvedId);
+return resolvedId;
 }
+/* =========================
+   START PRACTICE ATTEMPT
+========================= */
+console.log("Resolved practice set ID:", resolvedId);
+return resolvedId;
+}
+/* =========================
+   START PRACTICE ATTEMPT
+========================= */
+async function startPracticeAttempt(practiceSetId) {
+    const token = localStorage.getItem("prepvanta-token");
+    if (!token) {
+        throw new Error(
+            "Authentication token not found. Please login first."
+        );
+    }
+    if (!token) {
+        throw new Error("Authentication token not found. Please login first.");
+    }
+    const response = await fetch(
+        `http://localhost:5000/api/attempts/start/${practiceSetId}`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        }
+    );
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+            error.message || "Failed to start practice attempt."
+        );
+    }
+    return response.json();
+}
+/* =========================
+   SUBMIT PRACTICE ATTEMPT
+========================= */
+async function submitPracticeAttempt(attemptId, answers) {
+    const token = localStorage.getItem("prepvanta-token");
+    if (!token) {
+        throw new Error("Authentication token not found. Please login first.");
+    }
+    const response = await fetch(
+        `http://localhost:5000/api/attempts/${attemptId}/submit`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                answers
+            })
+        }
+    );
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+            error.message || "Failed to submit practice."
+        );
+    }
+    return response.json();
+}
+/* =========================
+   INIT PRACTICE PAGE
+========================= */
+async function init() {
+    const { cat, name } = getParams();
+    /*
+     * These functions already exist in the original practice-set.js.
+     * Keep them if they are present.
+     */
+    if (typeof renderBreadcrumb === "function") {
+        renderBreadcrumb(cat, name);
+    }
+    if (typeof renderHead === "function") {
+        renderHead(cat, name);
+    }
+    try {
+        /* -------------------------
+           GET PRACTICE SET ID
+        ------------------------- */
+  const practiceSetId =
+    new URLSearchParams(window.location.search).get("id");
+if (!practiceSetId) {
+    throw new Error(
+        "Practice set ID is missing from URL."
+    );
+}
+}
+        }
+        console.log(
+            "Loading practice set:",
+            practiceSetId
+        );
+        /* -------------------------
+           LOAD PRACTICE SET
+        ------------------------- */
+        const practiceSet =
+            await loadPracticeSet(practiceSetId);
+        console.log(
+            "Loaded practice set:",
+            practiceSet
+        );
+        /* -------------------------
+           NORMALIZE RESPONSE
+        ------------------------- */
+        const actualPracticeSet =
+            practiceSet.practiceSet ||
+            practiceSet.data ||
+            practiceSet;
+        /* -------------------------
+           TITLE + DESCRIPTION
+        ------------------------- */
+        const titleElement =
+            document.getElementById("psetTitle");
+        const subtitleElement =
+            document.getElementById("psetSubtitle");
+        if (titleElement) {
+            titleElement.textContent =
+                actualPracticeSet.title ||
+                "Practice Set";
+        }
+        if (subtitleElement) {
+            subtitleElement.textContent =
+                actualPracticeSet.description || "";
+        }
+        /* -------------------------
+           QUESTIONS
+        ------------------------- */
+        const mount =
+            document.getElementById("psetBody");
+        if (!mount) {
+            throw new Error(
+                "Practice set container (#psetBody) not found."
+            );
+        }
+        const questions =
+            actualPracticeSet.questions || [];
+        if (questions.length === 0) {
+            mount.innerHTML = `
+                <div class="mcq-card">
+                    <h3>No questions available</h3>
+                    <p>
+                        This practice set does not contain
+                        any questions yet.
+                    </p>
+                </div>
+            `;
+            return;
+        }
+        /* -------------------------
+           START ATTEMPT
+        ------------------------- */
+        const attemptResponse =
+            await startPracticeAttempt(practiceSetId);
+        console.log(
+            "Started attempt:",
+            attemptResponse
+        );
+        /*
+         * Support both possible backend responses:
+         *
+         * { _id: "..." }
+         *
+         * OR
+         *
+         * { attempt: { _id: "..." } }
+         */
+        const attempt =
+            attemptResponse.attempt ||
+            attemptResponse.data ||
+            attemptResponse;
+        const attemptId =
+            attempt._id ||
+            attempt.id;
+        if (!attemptId) {
+            throw new Error(
+                "Practice attempt ID was not returned by backend."
+            );
+        }
+        /* -------------------------
+           RENDER QUESTIONS
+        ------------------------- */
+  const questionsHTML = questions.map((question, index) => {
 
-function mcqCardHTML(item, qIndex, namePrefix, topicName) {
-    const options = item.options.map((opt, i) => `
-        <label class="mcq-option" data-correct="${i === item.correct}">
-            <input type="radio" name="${namePrefix}${qIndex}">
-            ${opt}
-        </label>
-    `).join("");
+    const questionId =
+        question._id ||
+        question.id ||
+        `question-${index}`;
+
+    const questionTitle =
+        question.question ||
+        question.title ||
+        question.text ||
+        "Question";
+
+    const description =
+        question.description || "";
+
+    const options =
+        Array.isArray(question.options)
+            ? question.options
+            : [];
+
+    const optionsHTML = options
+        .map((option, optionIndex) => {
+
+            const optionText =
+                typeof option === "object"
+                    ? (
+                        option.text ||
+                        option.label ||
+                        option.value ||
+                        ""
+                    )
+                    : String(option);
+
+            return `
+                <label class="option-item">
+                    <input
+                        type="radio"
+                        name="question-${questionId}"
+                        value="${String(optionText)
+                            .replace(/"/g, "&quot;")}"
+                        data-question-id="${questionId}"
+                    >
+                    <span>
+                        ${optionText}
+                    </span>
+                </label>
+            `;
+        })
+        .join("");
 
     return `
-        <div class="mcq-card">
-            <div class="mcq-q">${qIndex + 1}. ${item.q.replace("{topic}", topicName)}</div>
-            ${options}
-        </div>
-    `;
-}
+        <div class="mcq-card practice-question-card">
 
-function wireMcqCards(container) {
-    container.querySelectorAll(".mcq-option input").forEach(input => {
-        input.addEventListener("change", () => {
-            const card = input.closest(".mcq-card");
-            card.querySelectorAll(".mcq-option").forEach(opt => opt.classList.remove("correct", "wrong"));
-            const chosen = input.closest(".mcq-option");
-            const isCorrect = chosen.dataset.correct === "true";
-            chosen.classList.add(isCorrect ? "correct" : "wrong");
-            if (!isCorrect) {
-                const correctOpt = card.querySelector('.mcq-option[data-correct="true"]');
-                if (correctOpt) correctOpt.classList.add("correct");
+            <div class="question-number">
+                Question ${index + 1}
+            </div>
+
+            <h3>
+                ${questionTitle}
+            </h3>
+
+            ${
+                description
+                    ? `
+                        <p>
+                            ${description}
+                        </p>
+                    `
+                    : ""
             }
-        });
-    });
-}
 
-function wireShowAnswerButtons(container) {
-    container.querySelectorAll(".show-answer-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const reveal = document.getElementById(btn.dataset.target);
-            const isHidden = reveal.style.display === "none" || !reveal.style.display;
-            reveal.style.display = isHidden ? "block" : "none";
-            btn.textContent = isHidden ? "Hide Answer" : "Show Answer";
-        });
-    });
-}
+            <div class="options-list">
+                ${
+                    optionsHTML ||
+                    `
+                        <p>
+                            No options available
+                            for this question.
+                        </p>
+                    `
+                }
+            </div>
 
-/* ---------------- Mock test mode (cat=interview) ---------------- */
-
-function renderMockTest(name) {
-    const mount = document.getElementById("psetBody");
-
-    const questionsHTML = SAMPLE_OBJECTIVE.map((item, i) => mcqCardHTML(item, i, "mt", name)).join("");
-
-    mount.innerHTML = `
-        <div class="timer-pill" style="margin-bottom:22px;"><span class="dot"></span> 29:40 remaining</div>
-        ${questionsHTML}
-        <div class="practice-actions">
-            <button class="btn btn-secondary" onclick="history.back()">Back to Interview Practice</button>
-            <button class="btn btn-primary" onclick="alert('Test submitted — check your dashboard for the score.')">Submit Test</button>
         </div>
     `;
+}).join("");
+                return `
+ <h3>
+    ${questionTitle}
+ </h3>
 
-    wireMcqCards(mount);
+${description
+    ? `
+        <p>
+            ${description}
+        </p>
+      `
+    : ""
 }
 
-/* ---------------- Topic mode (reasoning / aptitude / topics / company) ---------------- */
-
-function renderTopicPractice(name) {
-    const mount = document.getElementById("psetBody");
-
-    const objectiveHTML = SAMPLE_OBJECTIVE.map((item, i) => mcqCardHTML(item, i, "pq", name)).join("");
-
-    const subjectiveHTML = SAMPLE_SUBJECTIVE.map((item, i) => `
-        <div class="mcq-card subjective-card">
-            <div class="mcq-q">${i + 1}. ${item.q.replace("{topic}", name)}</div>
-            <button type="button" class="btn btn-outline-danger show-answer-btn" data-target="pset-ans-${i}">Show Answer</button>
-            <div class="answer-reveal" id="pset-ans-${i}" style="display:none;">
-                <strong>Answer:</strong> ${item.answer}
-            </div>
-        </div>
-    `).join("");
-
-    const codingHTML = SAMPLE_CODING.map((item, i) => `
-        <div class="mcq-card">
-            <span class="qtype-badge coding">Coding</span>
-            <div class="mcq-q">${i + 1}. ${item.q.replace("{topic}", name)}</div>
-            <p style="color:var(--text-light);font-size:.88rem;margin-bottom:14px;">${item.hint}</p>
-            <a href="compiler.html" class="btn btn-primary">Open in Compiler</a>
-        </div>
-    `).join("");
-
-    mount.innerHTML = `
-        <div class="tabs-row">
-            <button class="tab-btn active" data-target="psetObjective">Objective</button>
-            <button class="tab-btn" data-target="psetSubjective">Subjective</button>
-            <button class="tab-btn" data-target="psetCoding">Coding</button>
-        </div>
-
-        <div class="tab-panel active" id="psetObjective">
-            ${objectiveHTML}
-            <div class="practice-actions">
-                <button class="btn btn-secondary" onclick="history.back()">Back to List</button>
-                <button class="btn btn-primary" onclick="alert('Answers submitted — check your dashboard for the score.')">Submit Set</button>
-            </div>
-        </div>
-
-        <div class="tab-panel" id="psetSubjective">
-            ${subjectiveHTML}
-        </div>
-
-        <div class="tab-panel" id="psetCoding">
-            ${codingHTML}
-        </div>
-    `;
-
-    wireMcqCards(mount);
-    wireShowAnswerButtons(mount);
-
-    mount.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            mount.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-            mount.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById(btn.dataset.target).classList.add("active");
-        });
-    });
-}
-
-function init() {
-    const { cat, name } = getParams();
-    renderBreadcrumb(cat, name);
-    renderHead(cat, name);
-
-    if (cat === "interview") {
-        renderMockTest(name);
-    } else {
-        renderTopicPractice(name);
+<div class="options-list">
+    ${
+        optionsHTML ||
+        `
+            <p>
+                No options available
+                for this question.
+            </p>
+        `
     }
-}
+</div>
+                            description
+                                ? `
+                                    <p>
+                                        ${description}
+                                    </p>
+                                `
+                                : ""
+                        }
+                        <div class="options-list">
+                            ${
+                                optionsHTML ||
+                                `
+                                    <p>
+                                        No options available
+                                        for this question.
+                                    </p>
+                                `
+                            }
+                        </div>
+                    </div>
+                `;
+         }).join("");
 
+/* -------------------------
+   PRACTICE UI
+------------------------- */
+
+mount.innerHTML = `
+    <div class="practice-test-container">
+        ${questionsHTML}
+
+        <div class="practice-actions">
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="submitPracticeBtn"
+            >
+                Submit Practice
+            </button>
+        </div>
+
+        <div
+            id="practiceSubmitMessage"
+            style="margin-top:15px;"
+        ></div>
+    </div>
+
+        /* -------------------------
+           SUBMIT BUTTON
+        ------------------------- */
+        const submitButton =
+            document.getElementById(
+                "submitPracticeBtn"
+            );
+        const messageBox =
+            document.getElementById(
+                "practiceSubmitMessage"
+            );
+        if (!submitButton) {
+            throw new Error(
+                "Submit Practice button was not created."
+            );
+        }
+        /* -------------------------
+           SUBMIT PRACTICE
+        ------------------------- */
+        submitButton.addEventListener(
+            "click",
+            async () => {
+                try {
+                    submitButton.disabled = true;
+                    submitButton.textContent =
+                        "Submitting...";
+                    /* -------------------------
+                       COLLECT ANSWERS
+                    ------------------------- */
+                    const answers =
+                        questions.map((question) => {
+                            const questionId =
+                                question._id ||
+                                question.id;
+                            const selected =
+                                document.querySelector(
+                                    `input[name="question-${questionId}"]:checked`
+                                );
+                            return {
+                                questionId,
+                                answer: selected
+                                    ? selected.value
+                                    : ""
+                            };
+                        });
+                    console.log(
+                        "Submitting answers:",
+                        answers
+                    );
+                    /* -------------------------
+                       SUBMIT TO BACKEND
+                    ------------------------- */
+                    const result =
+                        await submitPracticeAttempt(
+                            attemptId,
+                            answers
+                        );
+                    console.log(
+                        "Practice submitted:",
+                        result
+                    );
+                    /* -------------------------
+                       RESULT DATA
+                    ------------------------- */
+                    const resultAttempt =
+                        result.attempt ||
+                        result.data ||
+                        result;
+                    const score =
+                        resultAttempt.score ??
+                        result.score ??
+                        0;
+                    const totalQuestions =
+                        resultAttempt.totalQuestions ??
+                        result.totalQuestions ??
+                        questions.length;
+                    /* -------------------------
+                       SHOW SUCCESS
+                    ------------------------- */
+                    messageBox.innerHTML = `
+                        <div class="mcq-card">
+                            <h3>
+                                Practice submitted successfully
+                            </h3>
+                            <p>
+                                Score:
+                                <strong>
+                                    ${score}
+                                    /
+                                    ${totalQuestions}
+                                </strong>
+                            </p>
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                id="viewResultBtn"
+                            >
+                                View Result
+                            </button>
+                        </div>
+                    `;
+                    submitButton.style.display =
+                        "none";
+                    /* -------------------------
+                       VIEW RESULT
+                    ------------------------- */
+                    const viewResultBtn =
+                        document.getElementById(
+                            "viewResultBtn"
+                        );
+                    if (viewResultBtn) {
+                        viewResultBtn.addEventListener(
+                            "click",
+                            () => {
+                                window.location.href =
+                                    `attempt-result.html?id=${attemptId}`;
+                            }
+                        );
+                    }
+                } catch (error) {
+                    console.error(
+                        "Practice submission error:",
+                        error
+                    );
+                    messageBox.innerHTML = `
+                        <div class="mcq-card">
+                            <h3>
+                                Submission failed
+                            </h3>
+                            <p>
+                                ${error.message}
+                            </p>
+                        </div>
+                    `;
+                    submitButton.disabled =
+                        false;
+                    submitButton.textContent =
+                        "Submit Practice";
+                }
+            }
+        );
+    } catch (error) {
+        console.error(
+            "Practice set loading error:",
+            error
+        );
+        const mount =
+            document.getElementById(
+                "psetBody"
+            );
+        if (mount) {
+            mount.innerHTML = `
+                <div class="mcq-card">
+                    <h3>
+                        Unable to load practice set
+                    </h3>
+                    <p>
+                        ${error.message}
+                    </p>
+                </div>
+            `;
+        }
+    }
+}
+/* =========================
+   START
+========================= */
 init();
