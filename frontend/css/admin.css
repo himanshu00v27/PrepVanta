@@ -4367,6 +4367,105 @@
     min-height: 75px;
 }
 
+#adminQuestionTestCasesField[hidden] {
+    display: none !important;
+}
+
+#adminQuestionTestCases {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-question-test-case {
+    padding: 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.admin-question-test-case-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.admin-question-test-case-title {
+    color: #1e293b;
+    font-size: 13px;
+}
+
+.admin-question-test-case-remove {
+    padding: 6px 10px;
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+    background: #fff;
+    color: #dc2626;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-question-test-case-remove:hover {
+    background: #fef2f2;
+}
+
+.admin-question-test-case-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-question-test-case-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-question-test-hidden {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+#adminQuestionForm .admin-question-test-hidden input {
+    width: 16px;
+    min-height: 16px;
+    height: 16px;
+    padding: 0;
+}
+
+[data-theme="dark"] .admin-question-test-case {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .admin-question-test-case-title {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .admin-question-test-case-remove {
+    background: #111827;
+    border-color: #991b1b;
+    color: #fca5a5;
+}
+
+[data-theme="dark"] .admin-question-test-case-remove:hover {
+    background: #450a0a;
+}
+
+@media (max-width: 700px) {
+    .admin-question-test-case-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 #adminQuestionOptionsField[hidden] {
     display: none !important;
 }

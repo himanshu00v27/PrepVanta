@@ -8,6 +8,7 @@ const Attempt = require("../models/Attempt");
 const PracticeSet = require("../models/PracticeSet");
 const Question = require("../models/Question");
 const Progress = require("../models/Progress");
+const QuestionActivity = require("../models/QuestionActivity");
 
 // Start a practice attempt
 router.post("/start/:practiceSetId", authMiddleware, async (req, res) => {
@@ -43,6 +44,141 @@ router.post("/start/:practiceSetId", authMiddleware, async (req, res) => {
 });
 
 // Get current attempt
+// Get user's completed answer history
+router.get("/history/all", authMiddleware, async (req, res) => {
+    try {
+        const attempts = await Attempt.find({
+            user: req.user._id,
+            status: "completed"
+        })
+            .populate({
+                path: "practiceSet",
+                select: "title duration topic",
+                populate: {
+                    path: "topic",
+                    select: "name category"
+                }
+            })
+            .sort({ submittedAt: -1 });
+
+        res.json(attempts);
+    } catch (error) {
+        console.error("Error fetching answer history:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch answer history"
+        });
+    }
+});
+
+// Get dashboard statistics
+router.get("/dashboard/stats", authMiddleware, async (req, res) => {
+    try {
+        const attempts = await Attempt.find({
+            user: req.user._id,
+            status: "completed"
+        })
+            .populate({
+                path: "practiceSet",
+                select: "title topic",
+                populate: {
+                    path: "topic",
+                    select: "name category"
+                }
+            })
+            .populate("answers.question", "difficulty")
+            .sort({ submittedAt: -1 })
+            .lean();
+
+        const topicPracticeActivities = await QuestionActivity.find({
+            user: req.user._id
+        })
+            .populate("question", "difficulty")
+            .lean();
+
+        const attemptedQuestionIds = new Set();
+        const correctlySolvedQuestionIds = new Set();
+
+        const difficulty = {
+            easy: 0,
+            medium: 0,
+            hard: 0
+        };
+
+        for (const attempt of attempts) {
+            for (const item of attempt.answers || []) {
+                const userAnswer =
+                    typeof item.answer === "string"
+                        ? item.answer.trim()
+                        : "";
+
+                const questionId = item.question?._id?.toString();
+
+                if (userAnswer && questionId) {
+                    attemptedQuestionIds.add(questionId);
+                }
+
+                if (
+                    item.isCorrect === true &&
+                    questionId &&
+                    !correctlySolvedQuestionIds.has(questionId) &&
+                    ["easy", "medium", "hard"].includes(item.question.difficulty)
+                ) {
+                    correctlySolvedQuestionIds.add(questionId);
+                    difficulty[item.question.difficulty]++;
+                }
+            }
+        }
+
+        for (const activity of topicPracticeActivities) {
+            const questionId = activity.question?._id?.toString();
+
+            if (!questionId) {
+                continue;
+            }
+
+            attemptedQuestionIds.add(questionId);
+
+            if (
+                activity.isCorrect === true &&
+                !correctlySolvedQuestionIds.has(questionId) &&
+                ["easy", "medium", "hard"].includes(activity.question.difficulty)
+            ) {
+                correctlySolvedQuestionIds.add(questionId);
+                difficulty[activity.question.difficulty]++;
+            }
+        }
+
+        const questionsAttempted = attemptedQuestionIds.size;
+
+        const recentActivity = attempts.slice(0, 5).map((attempt) => ({
+            attemptId: attempt._id,
+            practiceSetTitle:
+                attempt.practiceSet?.title || "Deleted Practice Set",
+            topicName:
+                attempt.practiceSet?.topic?.name || "Topic unavailable",
+            category:
+                attempt.practiceSet?.topic?.category || "Category unavailable",
+            score: attempt.score || 0,
+            totalQuestions: attempt.totalQuestions || 0,
+            submittedAt: attempt.submittedAt
+        }));
+
+        res.json({
+            questionsAttempted,
+            practiceSetsAttempted: attempts.length,
+            accountStatus: req.user.isActive ? "Active" : "Disabled",
+            difficulty,
+            recentActivity
+        });
+    } catch (error) {
+        console.error("Error fetching dashboard statistics:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch dashboard statistics"
+        });
+    }
+});
 router.get("/:id", authMiddleware, async (req, res) => {
     try {
         const attempt = await Attempt.findOne({
@@ -211,10 +347,17 @@ router.get("/:id/result", authMiddleware, async (req, res) => {
             user: req.user._id,
             status: "completed"
         })
-            .populate("practiceSet", "title duration")
+            .populate({
+                path: "practiceSet",
+                select: "title duration topic",
+                populate: {
+                    path: "topic",
+                    select: "name category"
+                }
+            })
             .populate(
                 "answers.question",
-                "question answer explanation solution"
+                "title answer"
             );
 
         if (!attempt) {
@@ -250,28 +393,13 @@ router.get("/:id/result", authMiddleware, async (req, res) => {
     }
 });
 
-// Get user's completed answer history
-router.get("/history/all", authMiddleware, async (req, res) => {
-    try {
-        const attempts = await Attempt.find({
-            user: req.user._id,
-            status: "completed"
-        })
-            .populate("practiceSet", "title")
-            .populate(
-                "answers.question",
-                "question answer explanation"
-            )
-            .sort({ submittedAt: -1 });
 
-        res.json(attempts);
-    } catch (error) {
-        console.error("Error fetching answer history:", error);
-
-        res.status(500).json({
-            message: "Failed to fetch answer history"
-        });
-    }
-});
 
 module.exports = router;
+
+
+
+
+
+
+

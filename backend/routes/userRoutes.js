@@ -20,6 +20,7 @@ router.get("/search", authMiddleware, async (req, res) => {
         message: "User search is currently disabled by the administrator.",
       });
     }
+
     const q = (req.query.q || "").trim();
 
     if (!q) {
@@ -94,6 +95,157 @@ router.get("/search", authMiddleware, async (req, res) => {
 
     res.status(500).json({
       message: "Failed to search users",
+    });
+  }
+});
+
+/* ===================================
+   GET MY PROFILE
+   GET /api/users/me/profile
+=================================== */
+
+router.get("/me/profile", authMiddleware, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({
+      user: req.user._id,
+    }).lean();
+
+    res.json({
+      user: {
+        fullName: req.user.fullName,
+        username: req.user.username,
+        email: req.user.email,
+        userId: req.user.userId,
+        role: req.user.role,
+        isActive: req.user.isActive,
+        createdAt: req.user.createdAt,
+      },
+
+      profile: profile
+        ? {
+            name: profile.name || req.user.fullName,
+            bio: profile.bio || "",
+            skills: profile.skills || [],
+            education: profile.education || [],
+            experience: profile.experience || [],
+            projects: profile.projects || [],
+            resumeUrl: profile.resumeUrl || "",
+            githubUrl: profile.githubUrl || "",
+            linkedinUrl: profile.linkedinUrl || "",
+            portfolioUrl: profile.portfolioUrl || "",
+            isPublic: profile.isPublic !== false,
+          }
+        : {
+            name: req.user.fullName,
+            bio: "",
+            skills: [],
+            education: [],
+            experience: [],
+            projects: [],
+            resumeUrl: "",
+            githubUrl: "",
+            linkedinUrl: "",
+            portfolioUrl: "",
+            isPublic: true,
+          },
+    });
+  } catch (error) {
+    console.error("Error loading own profile:", error.message);
+
+    res.status(500).json({
+      message: "Failed to load profile",
+    });
+  }
+});
+
+/* ===================================
+   UPDATE MY PROFILE
+   PUT /api/users/me/profile
+=================================== */
+
+router.put("/me/profile", authMiddleware, async (req, res) => {
+  try {
+    const {
+      name,
+      bio,
+      skills,
+      education,
+      experience,
+      projects,
+      resumeUrl,
+      githubUrl,
+      linkedinUrl,
+      portfolioUrl,
+      isPublic,
+    } = req.body;
+
+    const cleanString = (value) =>
+      typeof value === "string" ? value.trim() : "";
+
+    const cleanArray = (value) =>
+      Array.isArray(value)
+        ? value
+            .filter((item) => typeof item === "string")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
+
+    const profileData = {
+      name: cleanString(name),
+      bio: cleanString(bio),
+      skills: cleanArray(skills),
+      education: cleanArray(education),
+      experience: cleanArray(experience),
+      projects: cleanArray(projects),
+      resumeUrl: cleanString(resumeUrl),
+      githubUrl: cleanString(githubUrl),
+      linkedinUrl: cleanString(linkedinUrl),
+      portfolioUrl: cleanString(portfolioUrl),
+      isPublic: typeof isPublic === "boolean" ? isPublic : true,
+    };
+
+    if (profileData.bio.length > 500) {
+      return res.status(400).json({
+        message: "Bio cannot exceed 500 characters",
+      });
+    }
+
+    const profile = await Profile.findOneAndUpdate(
+      { user: req.user._id },
+      {
+        $set: profileData,
+        $setOnInsert: {
+          user: req.user._id,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+      },
+    ).lean();
+
+    res.json({
+      message: "Profile updated successfully",
+      profile: {
+        name: profile.name || req.user.fullName,
+        bio: profile.bio || "",
+        skills: profile.skills || [],
+        education: profile.education || [],
+        experience: profile.experience || [],
+        projects: profile.projects || [],
+        resumeUrl: profile.resumeUrl || "",
+        githubUrl: profile.githubUrl || "",
+        linkedinUrl: profile.linkedinUrl || "",
+        portfolioUrl: profile.portfolioUrl || "",
+        isPublic: profile.isPublic !== false,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating own profile:", error.message);
+
+    res.status(500).json({
+      message: "Failed to update profile",
     });
   }
 });

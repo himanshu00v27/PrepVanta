@@ -200,7 +200,7 @@ function renderQuestion(question, index) {
           : String(option);
 
       return `
-        <label class="option-item">
+        <label class="mcq-option">
           <input
             type="radio"
             name="question-${escapeHtml(questionId)}"
@@ -249,6 +249,39 @@ function renderLoadError(error) {
   `;
 }
 
+/* =========================
+   PRACTICE TIMER
+========================= */
+
+function formatPracticeTime(totalSeconds) {
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function updatePracticeTimerDisplay(timerElement, remainingSeconds) {
+  if (!timerElement) {
+    return;
+  }
+
+  timerElement.classList.remove("is-warning", "is-danger", "is-expired");
+
+  if (remainingSeconds <= 0) {
+    timerElement.classList.add("is-expired");
+  } else if (remainingSeconds <= 60) {
+    timerElement.classList.add("is-danger");
+  } else if (remainingSeconds <= 300) {
+    timerElement.classList.add("is-warning");
+  }
+
+  const timeValue = timerElement.querySelector("[data-practice-time]");
+
+  if (timeValue) {
+    timeValue.textContent = formatPracticeTime(remainingSeconds);
+  }
+}
 /* =========================
    INIT PRACTICE PAGE
 ========================= */
@@ -318,8 +351,50 @@ async function init() {
       .map((question, index) => renderQuestion(question, index))
       .join("");
 
+    const durationMinutes = Number(practiceSet.duration);
+
+    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+      throw new Error("Practice set has an invalid duration.");
+    }
+
+    const durationSeconds = Math.floor(durationMinutes * 60);
+
+    const startedAtTime = new Date(attempt.startedAt).getTime();
+
+    const elapsedSeconds = Number.isFinite(startedAtTime)
+      ? Math.max(0, Math.floor((Date.now() - startedAtTime) / 1000))
+      : 0;
+
+    const expiresAt = Date.now() + Math.max(0, durationSeconds - elapsedSeconds) * 1000;
+
+    let remainingSeconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    let timerInterval = null;
+    let isSubmitting = false;
+    let isSubmitted = false;
+
     mount.innerHTML = `
       <div class="practice-test-container">
+        <div class="practice-timer-bar" id="practiceTimerBar">
+          <div class="practice-timer-info">
+            <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+            <span>
+              Time limit: ${escapeHtml(durationMinutes)} minute${durationMinutes === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div
+            class="practice-timer"
+            id="practiceTimer"
+            role="timer"
+            aria-live="off"
+          >
+            <i class="fas fa-clock" aria-hidden="true"></i>
+            <span data-practice-time>
+              ${formatPracticeTime(remainingSeconds)}
+            </span>
+          </div>
+        </div>
+
         ${questionsHTML}
 
         <div class="practice-actions">
@@ -340,30 +415,65 @@ async function init() {
     `;
 
     const submitButton = document.getElementById("submitPracticeBtn");
-
     const messageBox = document.getElementById("practiceSubmitMessage");
+    const timerElement = document.getElementById("practiceTimer");
+    const timerBar = document.getElementById("practiceTimerBar");
 
-    if (!submitButton || !messageBox) {
-      throw new Error("Practice submission controls were not created.");
+    if (!submitButton || !messageBox || !timerElement || !timerBar) {
+      throw new Error("Practice controls were not created.");
     }
 
-    submitButton.addEventListener("click", async () => {
+    function collectPracticeAnswers() {
+      return questions.map((question) => {
+        const questionId = question._id || question.id;
+
+        const selected = document.querySelector(
+          `input[name="question-${questionId}"]:checked`,
+        );
+
+        return {
+          questionId,
+          answer: selected ? selected.value : "",
+        };
+      });
+    }
+
+    function stopPracticeTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    async function completePractice({ timedOut = false } = {}) {
+      if (isSubmitting || isSubmitted) {
+        return;
+      }
+
+      isSubmitting = true;
+      stopPracticeTimer();
+
+      submitButton.disabled = true;
+      submitButton.textContent = timedOut
+        ? "Time expired - submitting..."
+        : "Submitting...";
+
+      if (timedOut) {
+        remainingSeconds = 0;
+        updatePracticeTimerDisplay(timerElement, remainingSeconds);
+        timerBar.classList.add("is-expired");
+
+        messageBox.innerHTML = `
+          <div class="mcq-card">
+            <p>
+              Time is up. Your current answers are being submitted automatically.
+            </p>
+          </div>
+        `;
+      }
+
       try {
-        submitButton.disabled = true;
-        submitButton.textContent = "Submitting...";
-
-        const answers = questions.map((question) => {
-          const questionId = question._id || question.id;
-
-          const selected = document.querySelector(
-            `input[name="question-${questionId}"]:checked`,
-          );
-
-          return {
-            questionId,
-            answer: selected ? selected.value : "",
-          };
-        });
+        const answers = collectPracticeAnswers();
 
         const result = await submitPracticeAttempt(attemptId, answers);
 
@@ -376,32 +486,42 @@ async function init() {
           result.totalQuestions ??
           questions.length;
 
+        isSubmitted = true;
+
         messageBox.innerHTML = `
-            <div class="mcq-card">
-              <h3>
-                Practice submitted successfully
-              </h3>
+          <div class="mcq-card">
+            <h3>
+              ${timedOut ? "Time is up - practice submitted" : "Practice submitted successfully"}
+            </h3>
 
-              <p>
-                Score:
-                <strong>
-                  ${escapeHtml(score)}
-                  /
-                  ${escapeHtml(totalQuestions)}
-                </strong>
-              </p>
+            <p>
+              Score:
+              <strong>
+                ${escapeHtml(score)}
+                /
+                ${escapeHtml(totalQuestions)}
+              </strong>
+            </p>
 
-              <button
-                type="button"
-                class="btn btn-primary"
-                id="viewResultBtn"
-              >
-                View Result
-              </button>
-            </div>
-          `;
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="viewResultBtn"
+            >
+              View Result
+            </button>
+          </div>
+        `;
 
         submitButton.style.display = "none";
+
+        const answerInputs = mount.querySelectorAll(
+          'input[name^="question-"]',
+        );
+
+        answerInputs.forEach((input) => {
+          input.disabled = true;
+        });
 
         const viewResultBtn = document.getElementById("viewResultBtn");
 
@@ -414,16 +534,53 @@ async function init() {
         console.error("Practice submission error:", error);
 
         messageBox.innerHTML = `
-            <div class="mcq-card">
-              <h3>Submission failed</h3>
-              <p>${escapeHtml(error.message)}</p>
-            </div>
-          `;
+          <div class="mcq-card">
+            <h3>Submission failed</h3>
+            <p>${escapeHtml(error.message)}</p>
+          </div>
+        `;
 
-        submitButton.disabled = false;
-        submitButton.textContent = "Submit Practice";
+        if (!timedOut) {
+          isSubmitting = false;
+          submitButton.disabled = false;
+          submitButton.textContent = "Submit Practice";
+
+          timerInterval = setInterval(updateTimer, 1000);
+        } else {
+          submitButton.disabled = false;
+          submitButton.textContent = "Retry Submission";
+          isSubmitting = false;
+        }
       }
+    }
+
+    function updateTimer() {
+      if (isSubmitting || isSubmitted) {
+        return;
+      }
+
+      remainingSeconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+
+      updatePracticeTimerDisplay(timerElement, remainingSeconds);
+
+      if (remainingSeconds <= 0) {
+        timerBar.classList.add("is-expired");
+        completePractice({ timedOut: true });
+      }
+    }
+
+    updatePracticeTimerDisplay(timerElement, remainingSeconds);
+
+    submitButton.addEventListener("click", () => {
+      completePractice({ timedOut: remainingSeconds <= 0 });
     });
+
+    if (remainingSeconds <= 0) {
+      timerBar.classList.add("is-expired");
+      completePractice({ timedOut: true });
+    } else {
+      timerInterval = setInterval(updateTimer, 1000);
+    }
   } catch (error) {
     console.error("Practice set loading error:", error);
 
@@ -436,3 +593,8 @@ async function init() {
 ========================= */
 
 init();
+
+
+
+
+

@@ -4,54 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <script src="js/auth-guard.js"></script>
 
-    <title>Companies | PrepVanta</title>
+    <title>Practice Result | PrepVanta</title>
 
-    <!-- Google Font -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
 
-    <!-- CSS -->
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
-    <link rel="stylesheet" href="css/companies.css">
+    <link rel="stylesheet" href="css/practice.css">
+    <link rel="stylesheet" href="css/practice-set.css">
+    <link rel="stylesheet" href="css/attempt-result.css">
     <link rel="stylesheet" href="css/platform-settings.css">
 </head>
 
 <body>
 
-    <!-- Sidebar Overlay -->
     <div class="overlay" id="overlay"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
 
         <div class="sidebar-header">
             <h2>
-                <img
-                    src="assets/img/logo-icon.png"
-                    alt="PrepVanta logo"
-                    class="logo-icon"
-                >
-
+                <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
                 <span class="logo-text">
                     <span class="prep">Prep</span><span class="vanta">Vanta</span>
                 </span>
@@ -104,7 +90,7 @@
                 Interview Practice
             </a>
 
-            <a href="companies.html" class="active">
+            <a href="companies.html">
                 <i class="fa-solid fa-building"></i>
                 Companies
             </a>
@@ -141,11 +127,8 @@
                 Login
             </a>
 
-            <a
-                href="#"
-                class="logout-link"
-                onclick="prepvantaLogout(); return false;"
-            >
+            <a href="#" class="logout-link"
+                onclick="prepvantaLogout(); return false;">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
@@ -153,24 +136,18 @@
 
     </aside>
 
-    <!-- Navbar -->
     <nav class="navbar">
 
         <div class="container nav-container">
 
             <div class="nav-left">
 
-                <button class="menu-btn" id="menuBtn">
+                <button class="menu-btn" id="menuBtn" type="button">
                     <i class="fa-solid fa-bars"></i>
                 </button>
 
                 <a href="index.html" class="logo">
-                    <img
-                        src="assets/img/logo-icon.png"
-                        alt="PrepVanta logo"
-                        class="logo-icon"
-                    >
-
+                    <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
                     <span class="logo-text">
                         <span class="prep">Prep</span><span class="vanta">Vanta</span>
                     </span>
@@ -190,26 +167,19 @@
 
                 <div class="search-box">
                     <form
-                        onsubmit="event.preventDefault(); const q=this.q.value.trim(); location.href='topics.html'+(q?('?q='+encodeURIComponent(q)):'');"
-                    >
-                        <input
-                            type="text"
-                            name="q"
-                            placeholder="Search topics..."
-                        >
+                        onsubmit="event.preventDefault(); const q=this.q.value.trim(); location.href='topics.html'+(q?('?q='+encodeURIComponent(q)):'');">
+                        <input type="text" name="q" placeholder="Search topics...">
                         <i class="fa-solid fa-search"></i>
                     </form>
                 </div>
 
-                <button class="theme-toggle">
+                <button class="theme-toggle" type="button">
                     <i class="fa-solid fa-moon"></i>
                 </button>
 
-                <a
-                    href="dashboard.html"
+                <a href="dashboard.html"
                     class="profile-btn"
-                    style="display:flex; align-items:center; justify-content:center; text-decoration:none;"
-                >
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
                     <i class="fa-solid fa-user"></i>
                 </a>
 
@@ -219,53 +189,28 @@
 
     </nav>
 
-    <!-- Companies -->
-    <section class="companies-page">
+    <main>
+        <section class="practice-set-page attempt-result-page">
 
-        <div class="container">
+            <div class="container">
 
-            <div class="companies-header">
-                <h1>Company-wise Prep</h1>
+                <div class="pset-breadcrumb">
+                    <a href="practice-sets.html">Practice Sets</a>
+                    <span>/</span>
+                    <span>Result</span>
+                </div>
 
-                <p class="sub">
-                    Practice sets tuned to how each company actually structures
-                    its hiring process.
-                </p>
-            </div>
-
-            <!-- Company Search -->
-            <div class="company-controls">
-
-                <div class="company-search">
-
-                    <i class="fa-solid fa-magnifying-glass"></i>
-
-                    <input
-                        type="text"
-                        id="companySearch"
-                        placeholder="Search companies by name, industry or topic..."
-                        autocomplete="off"
-                        aria-label="Search companies"
-                    >
-
+                <div id="attemptResultBody">
+                    <div class="mcq-card">
+                        <p>Loading your result...</p>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- Companies loaded from API -->
-            <div class="company-grid" id="companyGrid">
+        </section>
+    </main>
 
-                <p class="company-loading">
-                    Loading companies...
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- Footer -->
     <footer>
 
         <div class="container">
@@ -274,17 +219,10 @@
 
                 <div>
                     <h2 class="footer-logo">
-
-                        <img
-                            src="assets/img/logo-icon.png"
-                            alt="PrepVanta logo"
-                            class="logo-icon"
-                        >
-
+                        <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
                         <span class="logo-text">
                             <span class="prep">Prep</span><span class="vanta">Vanta</span>
                         </span>
-
                     </h2>
 
                     <p>Learn. Practice. Succeed.</p>
@@ -320,7 +258,7 @@
             </div>
 
             <div class="copyright">
-                © 2026 PrepVanta. All Rights Reserved.
+                &copy; 2026 PrepVanta. All Rights Reserved.
             </div>
 
         </div>
@@ -331,13 +269,12 @@
     <script src="js/theme.js"></script>
     <script src="js/main.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/companies.js"></script>
-
+    <script src="js/attempt-result.js"></script>
     <script src="js/platform-settings.js"></script>
+
 </body>
 
 </html>
-
 
 
 

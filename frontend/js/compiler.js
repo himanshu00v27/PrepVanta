@@ -22,6 +22,127 @@
   }
 
   /* ===================================
+       CODING QUESTION PRACTICE MODE
+    =================================== */
+
+  const practiceQuestionPanel = document.getElementById(
+    "compilerPracticeQuestion",
+  );
+  const practiceQuestionTitle = document.getElementById(
+    "compilerPracticeQuestionTitle",
+  );
+  const practiceDifficulty = document.getElementById(
+    "compilerPracticeDifficulty",
+  );
+  const practiceTopic = document.getElementById("compilerPracticeTopic");
+  const practiceDescription = document.getElementById(
+    "compilerPracticeDescription",
+  );
+  const practiceError = document.getElementById("compilerPracticeError");
+
+  let practiceTopicId = null;
+  let practiceQuestionId = null;
+
+  async function initCodingPracticeMode() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("mode") !== "practice") {
+      return;
+    }
+
+    practiceTopicId = params.get("topic");
+    practiceQuestionId = params.get("question");
+
+    const topicId = practiceTopicId;
+    const questionId = practiceQuestionId;
+
+    if (!practiceQuestionPanel) {
+      return;
+    }
+
+    practiceQuestionPanel.hidden = false;
+
+    if (!topicId || !questionId) {
+      if (practiceError) {
+        practiceError.hidden = false;
+        practiceError.textContent =
+          "This coding practice link is incomplete. Please return to the topic and open the question again.";
+      }
+
+      return;
+    }
+
+    const token = getToken();
+
+    if (!token) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/questions/topic-practice/${encodeURIComponent(topicId)}/coding/${encodeURIComponent(questionId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        localStorage.removeItem("prepvanta-token");
+        localStorage.removeItem("prepvanta-user");
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to load this coding question.",
+        );
+      }
+
+      const question = data.question || {};
+      const topic = data.topic || {};
+
+      if (practiceQuestionTitle) {
+        practiceQuestionTitle.textContent =
+          question.title || "Coding Question";
+      }
+
+      if (practiceDifficulty) {
+        practiceDifficulty.textContent =
+          question.difficulty || "Coding";
+      }
+
+      if (practiceTopic) {
+        practiceTopic.textContent = topic.name
+          ? `Topic: ${topic.name}`
+          : "";
+      }
+
+      if (practiceDescription) {
+        practiceDescription.textContent =
+          question.description || "No question description provided.";
+      }
+
+      document.title = question.title
+        ? `${question.title} | PrepVanta`
+        : "Coding Practice | PrepVanta";
+    } catch (error) {
+      console.error("Coding practice question error:", error);
+
+      if (practiceError) {
+        practiceError.hidden = false;
+        practiceError.textContent =
+          error.message || "Unable to load this coding question.";
+      }
+    }
+  }
+  /* ===================================
        STARTER CODE
     =================================== */
 
@@ -63,6 +184,7 @@ int main() {
   }
 
   loadSample(langSelect.value);
+  initCodingPracticeMode();
 
   langSelect.addEventListener("change", function () {
     loadSample(langSelect.value);
@@ -167,6 +289,12 @@ int main() {
           language,
           code,
           input,
+          ...(practiceTopicId && practiceQuestionId
+            ? {
+                topicId: practiceTopicId,
+                questionId: practiceQuestionId,
+              }
+            : {}),
         }),
       });
 
@@ -196,7 +324,12 @@ int main() {
 
       consoleArea.innerHTML = "";
 
-      if (run.output) {
+      const suppressPracticeOutput =
+        practiceTopicId &&
+        practiceQuestionId &&
+        !input.trim();
+
+      if (run.output && !suppressPracticeOutput) {
         printOutput(run.output, "ok");
       }
 
@@ -204,8 +337,30 @@ int main() {
         printOutput(run.error, "err");
       }
 
-      if (!run.output && !run.error) {
+      if (!run.output && !run.error && !suppressPracticeOutput) {
         printOutput("Program finished without producing output.", "muted");
+      }
+
+      if (data.judging) {
+        const passedTests = Number(data.judging.passedTests) || 0;
+        const totalTests = Number(data.judging.totalTests) || 0;
+
+        if (data.judging.allPassed) {
+          printOutput(
+            `All ${totalTests} test case${totalTests === 1 ? "" : "s"} passed.`,
+            "ok",
+          );
+        } else if (totalTests > 0) {
+          printOutput(
+            `Passed ${passedTests}/${totalTests} test cases.`,
+            "err",
+          );
+        } else {
+          printOutput(
+            "This coding question does not have test cases configured yet.",
+            "muted",
+          );
+        }
       }
 
       showExecutionMeta(run);
@@ -247,3 +402,7 @@ int main() {
     }
   });
 })();
+
+
+
+

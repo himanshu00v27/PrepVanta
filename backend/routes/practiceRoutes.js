@@ -113,6 +113,49 @@ router.get("/resolve/topic", authMiddleware, async (req, res) => {
 });
 
 // --------------------------------------------------
+// Get learner-safe practice set listing
+// --------------------------------------------------
+
+router.get("/learner/list", authMiddleware, async (req, res) => {
+  try {
+    const practiceSets = await PracticeSet.find({
+      status: "published",
+    })
+      .select("title description topic questions duration createdAt")
+      .populate({
+        path: "topic",
+        select: "name category description status",
+        match: {
+          status: "published",
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const learnerPracticeSets = practiceSets
+      .filter((practiceSet) => practiceSet.topic)
+      .map((practiceSet) => ({
+        _id: practiceSet._id,
+        title: practiceSet.title,
+        description: practiceSet.description || "",
+        topic: practiceSet.topic,
+        duration: practiceSet.duration,
+        questionCount: Array.isArray(practiceSet.questions)
+          ? practiceSet.questions.length
+          : 0,
+        createdAt: practiceSet.createdAt,
+      }));
+
+    res.json(learnerPracticeSets);
+  } catch (error) {
+    console.error("Error fetching learner practice sets:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch practice sets",
+    });
+  }
+});
+// --------------------------------------------------
 // Get single practice set
 // --------------------------------------------------
 
@@ -331,3 +374,4 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+

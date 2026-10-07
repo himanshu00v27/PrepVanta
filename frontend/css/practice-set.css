@@ -94,3 +94,271 @@
     background:rgba(234,179,8,.15);
     color:#EAB308;
 }
+
+/* ===================================
+   PRACTICE TIMER
+=================================== */
+
+.practice-timer-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:14px 18px;
+    margin-bottom:20px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.practice-timer-info{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--text-light);
+    font-size:.9rem;
+    font-weight:600;
+}
+
+.practice-timer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:1.15rem;
+    font-weight:800;
+    color:var(--text);
+    font-variant-numeric:tabular-nums;
+}
+
+.practice-timer i{
+    color:var(--primary);
+}
+
+.practice-timer.is-warning{
+    color:#B45309;
+}
+
+.practice-timer.is-warning i{
+    color:#B45309;
+}
+
+.practice-timer.is-danger{
+    color:#DC2626;
+}
+
+.practice-timer.is-danger i{
+    color:#DC2626;
+}
+
+.practice-timer.is-expired{
+    color:#DC2626;
+}
+
+.practice-timer-bar.is-expired{
+    border-color:rgba(220,38,38,.35);
+}
+
+[data-theme="dark"] .practice-timer.is-warning,
+[data-theme="dark"] .practice-timer.is-warning i{
+    color:#FBBF24;
+}
+
+[data-theme="dark"] .practice-timer.is-danger,
+[data-theme="dark"] .practice-timer.is-danger i,
+[data-theme="dark"] .practice-timer.is-expired,
+[data-theme="dark"] .practice-timer.is-expired i{
+    color:#F87171;
+}
+
+[data-theme="dark"] .practice-timer-bar.is-expired{
+    border-color:rgba(248,113,113,.4);
+}
+
+@media (max-width:600px){
+    .practice-timer-bar{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .practice-timer{
+        font-size:1.05rem;
+    }
+}
+
+/* ===================================
+   TOPIC PRACTICE ANSWER FEEDBACK
+=================================== */
+
+.topic-practice-page .answer-reveal.is-correct{
+    background:rgba(34,197,94,.12);
+    border-left-color:var(--success);
+}
+
+.topic-practice-page .answer-reveal.is-correct strong{
+    color:var(--success);
+}
+
+[data-theme="dark"] .topic-practice-page .answer-reveal.is-correct{
+    background:rgba(34,197,94,.12);
+}
+
+/* ===================================
+   TOPIC PRACTICE QUESTION TYPES
+=================================== */
+
+.topic-practice-type-switcher{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+    padding:6px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    width:max-content;
+    max-width:100%;
+}
+
+.topic-practice-type-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:0;
+    background:transparent;
+    color:var(--text-light);
+    padding:10px 16px;
+    border-radius:11px;
+    font-family:inherit;
+    font-size:.88rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.topic-practice-type-btn:hover{
+    color:var(--primary);
+    background:var(--bg);
+}
+
+.topic-practice-type-btn.active{
+    background:var(--primary);
+    color:#fff;
+}
+
+.topic-practice-type-btn span{
+    min-width:22px;
+    height:22px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 6px;
+    border-radius:999px;
+    background:var(--bg);
+    color:var(--text-light);
+    font-size:.72rem;
+    font-weight:700;
+}
+
+.topic-practice-type-btn.active span{
+    background:rgba(255,255,255,.2);
+    color:#fff;
+}
+
+.subjective-practice-actions,
+.coding-practice-actions{
+    display:flex;
+    margin-top:20px;
+}
+
+.subjective-answer-container[hidden]{
+    display:none;
+}
+
+.subjective-answer-reveal{
+    margin-top:18px;
+    padding:18px;
+    border:1px solid var(--border);
+    border-left:4px solid var(--primary);
+    border-radius:14px;
+    background:var(--bg);
+}
+
+.subjective-answer-reveal strong{
+    display:block;
+    margin-bottom:6px;
+    color:var(--primary);
+}
+
+.subjective-answer-reveal p{
+    margin:0;
+    color:var(--text);
+    line-height:1.7;
+    white-space:pre-wrap;
+}
+
+.subjective-answer-explanation{
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+}
+
+.coding-practice-heading{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+}
+
+.coding-practice-heading h3{
+    margin:0;
+}
+
+.coding-practice-actions .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;
+}
+
+.topic-practice-inline-error{
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:rgba(239,68,68,.1);
+    color:#DC2626;
+    border:1px solid rgba(239,68,68,.25);
+    font-size:.88rem;
+}
+
+.topic-practice-empty{
+    text-align:center;
+}
+
+.topic-practice-empty p{
+    color:var(--text-light);
+    margin-top:6px;
+}
+
+[data-theme="dark"] .topic-practice-inline-error{
+    color:#F87171;
+    background:rgba(239,68,68,.1);
+    border-color:rgba(248,113,113,.25);
+}
+
+@media (max-width:600px){
+    .topic-practice-type-switcher{
+        width:100%;
+    }
+
+    .topic-practice-type-btn{
+        flex:1 1 0;
+        padding:10px 8px;
+    }
+
+    .coding-practice-heading{
+        flex-direction:column;
+    }
+}

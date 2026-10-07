@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -75,6 +75,15 @@
             <a href="topics.html">
                 <i class="fa-solid fa-book"></i>
                 Topics
+            </a>
+
+            <a href="practice-sets.html">
+                <i class="fa-solid fa-clipboard-list"></i>
+                Practice Sets
+            </a>
+            <a href="attempt-history.html">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Attempt History
             </a>
 
             <a href="aptitude.html">
@@ -231,6 +240,42 @@
                 Write, run and debug code in multiple programming languages.
             </p>
 
+            <div
+                class="compiler-practice-question"
+                id="compilerPracticeQuestion"
+                hidden
+            >
+                <div class="compiler-practice-question-header">
+                    <div>
+                        <span class="compiler-practice-label">
+                            <i class="fa-solid fa-code"></i>
+                            Coding Practice
+                        </span>
+                        <h2 id="compilerPracticeQuestionTitle">Coding Question</h2>
+                    </div>
+
+                    <span
+                        class="compiler-practice-difficulty"
+                        id="compilerPracticeDifficulty"
+                    ></span>
+                </div>
+
+                <p
+                    class="compiler-practice-topic"
+                    id="compilerPracticeTopic"
+                ></p>
+
+                <p
+                    class="compiler-practice-description"
+                    id="compilerPracticeDescription"
+                ></p>
+
+                <div
+                    class="compiler-practice-error"
+                    id="compilerPracticeError"
+                    hidden
+                ></div>
+            </div>
             <div class="compiler-shell">
 
                 <!-- Code Pane -->
@@ -416,7 +461,7 @@
             </div>
 
             <div class="copyright">
-                Â© 2026 PrepVanta. All Rights Reserved.
+                © 2026 PrepVanta. All Rights Reserved.
             </div>
 
         </div>
@@ -427,10 +472,18 @@
     <script src="js/theme.js"></script>
     <script src="js/main.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/compiler.js"></script>
+    <script src="js/compiler.js?v=3"></script>
 
     <script src="js/platform-settings.js"></script>
 </body>
 
 </html>
+
+
+
+
+
+
+
+
 

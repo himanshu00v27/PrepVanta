@@ -65,6 +65,23 @@ const questionSchema = new mongoose.Schema(
       trim: true,
     },
 
+    testCases: [
+      {
+        input: {
+          type: String,
+          default: "",
+        },
+        expectedOutput: {
+          type: String,
+          required: true,
+        },
+        isHidden: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
+
     status: {
       type: String,
       enum: ["draft", "published"],
@@ -83,3 +100,4 @@ const questionSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Question", questionSchema);
+

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/dashboard.css?v=2">
     <link rel="stylesheet" href="css/walkthrough.css">
     <link rel="stylesheet" href="css/platform-settings.css">
 </head>
@@ -65,6 +65,15 @@
             <a href="topics.html">
                 <i class="fa-solid fa-book"></i>
                 Topics
+            </a>
+
+            <a href="practice-sets.html">
+                <i class="fa-solid fa-clipboard-list"></i>
+                Practice Sets
+            </a>
+            <a href="attempt-history.html">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Attempt History
             </a>
 
             <a href="aptitude.html">
@@ -197,42 +206,314 @@
                 <p>Here's how your placement prep is shaping up.</p>
             </div>
 
-            <div class="profile-card">
+            <div class="profile-card dashboard-profile-card">
                 <div class="profile-avatar" id="profileAvatar">--</div>
+
                 <div class="profile-info">
-                    <h2 id="profileName">Loading...</h2>
-                    <div class="profile-meta">
-                        <span id="profileUsername">@--</span>
-                        <span>User ID: <code id="profileUserId">--------</code></span>
-                        <span>Joined <span id="profileJoined">--</span></span>
+                    <div class="profile-title-row">
+                        <div>
+                            <h2 id="profileName">Loading...</h2>
+
+                            <div class="profile-meta">
+                                <span id="profileUsername">@--</span>
+                                <span>User ID: <code id="profileUserId">--------</code></span>
+                                <span>Joined <span id="profileJoined">--</span></span>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary profile-edit-btn"
+                            id="editProfileBtn"
+                        >
+                            Edit Profile
+                        </button>
+                    </div>
+
+                    <p class="profile-bio" id="profileBio">
+                        Add a short bio to introduce yourself.
+                    </p>
+
+                    <div class="profile-visibility" id="profileVisibility">
+                        Public profile
                     </div>
                 </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card"><h2>1,284</h2><p>Questions Solved</p></div>
-                <div class="stat-card"><h2>23</h2><p>Mock Tests Taken</p></div>
-                <div class="stat-card"><h2>9</h2><p>Day Streak</p></div>
-                <div class="stat-card"><h2>#412</h2><p>Global Rank</p></div>
+            <section class="profile-details-card" aria-labelledby="profileDetailsTitle">
+                <div class="profile-section-head">
+                    <div>
+                        <h2 id="profileDetailsTitle">Your Profile</h2>
+                        <p>Add optional details that other PrepVanta users can see when your profile is public.</p>
+                    </div>
+                </div>
+
+                <div class="profile-details-grid">
+                    <div class="profile-detail-section">
+                        <h3>Skills</h3>
+                        <div class="profile-tags" id="profileSkills">
+                            <span class="profile-empty">No skills added yet.</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail-section">
+                        <h3>Education</h3>
+                        <div id="profileEducation">
+                            <p class="profile-empty">No education added yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail-section">
+                        <h3>Experience</h3>
+                        <div id="profileExperience">
+                            <p class="profile-empty">No experience added yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail-section">
+                        <h3>Projects</h3>
+                        <div id="profileProjects">
+                            <p class="profile-empty">No projects added yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail-section profile-links-section">
+                        <h3>Links</h3>
+                        <div class="profile-links" id="profileLinks">
+                            <span class="profile-empty">No links added yet.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="stats-grid dashboard-stats-grid">
+                <div class="stat-card">
+                    <h2 id="questionsAttempted">--</h2>
+                    <p>Questions Attempted</p>
+                </div>
+
+                <div class="stat-card">
+                    <h2 id="practiceSetsAttempted">--</h2>
+                    <p>Practice Sets Attempted</p>
+                </div>
+
+                <div class="stat-card">
+                    <h2 id="accountStatus">--</h2>
+                    <p>Account Status</p>
+                </div>
             </div>
 
             <div class="dash-grid">
                 <div class="panel-card">
-                    <h3>Topic-wise Progress</h3>
-                    <div id="progressList"></div>
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Difficulty Breakdown</h3>
+                            <p>Correctly solved questions by difficulty.</p>
+                        </div>
+                    </div>
+
+                    <div class="difficulty-layout">
+                        <div
+                            class="difficulty-chart"
+                            id="difficultyChart"
+                            role="img"
+                            aria-label="Difficulty breakdown"
+                        >
+                            <div class="difficulty-chart-center">
+                                <strong id="difficultyTotal">0</strong>
+                                <span>Solved</span>
+                            </div>
+                        </div>
+
+                        <div class="difficulty-legend">
+                            <div class="difficulty-item">
+                                <span class="difficulty-dot easy"></span>
+                                <span>Easy</span>
+                                <strong id="easySolved">0</strong>
+                            </div>
+
+                            <div class="difficulty-item">
+                                <span class="difficulty-dot medium"></span>
+                                <span>Medium</span>
+                                <strong id="mediumSolved">0</strong>
+                            </div>
+
+                            <div class="difficulty-item">
+                                <span class="difficulty-dot hard"></span>
+                                <span>Hard</span>
+                                <strong id="hardSolved">0</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="panel-card">
-                    <h3>Recent Mock Test Results</h3>
-                    <div id="resultsList"></div>
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Recent Practice Activity</h3>
+                            <p>Your latest completed Practice Set attempts.</p>
+                        </div>
+
+                        <a href="attempt-history.html" class="panel-link">View History</a>
+                    </div>
+
+                    <div id="recentActivityList">
+                        <p class="dashboard-empty">Loading recent activity...</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="dash-cta">
-                <div>
-                    <h3>Looking for a study partner?</h3>
-                    <p>Search PrepVanta by username or user ID.</p>
+            <div class="profile-modal" id="profileModal" aria-hidden="true">
+                <div class="profile-modal-backdrop" data-close-profile-modal></div>
+
+                <div
+                    class="profile-modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="profileModalTitle"
+                >
+                    <div class="profile-modal-head">
+                        <div>
+                            <h2 id="profileModalTitle">Edit Profile</h2>
+                            <p>All profile details are optional.</p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="profile-modal-close"
+                            id="closeProfileModal"
+                            aria-label="Close profile editor"
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="profile-form-grid">
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileNameInput">Display Name</label>
+                                <input
+                                    type="text"
+                                    id="profileNameInput"
+                                    maxlength="120"
+                                    placeholder="Your display name"
+                                >
+                            </div>
+
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileBioInput">About</label>
+                                <textarea
+                                    id="profileBioInput"
+                                    maxlength="500"
+                                    rows="4"
+                                    placeholder="Tell other learners a little about yourself"
+                                ></textarea>
+                                <small>Maximum 500 characters.</small>
+                            </div>
+
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileSkillsInput">Skills</label>
+                                <input
+                                    type="text"
+                                    id="profileSkillsInput"
+                                    placeholder="JavaScript, Python, DSA"
+                                >
+                                <small>Separate multiple skills with commas.</small>
+                            </div>
+
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileEducationInput">Education</label>
+                                <textarea
+                                    id="profileEducationInput"
+                                    rows="3"
+                                    placeholder="Add one education entry per line"
+                                ></textarea>
+                            </div>
+
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileExperienceInput">Experience</label>
+                                <textarea
+                                    id="profileExperienceInput"
+                                    rows="3"
+                                    placeholder="Add one experience entry per line"
+                                ></textarea>
+                            </div>
+
+                            <div class="profile-form-group profile-form-full">
+                                <label for="profileProjectsInput">Projects</label>
+                                <textarea
+                                    id="profileProjectsInput"
+                                    rows="3"
+                                    placeholder="Add one project per line"
+                                ></textarea>
+                            </div>
+
+                            <div class="profile-form-group">
+                                <label for="profileGithubInput">GitHub</label>
+                                <input
+                                    type="url"
+                                    id="profileGithubInput"
+                                    placeholder="https://github.com/username"
+                                >
+                            </div>
+
+                            <div class="profile-form-group">
+                                <label for="profileLinkedinInput">LinkedIn</label>
+                                <input
+                                    type="url"
+                                    id="profileLinkedinInput"
+                                    placeholder="https://linkedin.com/in/username"
+                                >
+                            </div>
+
+                            <div class="profile-form-group">
+                                <label for="profilePortfolioInput">Portfolio</label>
+                                <input
+                                    type="url"
+                                    id="profilePortfolioInput"
+                                    placeholder="https://yourportfolio.com"
+                                >
+                            </div>
+
+                            <div class="profile-form-group">
+                                <label for="profileResumeInput">Resume</label>
+                                <input
+                                    type="url"
+                                    id="profileResumeInput"
+                                    placeholder="https://example.com/resume"
+                                >
+                            </div>
+
+                            <label class="profile-public-toggle profile-form-full">
+                                <input type="checkbox" id="profilePublicInput" checked>
+                                <span>
+                                    <strong>Public profile</strong>
+                                    <small>Allow other PrepVanta users to find and view your profile.</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <p class="profile-form-message" id="profileFormMessage"></p>
+
+                        <div class="profile-form-actions">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="cancelProfileBtn"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="saveProfileBtn"
+                            >
+                                Save Profile
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <a href="search-users.html" class="btn btn-secondary">Find Users</a>
             </div>
 
             <div class="dash-cta" style="margin-top:20px;">
@@ -300,7 +581,7 @@
 
             <div class="copyright">
 
-                Â© 2026 PrepVanta. All Rights Reserved.
+                © 2026 PrepVanta. All Rights Reserved.
 
             </div>
 
@@ -312,11 +593,19 @@
 <script src="js/theme.js"></script>
 <script src="js/main.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="js/dashboard.js?v=2"></script>
 <script src="js/walkthrough.js"></script>
 <script src="js/platform-settings.js"></script>
 
 </body>
 
 </html>
+
+
+
+
+
+
+
+
 

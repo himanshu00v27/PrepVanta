@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/auth-guard.js"></script>
 
-    <title>Reasoning | PrepVanta</title>
+    <title>Practice Sets | PrepVanta</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
-    <link rel="stylesheet" href="css/listing.css">
+    <link rel="stylesheet" href="css/practice-sets.css">
     <link rel="stylesheet" href="css/platform-settings.css">
 </head>
 
@@ -65,7 +65,7 @@
                 Topics
             </a>
 
-            <a href="practice-sets.html">
+            <a href="practice-sets.html" class="active">
                 <i class="fa-solid fa-clipboard-list"></i>
                 Practice Sets
             </a>
@@ -79,7 +79,7 @@
                 Aptitude
             </a>
 
-            <a href="reasoning.html" class="active">
+            <a href="reasoning.html">
                 <i class="fa-solid fa-brain"></i>
                 Reasoning
             </a>
@@ -168,8 +168,9 @@
 
                 <a href="index.html">Home</a>
                 <a href="aptitude.html">Aptitude</a>
-                <a href="reasoning.html" class="active">Reasoning</a>
+                <a href="reasoning.html">Reasoning</a>
                 <a href="topics.html">Topics</a>
+                <a href="practice-sets.html" class="active">Practice Sets</a>
                 <a href="compiler.html">Compiler</a>
 
             </div>
@@ -197,113 +198,25 @@
 
     </nav>
 
-    <section class="listing-page">
+    <section class="practice-sets-page">
         <div class="container">
-            <h1>Reasoning</h1>
-            <p class="sub">Pick a topic to start practicing — verbal, series-based, arrangement and quantitative reasoning, all in one place.</p>
+            <h1>Practice Sets</h1>
+            <p class="sub">
+                Take structured, timed practice sets created by PrepVanta.
+            </p>
 
-            <div class="section-divider">
-                <h2>Verbal Reasoning</h2>
-                <p>Relationships, logic and inference-based questions.</p>
-            </div>
-            <div class="category-grid">
-                <a href="topic-practice.html?cat=reasoning&name=Blood%20Relations" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-people-arrows"></i></div>
-                    <h3>Blood Relations</h3>
-                    <p>Family trees &amp; relationship puzzles</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Syllogisms" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-diagram-project"></i></div>
-                    <h3>Syllogisms</h3>
-                    <p>Statements &amp; logical conclusions</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Coding-Decoding" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-key"></i></div>
-                    <h3>Coding-Decoding</h3>
-                    <p>Pattern-based letter &amp; number codes</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Analogy" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-equals"></i></div>
-                    <h3>Analogy</h3>
-                    <p>Word &amp; number relationship pairs</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Statement%20and%20Assumption" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-comment-dots"></i></div>
-                    <h3>Statement &amp; Assumption</h3>
-                    <p>Judge implicit assumptions</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
+            <div id="practiceSetsMessage" class="practice-sets-message">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading practice sets...</p>
             </div>
 
-            <div class="section-divider">
-                <h2>Series &amp; Patterns</h2>
-                <p>Spot the pattern in numbers, letters and directions.</p>
-            </div>
-            <div class="category-grid">
-                <a href="topic-practice.html?cat=reasoning&name=Number%20Series" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-hashtag"></i></div>
-                    <h3>Number Series</h3>
-                    <p>Find the next number in the sequence</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Letter%20Series" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-font"></i></div>
-                    <h3>Letter Series</h3>
-                    <p>Alphabet-based sequence puzzles</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Distance%20and%20Directions" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-compass"></i></div>
-                    <h3>Distance &amp; Directions</h3>
-                    <p>Navigation &amp; direction-based problems</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-            </div>
-
-            <div class="section-divider">
-                <h2>Arrangements &amp; Puzzles</h2>
-                <p>Seating, ordering and grouping problems.</p>
-            </div>
-            <div class="category-grid">
-                <a href="topic-practice.html?cat=reasoning&name=Seating%20Arrangement" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-chair"></i></div>
-                    <h3>Seating Arrangement</h3>
-                    <p>Linear &amp; circular arrangement puzzles</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-            </div>
-
-            <div class="section-divider">
-                <h2>Quantitative Reasoning</h2>
-                <p>Numeric reasoning topics that show up alongside verbal sets.</p>
-            </div>
-            <div class="category-grid">
-                <a href="topic-practice.html?cat=reasoning&name=Height%20and%20Distance" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-ruler-vertical"></i></div>
-                    <h3>Height &amp; Distance</h3>
-                    <p>Angles of elevation &amp; depression</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=HCF%20and%20LCM" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-divide"></i></div>
-                    <h3>HCF &amp; LCM</h3>
-                    <p>Highest common factor &amp; lowest common multiple</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-                <a href="topic-practice.html?cat=reasoning&name=Clock%20and%20Calendar" class="category-card">
-                    <div class="category-icon"><i class="fa-solid fa-clock"></i></div>
-                    <h3>Clock &amp; Calendar</h3>
-                    <p>Angle, time &amp; date-based reasoning</p>
-                    <span class="cta">Practice <i class="fa-solid fa-arrow-right"></i></span>
-                </a>
-            </div>
+            <div
+                id="practiceSetsGrid"
+                class="practice-sets-grid"
+                aria-live="polite"
+            ></div>
         </div>
     </section>
-
     <footer>
 
         <div class="container">
@@ -371,10 +284,13 @@
 <script src="js/theme.js"></script>
 <script src="js/main.js"></script>
 <script src="js/auth.js"></script>
+
     <script src="js/platform-settings.js"></script>
+<script src="js/practice-sets.js"></script>
 </body>
 
 </html>
+
 
 
 

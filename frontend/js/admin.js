@@ -3216,6 +3216,18 @@
   const adminQuestionOptionsField = document.getElementById(
     "adminQuestionOptionsField",
   );
+  const adminQuestionTestCasesField = document.getElementById(
+    "adminQuestionTestCasesField",
+  );
+
+  const adminQuestionTestCases = document.getElementById(
+    "adminQuestionTestCases",
+  );
+
+  const adminAddQuestionTestCaseBtn = document.getElementById(
+    "adminAddQuestionTestCaseBtn",
+  );
+
   const adminQuestionTitle = document.getElementById("adminQuestionTitle");
 
   const adminQuestionDescription = document.getElementById(
@@ -3255,6 +3267,104 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function addAdminQuestionTestCase(testCase = {}) {
+    if (!adminQuestionTestCases) {
+      return;
+    }
+
+    const row = document.createElement("div");
+    row.className = "admin-question-test-case";
+
+    row.innerHTML = `
+      <div class="admin-question-test-case-header">
+        <strong class="admin-question-test-case-title">Test Case</strong>
+        <button type="button" class="admin-question-test-case-remove">Remove</button>
+      </div>
+
+      <div class="admin-question-test-case-grid">
+        <div>
+          <label>Input <span class="optional-label">(Optional)</span></label>
+          <textarea class="admin-question-test-input" rows="3" placeholder="Input passed to the program"></textarea>
+        </div>
+
+        <div>
+          <label>Expected Output</label>
+          <textarea class="admin-question-test-output" rows="3" placeholder="Expected program output"></textarea>
+        </div>
+      </div>
+
+      <label class="admin-question-test-hidden">
+        <input type="checkbox" class="admin-question-test-hidden-input">
+        Hidden test case
+      </label>
+    `;
+
+    row.querySelector(".admin-question-test-input").value =
+      typeof testCase.input === "string" ? testCase.input : "";
+
+    row.querySelector(".admin-question-test-output").value =
+      typeof testCase.expectedOutput === "string"
+        ? testCase.expectedOutput
+        : "";
+
+    row.querySelector(".admin-question-test-hidden-input").checked =
+      testCase.isHidden !== false;
+
+    row.querySelector(".admin-question-test-case-remove").addEventListener(
+      "click",
+      () => {
+        row.remove();
+        refreshAdminQuestionTestCaseTitles();
+      },
+    );
+
+    adminQuestionTestCases.appendChild(row);
+    refreshAdminQuestionTestCaseTitles();
+  }
+
+  function refreshAdminQuestionTestCaseTitles() {
+    if (!adminQuestionTestCases) {
+      return;
+    }
+
+    adminQuestionTestCases
+      .querySelectorAll(".admin-question-test-case-title")
+      .forEach((title, index) => {
+        title.textContent = `Test Case ${index + 1}`;
+      });
+  }
+
+  function clearAdminQuestionTestCases() {
+    if (adminQuestionTestCases) {
+      adminQuestionTestCases.innerHTML = "";
+    }
+  }
+
+  function populateAdminQuestionTestCases(testCases = []) {
+    clearAdminQuestionTestCases();
+
+    if (Array.isArray(testCases)) {
+      testCases.forEach((testCase) => addAdminQuestionTestCase(testCase));
+    }
+  }
+
+  function collectAdminQuestionTestCases() {
+    if (!adminQuestionTestCases) {
+      return [];
+    }
+
+    return Array.from(
+      adminQuestionTestCases.querySelectorAll(".admin-question-test-case"),
+    ).map((row) => ({
+      input: row.querySelector(".admin-question-test-input")?.value || "",
+      expectedOutput:
+        row.querySelector(".admin-question-test-output")?.value || "",
+      isHidden: Boolean(
+        row.querySelector(".admin-question-test-hidden-input")?.checked,
+      ),
+    }));
   }
 
   function populateAdminQuestionTopics() {
@@ -3343,6 +3453,12 @@
       adminQuestionOptionsField.hidden = false;
     }
 
+    clearAdminQuestionTestCases();
+
+    if (adminQuestionTestCasesField) {
+      adminQuestionTestCasesField.hidden = true;
+    }
+
     adminQuestionModal.hidden = false;
   }
   function openEditQuestionModal(question) {
@@ -3418,6 +3534,12 @@
 
     if (adminQuestionOptionsField) {
       adminQuestionOptionsField.hidden = question.type !== "objective";
+    }
+
+    populateAdminQuestionTestCases(question.testCases || []);
+
+    if (adminQuestionTestCasesField) {
+      adminQuestionTestCasesField.hidden = question.type !== "coding";
     }
 
     adminQuestionModal.hidden = false;
@@ -3500,6 +3622,34 @@
       }));
     }
 
+    let testCases = [];
+
+    if (type === "coding") {
+      testCases = collectAdminQuestionTestCases();
+
+      if (testCases.length === 0) {
+        await showAdminMessage({
+          title: "Test Case Required",
+          message: "Coding questions require at least one test case.",
+          type: "warning",
+        });
+        return;
+      }
+
+      const hasMissingExpectedOutput = testCases.some(
+        (testCase) => !testCase.expectedOutput.trim(),
+      );
+
+      if (hasMissingExpectedOutput) {
+        await showAdminMessage({
+          title: "Expected Output Required",
+          message: "Every coding test case requires an expected output.",
+          type: "warning",
+        });
+        return;
+      }
+    }
+
     const payload = {
       title,
       description,
@@ -3512,6 +3662,7 @@
       answer,
       explanation,
       solution,
+      testCases,
     };
 
     try {
@@ -3949,12 +4100,29 @@
 
   if (adminQuestionFormType) {
     adminQuestionFormType.addEventListener("change", () => {
-      if (!adminQuestionOptionsField) {
-        return;
+      const type = adminQuestionFormType.value;
+
+      if (adminQuestionOptionsField) {
+        adminQuestionOptionsField.hidden = type !== "objective";
       }
 
-      adminQuestionOptionsField.hidden =
-        adminQuestionFormType.value !== "objective";
+      if (adminQuestionTestCasesField) {
+        adminQuestionTestCasesField.hidden = type !== "coding";
+      }
+
+      if (
+        type === "coding" &&
+        adminQuestionTestCases &&
+        !adminQuestionTestCases.querySelector(".admin-question-test-case")
+      ) {
+        addAdminQuestionTestCase();
+      }
+    });
+  }
+
+  if (adminAddQuestionTestCaseBtn) {
+    adminAddQuestionTestCaseBtn.addEventListener("click", () => {
+      addAdminQuestionTestCase();
     });
   }
 
@@ -5378,6 +5546,7 @@
   loadAdminTopics().then(() => loadAdminPracticeSets());
   loadAdminQuestions();
 })();
+
 
 
 

@@ -71,7 +71,7 @@ async function executeCode({ language, code, input = "" }) {
         language: config.language,
         versionIndex: config.versionIndex,
       }),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(60000),
     });
   } catch (error) {
     if (error.name === "TimeoutError") {
@@ -133,3 +133,5 @@ module.exports = {
   executeCode,
   getSupportedLanguages,
 };
+
+

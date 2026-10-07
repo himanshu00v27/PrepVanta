@@ -1,0 +1,127 @@
+/* ===================================
+   PRACTICE SETS LISTING PAGE
+=================================== */
+
+.practice-sets-page{
+    padding:50px 0 100px;
+}
+
+.practice-sets-page > .container > h1{
+    font-size:2.2rem;
+    margin-bottom:8px;
+}
+
+.practice-sets-page > .container > .sub{
+    color:var(--text-light);
+    margin-bottom:35px;
+}
+
+.practice-sets-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+}
+
+.practice-set-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:25px;
+    box-shadow:var(--shadow);
+    transition:.25s ease;
+    display:flex;
+    flex-direction:column;
+    min-height:250px;
+}
+
+.practice-set-card:hover{
+    transform:translateY(-5px);
+    border-color:var(--primary);
+}
+
+.practice-set-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    width:max-content;
+    padding:6px 11px;
+    border-radius:999px;
+    background:rgba(79,70,229,.1);
+    color:var(--primary);
+    font-size:.72rem;
+    font-weight:700;
+    margin-bottom:14px;
+}
+
+.practice-set-card h3{
+    font-size:1.05rem;
+    margin-bottom:8px;
+}
+
+.practice-set-description{
+    color:var(--text-light);
+    font-size:.84rem;
+    line-height:1.6;
+    margin-bottom:18px;
+}
+
+.practice-set-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 16px;
+    margin-top:auto;
+    margin-bottom:18px;
+    color:var(--text-light);
+    font-size:.78rem;
+}
+
+.practice-set-meta span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.practice-set-meta i{
+    color:var(--primary);
+}
+
+.practice-set-card .btn{
+    width:100%;
+    text-align:center;
+}
+
+.practice-sets-message{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:35px 25px;
+    text-align:center;
+    color:var(--text-light);
+}
+
+.practice-sets-message i{
+    display:block;
+    font-size:2rem;
+    color:var(--primary);
+    margin-bottom:12px;
+}
+
+@media(max-width:900px){
+    .practice-sets-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .practice-sets-page{
+        padding:35px 0 70px;
+    }
+
+    .practice-sets-page > .container > h1{
+        font-size:1.8rem;
+    }
+
+    .practice-sets-grid{
+        grid-template-columns:1fr;
+    }
+}
