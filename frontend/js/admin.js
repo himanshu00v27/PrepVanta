@@ -4025,6 +4025,534 @@
   }
 
   /* ===================================
+     GROUP 2 - TOPIC MANAGEMENT
+  =================================== */
+
+  const adminTopicList = document.getElementById("adminTopicList");
+  const adminTopicCount = document.getElementById("adminTopicCount");
+  const adminTopicSearch = document.getElementById("adminTopicSearch");
+  const adminTopicCategory = document.getElementById("adminTopicCategory");
+  const adminTopicStatus = document.getElementById("adminTopicStatus");
+  const adminRefreshTopicsBtn = document.getElementById(
+    "adminRefreshTopicsBtn",
+  );
+  const adminAddTopicBtn = document.getElementById("adminAddTopicBtn");
+
+  const adminTopicModal = document.getElementById("adminTopicModal");
+  const adminTopicModalClose = document.getElementById(
+    "adminTopicModalClose",
+  );
+  const adminTopicCancelBtn = document.getElementById(
+    "adminTopicCancelBtn",
+  );
+  const adminTopicForm = document.getElementById("adminTopicForm");
+  const adminTopicMongoId = document.getElementById("adminTopicMongoId");
+  const adminTopicModalTitle = document.getElementById(
+    "adminTopicModalTitle",
+  );
+  const adminTopicName = document.getElementById("adminTopicName");
+  const adminTopicFormCategory = document.getElementById(
+    "adminTopicFormCategory",
+  );
+  const adminTopicFormStatus = document.getElementById(
+    "adminTopicFormStatus",
+  );
+  const adminTopicDescription = document.getElementById(
+    "adminTopicDescription",
+  );
+  const adminTopicSaveBtn = document.getElementById("adminTopicSaveBtn");
+
+  const adminTopicsPrevBtn = document.getElementById("adminTopicsPrevBtn");
+  const adminTopicsNextBtn = document.getElementById("adminTopicsNextBtn");
+  const adminTopicsPageInfo = document.getElementById(
+    "adminTopicsPageInfo",
+  );
+
+  let adminTopicsCurrentPage = 1;
+  const ADMIN_TOPICS_PER_PAGE = 5;
+
+  function closeAdminTopicModal() {
+    if (!adminTopicModal) {
+      return;
+    }
+
+    adminTopicModal.hidden = true;
+  }
+
+  function openAddTopicModal() {
+    if (!adminTopicModal || !adminTopicForm) {
+      return;
+    }
+
+    adminTopicForm.reset();
+
+    if (adminTopicMongoId) {
+      adminTopicMongoId.value = "";
+    }
+
+    if (adminTopicModalTitle) {
+      adminTopicModalTitle.textContent = "Add Topic";
+    }
+
+    if (adminTopicFormStatus) {
+      adminTopicFormStatus.value = "published";
+    }
+
+    adminTopicModal.hidden = false;
+  }
+
+  function openEditTopicModal(topic) {
+    if (!topic || !adminTopicModal || !adminTopicForm) {
+      return;
+    }
+
+    adminTopicForm.reset();
+
+    if (adminTopicMongoId) {
+      adminTopicMongoId.value = topic._id || "";
+    }
+
+    if (adminTopicModalTitle) {
+      adminTopicModalTitle.textContent = "Edit Topic";
+    }
+
+    if (adminTopicName) {
+      adminTopicName.value = topic.name || "";
+    }
+
+    if (adminTopicFormCategory) {
+      adminTopicFormCategory.value = topic.category || "";
+    }
+
+    if (adminTopicFormStatus) {
+      adminTopicFormStatus.value = topic.status || "draft";
+    }
+
+    if (adminTopicDescription) {
+      adminTopicDescription.value = topic.description || "";
+    }
+
+    adminTopicModal.hidden = false;
+  }
+
+  function renderAdminTopics() {
+    if (!adminTopicList || !adminTopicCount) {
+      return;
+    }
+
+    const search = String(adminTopicSearch?.value || "")
+      .trim()
+      .toLowerCase();
+
+    const category = String(adminTopicCategory?.value || "").trim();
+    const status = String(adminTopicStatus?.value || "").trim();
+
+    const filteredTopics = adminTopics.filter((topic) => {
+      const matchesSearch =
+        !search ||
+        String(topic.name || "").toLowerCase().includes(search) ||
+        String(topic.description || "").toLowerCase().includes(search);
+
+      const matchesCategory = !category || topic.category === category;
+      const matchesStatus = !status || topic.status === status;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+
+    adminTopicCount.textContent = `${filteredTopics.length} topic${
+      filteredTopics.length === 1 ? "" : "s"
+    }`;
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredTopics.length / ADMIN_TOPICS_PER_PAGE),
+    );
+
+    if (adminTopicsCurrentPage > totalPages) {
+      adminTopicsCurrentPage = totalPages;
+    }
+
+    const startIndex =
+      (adminTopicsCurrentPage - 1) * ADMIN_TOPICS_PER_PAGE;
+
+    const paginatedTopics = filteredTopics.slice(
+      startIndex,
+      startIndex + ADMIN_TOPICS_PER_PAGE,
+    );
+
+    if (adminTopicsPageInfo) {
+      adminTopicsPageInfo.textContent =
+        `Page ${adminTopicsCurrentPage} of ${totalPages}`;
+    }
+
+    if (adminTopicsPrevBtn) {
+      adminTopicsPrevBtn.disabled = adminTopicsCurrentPage <= 1;
+    }
+
+    if (adminTopicsNextBtn) {
+      adminTopicsNextBtn.disabled =
+        adminTopicsCurrentPage >= totalPages ||
+        filteredTopics.length === 0;
+    }
+
+    if (filteredTopics.length === 0) {
+      adminTopicList.innerHTML = `
+        <div class="admin-empty-state">
+          No topics found.
+        </div>
+      `;
+      return;
+    }
+
+    adminTopicList.innerHTML = paginatedTopics
+      .map(
+        (topic) => `
+          <div class="admin-topic-item">
+
+            <div class="admin-topic-main">
+
+              <strong>
+                ${escapeAdminQuestionHtml(topic.name)}
+              </strong>
+
+              ${
+                topic.description
+                  ? `
+                    <p>
+                      ${escapeAdminQuestionHtml(topic.description)}
+                    </p>
+                  `
+                  : ""
+              }
+
+              <div class="admin-topic-meta">
+
+                <span>
+                  ${escapeAdminQuestionHtml(topic.category)}
+                </span>
+
+                <span>
+                  ${escapeAdminQuestionHtml(topic.status)}
+                </span>
+
+              </div>
+
+            </div>
+
+            <div class="admin-topic-actions">
+
+              <button
+                type="button"
+                class="btn btn-secondary admin-topic-edit-btn"
+                data-topic-id="${escapeAdminQuestionHtml(topic._id)}"
+              >
+                <i class="fa-solid fa-pen"></i>
+                Edit
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-danger admin-topic-delete-btn"
+                data-topic-id="${escapeAdminQuestionHtml(topic._id)}"
+              >
+                <i class="fa-solid fa-trash"></i>
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+        `,
+      )
+      .join("");
+  }
+
+  async function loadAdminTopics() {
+    if (!adminTopicList) {
+      return;
+    }
+
+    adminTopicList.innerHTML = `
+      <div class="admin-empty-state">
+        Loading topics...
+      </div>
+    `;
+
+    try {
+      const response = await fetch("http://localhost:5000/api/topics", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => []);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load topics.");
+      }
+
+      adminTopics = Array.isArray(data) ? data : [];
+
+      populateAdminQuestionTopics();
+      populateAdminQuestionFormTopics();
+      renderAdminTopics();
+    } catch (error) {
+      console.error("Admin topics error:", error);
+
+      adminTopicList.innerHTML = `
+        <div class="admin-empty-state">
+          Unable to load topics.
+        </div>
+      `;
+    }
+  }
+
+  async function saveAdminTopic(event) {
+    event.preventDefault();
+
+    const mongoId = String(adminTopicMongoId?.value || "").trim();
+    const editing = Boolean(mongoId);
+
+    const name = String(adminTopicName?.value || "").trim();
+    const category = String(adminTopicFormCategory?.value || "").trim();
+    const description = String(adminTopicDescription?.value || "").trim();
+    const status = String(adminTopicFormStatus?.value || "draft").trim();
+
+    if (!name || !category) {
+      await showAdminMessage({
+        title: "Missing Information",
+        message: "Topic name and category are required.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const payload = {
+      name,
+      category,
+      description,
+      status,
+    };
+
+    try {
+      if (adminTopicSaveBtn) {
+        adminTopicSaveBtn.disabled = true;
+        adminTopicSaveBtn.textContent = "Saving...";
+      }
+
+      const url = editing
+        ? `http://localhost:5000/api/topics/${encodeURIComponent(mongoId)}`
+        : "http://localhost:5000/api/topics";
+
+      const response = await fetch(url, {
+        method: editing ? "PUT" : "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            (editing ? "Failed to update topic." : "Failed to create topic."),
+        );
+      }
+
+      closeAdminTopicModal();
+      adminTopicsCurrentPage = 1;
+
+      await loadAdminTopics();
+
+      await showAdminMessage({
+        title: editing ? "Topic Updated" : "Topic Created",
+        message: editing
+          ? "Topic updated successfully."
+          : "Topic created successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Save topic error:", error);
+
+      await showAdminMessage({
+        title: editing ? "Update Failed" : "Creation Failed",
+        message:
+          error.message ||
+          (editing ? "Failed to update topic." : "Failed to create topic."),
+        type: "error",
+      });
+    } finally {
+      if (adminTopicSaveBtn) {
+        adminTopicSaveBtn.disabled = false;
+        adminTopicSaveBtn.innerHTML = `
+          <i class="fa-solid fa-floppy-disk"></i>
+          Save Topic
+        `;
+      }
+    }
+  }
+
+  if (adminTopicList) {
+    adminTopicList.addEventListener("click", async (event) => {
+      const editButton = event.target.closest(".admin-topic-edit-btn");
+      const deleteButton = event.target.closest(".admin-topic-delete-btn");
+
+      if (editButton) {
+        const topicId = editButton.dataset.topicId;
+
+        const topic = adminTopics.find(
+          (item) => String(item._id) === String(topicId),
+        );
+
+        if (!topic) {
+          await showAdminMessage({
+            title: "Topic Not Found",
+            message: "Unable to find this topic.",
+            type: "error",
+          });
+          return;
+        }
+
+        openEditTopicModal(topic);
+        return;
+      }
+
+      if (deleteButton) {
+        const topicId = deleteButton.dataset.topicId;
+
+        const topic = adminTopics.find(
+          (item) => String(item._id) === String(topicId),
+        );
+
+        if (!topic) {
+          await showAdminMessage({
+            title: "Topic Not Found",
+            message: "Unable to find this topic.",
+            type: "error",
+          });
+          return;
+        }
+
+        const confirmed = await showAdminConfirm({
+          title: "Delete Topic?",
+          message: `Are you sure you want to delete "${topic.name}"? This action cannot be undone.`,
+          confirmText: "Delete",
+        });
+
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          deleteButton.disabled = true;
+          deleteButton.textContent = "Deleting...";
+
+          const response = await fetch(
+            `http://localhost:5000/api/topics/${encodeURIComponent(topicId)}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to delete topic.");
+          }
+
+          await loadAdminTopics();
+
+          await showAdminMessage({
+            title: "Topic Deleted",
+            message: data.message || "Topic deleted successfully.",
+            type: "success",
+          });
+        } catch (error) {
+          console.error("Delete topic error:", error);
+
+          await showAdminMessage({
+            title: "Unable to Delete Topic",
+            message: error.message || "Failed to delete topic.",
+            type: "error",
+          });
+
+          deleteButton.disabled = false;
+          deleteButton.innerHTML = `
+            <i class="fa-solid fa-trash"></i>
+            Delete
+          `;
+        }
+      }
+    });
+  }
+
+  if (adminTopicForm) {
+    adminTopicForm.addEventListener("submit", saveAdminTopic);
+  }
+
+  if (adminAddTopicBtn) {
+    adminAddTopicBtn.addEventListener("click", openAddTopicModal);
+  }
+
+  if (adminTopicModalClose) {
+    adminTopicModalClose.addEventListener("click", closeAdminTopicModal);
+  }
+
+  if (adminTopicCancelBtn) {
+    adminTopicCancelBtn.addEventListener("click", closeAdminTopicModal);
+  }
+
+  if (adminTopicSearch) {
+    adminTopicSearch.addEventListener("input", () => {
+      adminTopicsCurrentPage = 1;
+      renderAdminTopics();
+    });
+  }
+
+  if (adminTopicCategory) {
+    adminTopicCategory.addEventListener("change", () => {
+      adminTopicsCurrentPage = 1;
+      renderAdminTopics();
+    });
+  }
+
+  if (adminTopicStatus) {
+    adminTopicStatus.addEventListener("change", () => {
+      adminTopicsCurrentPage = 1;
+      renderAdminTopics();
+    });
+  }
+
+  if (adminTopicsPrevBtn) {
+    adminTopicsPrevBtn.addEventListener("click", () => {
+      if (adminTopicsCurrentPage > 1) {
+        adminTopicsCurrentPage -= 1;
+        renderAdminTopics();
+      }
+    });
+  }
+
+  if (adminTopicsNextBtn) {
+    adminTopicsNextBtn.addEventListener("click", () => {
+      adminTopicsCurrentPage += 1;
+      renderAdminTopics();
+    });
+  }
+
+  if (adminRefreshTopicsBtn) {
+    adminRefreshTopicsBtn.addEventListener("click", async () => {
+      await loadAdminTopics();
+    });
+  }
+
+
+  /* ===================================
      INITIAL LOAD
   =================================== */
 
@@ -4035,6 +4563,8 @@
   loadAdminSupportTickets();
   loadAuditLogs();
 
-  loadAdminQuestionTopics();
+  loadAdminTopics();
   loadAdminQuestions();
 })();
+
+

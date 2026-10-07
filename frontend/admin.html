@@ -755,6 +755,123 @@
 </div>
 
 
+<!-- ==========================================
+     GROUP 2 - TOPIC MANAGEMENT
+========================================== -->
+
+<div class="panel-card admin-topics-panel" style="width: 100%; max-width: none;">
+
+    <div class="panel-header">
+
+        <div>
+            <h3>
+                <i class="fa-solid fa-layer-group"></i>
+                Topic Management
+            </h3>
+
+            <p class="panel-subtitle">
+                Create, edit, publish and manage practice topics.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            id="adminAddTopicBtn"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Add Topic
+        </button>
+
+    </div>
+
+    <div class="admin-topic-filters">
+
+        <div class="form-group">
+            <label for="adminTopicSearch">Search</label>
+            <input
+                type="text"
+                id="adminTopicSearch"
+                placeholder="Search topics..."
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="adminTopicCategory">Category</label>
+            <select id="adminTopicCategory">
+                <option value="">All Categories</option>
+                <option value="Aptitude">Aptitude</option>
+                <option value="Reasoning">Reasoning</option>
+                <option value="Technical">Technical</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="adminTopicStatus">Status</label>
+            <select id="adminTopicStatus">
+                <option value="">All Statuses</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="admin-topic-summary">
+
+        <span id="adminTopicCount">
+            0 topics
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminRefreshTopicsBtn"
+        >
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+        </button>
+
+    </div>
+
+    <div
+        class="admin-topic-list"
+        id="adminTopicList"
+    >
+        <div class="admin-empty-state">
+            Loading topics...
+        </div>
+    </div>
+
+    <div class="admin-topic-pagination">
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminTopicsPrevBtn"
+        >
+            <i class="fa-solid fa-chevron-left"></i>
+            Previous
+        </button>
+
+        <span id="adminTopicsPageInfo">
+            Page 1
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminTopicsNextBtn"
+        >
+            Next
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+    </div>
+
+</div>
+
+
                 <!-- ===================================
                      COMPANY EDITOR MODAL
                 =================================== -->
@@ -1261,6 +1378,151 @@
 
     </div>
 </div>
+<!-- ===================================
+     GROUP 2 - TOPIC EDITOR MODAL
+=================================== -->
+
+<div
+    class="admin-company-modal-overlay"
+    id="adminTopicModal"
+    hidden
+>
+    <div
+        class="admin-company-modal admin-topic-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminTopicModalTitle"
+    >
+
+        <div class="admin-company-modal-head">
+
+            <div>
+                <span class="admin-company-modal-label">
+                    Topic Editor
+                </span>
+
+                <h3 id="adminTopicModalTitle">
+                    Add Topic
+                </h3>
+            </div>
+
+            <button
+                type="button"
+                class="admin-company-modal-close"
+                id="adminTopicModalClose"
+                aria-label="Close topic editor"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        <form id="adminTopicForm">
+
+            <input
+                type="hidden"
+                id="adminTopicMongoId"
+            >
+
+            <div class="admin-company-form-grid">
+
+                <div class="form-group">
+                    <label for="adminTopicName">
+                        Topic Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminTopicName"
+                        placeholder="e.g. Percentages"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="adminTopicFormCategory">
+                        Category *
+                    </label>
+
+                    <select
+                        id="adminTopicFormCategory"
+                        required
+                    >
+                        <option value="">
+                            Select category
+                        </option>
+
+                        <option value="Aptitude">
+                            Aptitude
+                        </option>
+
+                        <option value="Reasoning">
+                            Reasoning
+                        </option>
+
+                        <option value="Technical">
+                            Technical
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminTopicFormStatus">
+                        Status
+                    </label>
+
+                    <select id="adminTopicFormStatus">
+                        <option value="published">
+                            Published
+                        </option>
+
+                        <option value="draft">
+                            Draft
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group admin-topic-description-field">
+                    <label for="adminTopicDescription">
+                        Description (Optional)
+                    </label>
+
+                    <textarea
+                        id="adminTopicDescription"
+                        rows="4"
+                        placeholder="Short description of this topic..."
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="admin-company-modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="adminTopicCancelBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="adminTopicSaveBtn"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Topic
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
 <!-- ===================================
      ADMIN ACTION MESSAGE MODAL
 =================================== -->
@@ -2427,3 +2689,4 @@
 </body>
 
 </html>
+
