@@ -872,6 +872,119 @@
 </div>
 
 
+<!-- ==========================================
+     GROUP 2 - PRACTICE SET MANAGEMENT
+========================================== -->
+
+<div class="panel-card admin-practice-sets-panel" style="width: 100%; max-width: none;">
+
+    <div class="panel-header">
+
+        <div>
+            <h3>
+                <i class="fa-solid fa-clipboard-list"></i>
+                Practice Set Management
+            </h3>
+
+            <p class="panel-subtitle">
+                Create, edit, publish and manage topic-based practice sets.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            id="adminAddPracticeSetBtn"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Add Practice Set
+        </button>
+
+    </div>
+
+    <div class="admin-practice-set-filters">
+
+        <div class="form-group">
+            <label for="adminPracticeSetSearch">Search</label>
+            <input
+                type="text"
+                id="adminPracticeSetSearch"
+                placeholder="Search practice sets..."
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="adminPracticeSetTopic">Topic</label>
+            <select id="adminPracticeSetTopic">
+                <option value="">All Topics</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="adminPracticeSetStatus">Status</label>
+            <select id="adminPracticeSetStatus">
+                <option value="">All Statuses</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="admin-practice-set-summary">
+
+        <span id="adminPracticeSetCount">
+            0 practice sets
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminRefreshPracticeSetsBtn"
+        >
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+        </button>
+
+    </div>
+
+    <div
+        class="admin-practice-set-list"
+        id="adminPracticeSetList"
+    >
+        <div class="admin-empty-state">
+            Loading practice sets...
+        </div>
+    </div>
+
+    <div class="admin-practice-set-pagination">
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminPracticeSetsPrevBtn"
+        >
+            <i class="fa-solid fa-chevron-left"></i>
+            Previous
+        </button>
+
+        <span id="adminPracticeSetsPageInfo">
+            Page 1
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="adminPracticeSetsNextBtn"
+        >
+            Next
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+    </div>
+
+</div>
+
                 <!-- ===================================
                      COMPANY EDITOR MODAL
                 =================================== -->
@@ -1522,6 +1635,178 @@
     </div>
 </div>
 
+
+<!-- ===================================
+     GROUP 2 - PRACTICE SET EDITOR MODAL
+=================================== -->
+
+<div
+    class="admin-company-modal-overlay"
+    id="adminPracticeSetModal"
+    hidden
+>
+    <div
+        class="admin-company-modal admin-practice-set-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminPracticeSetModalTitle"
+    >
+
+        <div class="admin-company-modal-head">
+
+            <div>
+                <span class="admin-company-modal-label">
+                    Practice Set Editor
+                </span>
+
+                <h3 id="adminPracticeSetModalTitle">
+                    Add Practice Set
+                </h3>
+            </div>
+
+            <button
+                type="button"
+                class="admin-company-modal-close"
+                id="adminPracticeSetModalClose"
+                aria-label="Close practice set editor"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        <form id="adminPracticeSetForm">
+
+            <input
+                type="hidden"
+                id="adminPracticeSetMongoId"
+            >
+
+            <div class="admin-company-form-grid">
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminPracticeSetTitle">
+                        Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminPracticeSetTitle"
+                        placeholder="Example: Percentages Practice Set"
+                        required
+                    >
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminPracticeSetFormTopic">
+                        Topic
+                    </label>
+
+                    <select
+                        id="adminPracticeSetFormTopic"
+                        required
+                    >
+                        <option value="">
+                            Select topic
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminPracticeSetDuration">
+                        Duration (minutes)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="adminPracticeSetDuration"
+                        min="1"
+                        step="1"
+                        placeholder="Example: 30"
+                        required
+                    >
+                </div>
+
+                <div class="admin-company-field">
+                    <label for="adminPracticeSetFormStatus">
+                        Publication Status
+                    </label>
+
+                    <select id="adminPracticeSetFormStatus">
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                        <option value="published">
+                            Published
+                        </option>
+                    </select>
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+                    <label for="adminPracticeSetDescription">
+                        Description <span class="optional-label">(Optional)</span>
+                    </label>
+
+                    <textarea
+                        id="adminPracticeSetDescription"
+                        rows="4"
+                        placeholder="Describe this practice set..."
+                    ></textarea>
+                </div>
+
+                <div class="admin-company-field admin-company-field-full">
+
+                    <label>
+                        Questions
+                    </label>
+
+                    <small class="admin-practice-set-question-help">
+                        Select a topic first. Only questions belonging to that topic can be added.
+                    </small>
+
+                    <div
+                        class="admin-practice-set-question-list"
+                        id="adminPracticeSetQuestionList"
+                    >
+                        <div class="admin-empty-state">
+                            Select a topic to load questions.
+                        </div>
+                    </div>
+
+                    <small id="adminPracticeSetSelectedCount">
+                        0 questions selected
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="admin-company-form-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="adminPracticeSetCancelBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="adminPracticeSetSaveBtn"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Practice Set
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
 
 <!-- ===================================
      ADMIN ACTION MESSAGE MODAL
@@ -2689,4 +2974,6 @@
 </body>
 
 </html>
+
+
 
