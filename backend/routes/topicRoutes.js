@@ -8,6 +8,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 const Topic = require("../models/Topic");
 const Question = require("../models/Question");
 const PracticeSet = require("../models/PracticeSet");
+const { createAuditLog } = require("../services/auditService");
 
 // --------------------------------------------------
 // Get topics
@@ -125,6 +126,24 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
       createdBy: req.user._id,
     });
 
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+
+      category: "topic_management",
+      action: "TOPIC_CREATED",
+
+      targetType: "topic",
+      targetId: topic._id.toString(),
+      targetName: topic.name,
+
+      status: "success",
+      ipAddress: req.ip,
+
+      details: `Created topic ${topic.name} with status ${topic.status}`,
+    });
+
     res.status(201).json(topic);
   } catch (error) {
     console.error("Error creating topic:", error);
@@ -185,6 +204,24 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 
     await topic.save();
 
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+
+      category: "topic_management",
+      action: "TOPIC_UPDATED",
+
+      targetType: "topic",
+      targetId: topic._id.toString(),
+      targetName: topic.name,
+
+      status: "success",
+      ipAddress: req.ip,
+
+      details: `Updated topic ${topic.name} with status ${topic.status}`,
+    });
+
     res.json(topic);
   } catch (error) {
     console.error("Error updating topic:", error);
@@ -229,6 +266,24 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     }
 
     await topic.deleteOne();
+
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+
+      category: "topic_management",
+      action: "TOPIC_DELETED",
+
+      targetType: "topic",
+      targetId: topic._id.toString(),
+      targetName: topic.name,
+
+      status: "success",
+      ipAddress: req.ip,
+
+      details: `Deleted topic ${topic.name} from category ${topic.category}`,
+    });
 
     res.json({
       message: "Topic deleted successfully",

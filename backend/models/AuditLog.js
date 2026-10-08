@@ -39,6 +39,8 @@ const auditLogSchema = new mongoose.Schema(
         "platform_settings",
         "company_management",
         "support_management",
+        "topic_management",
+        "question_management",
         "administrator",
       ],
       default: null,

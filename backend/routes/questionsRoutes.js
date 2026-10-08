@@ -1,3 +1,4 @@
+const { createAuditLog } = require("../services/auditService");
 const express = require("express");
 
 const router = express.Router();
@@ -480,6 +481,24 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
 
     const savedQuestion = await question.save();
 
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+
+      category: "question_management",
+      action: "QUESTION_CREATED",
+
+      targetType: "question",
+      targetId: savedQuestion._id.toString(),
+      targetName: savedQuestion.title,
+
+      status: "success",
+      ipAddress: req.ip,
+
+      details: `Created ${savedQuestion.type} question ${savedQuestion.title} with status ${savedQuestion.status}`,
+    });
+
     const populatedQuestion = await Question.findById(
       savedQuestion._id,
     ).populate("topic");
@@ -588,6 +607,31 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
       runValidators: true,
     }).populate("topic");
 
+    const oldStatus = existingQuestion.status;
+    const newStatus = question.status;
+
+    let auditAction = "QUESTION_UPDATED";
+
+    if (oldStatus !== "published" && newStatus === "published") {
+      auditAction = "QUESTION_PUBLISHED";
+    } else if (oldStatus === "published" && newStatus !== "published") {
+      auditAction = "QUESTION_UNPUBLISHED";
+    }
+
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+      category: "question_management",
+      action: auditAction,
+      targetType: "question",
+      targetId: question._id.toString(),
+      targetName: question.title,
+      status: "success",
+      ipAddress: req.ip,
+      details: `Updated question ${question.title}; status: ${oldStatus} -> ${newStatus}`,
+    });
+
     res.json(question);
   } catch (error) {
     console.error("Error updating question:", error);
@@ -623,6 +667,24 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     }
 
     await Question.findByIdAndDelete(question._id);
+
+    await createAuditLog({
+      userId: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
+
+      category: "question_management",
+      action: "QUESTION_DELETED",
+
+      targetType: "question",
+      targetId: question._id.toString(),
+      targetName: question.title,
+
+      status: "success",
+      ipAddress: req.ip,
+
+      details: `Deleted ${question.type} question ${question.title}`,
+    });
 
     res.json({
       message: "Question deleted successfully",
