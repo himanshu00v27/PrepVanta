@@ -340,6 +340,9 @@ async function initTopicPractice() {
       ? ["objective", "subjective", "coding"]
       : ["objective"];
 
+    let questionSearch = "";
+    let selectedDifficulty = "all";
+
     let activeType =
       allowedTypes.find((type) => questionsByType[type].length > 0) ||
       allowedTypes[0];
@@ -658,10 +661,54 @@ async function initTopicPractice() {
       });
     }
 
+    function getFilteredQuestions() {
+      return questionsByType[activeType].filter((question) => {
+        const searchableText = `${question.title || ""} ${question.description || ""}`.toLowerCase();
+        const matchesSearch = searchableText.includes(questionSearch.toLowerCase());
+        const matchesDifficulty =
+          selectedDifficulty === "all" ||
+          String(question.difficulty || "").toLowerCase() === selectedDifficulty;
+
+        return matchesSearch && matchesDifficulty;
+      });
+    }
+
+    function renderQuestionFilters() {
+      return `
+        <div class="mcq-card" style="margin:20px 0;padding:20px;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+            <input
+              id="questionSearchInput"
+              type="search"
+              placeholder="Search questions..."
+              value="${escapeTopicPracticeHtml(questionSearch)}"
+              aria-label="Search questions"
+              style="flex:2;min-width:200px;padding:12px;border:1px solid #aaa;border-radius:8px;"
+            >
+
+            <select
+              id="questionDifficultyFilter"
+              aria-label="Filter by difficulty"
+              style="flex:1;min-width:150px;padding:12px;border:1px solid #aaa;border-radius:8px;"
+            >
+              <option value="all" ${selectedDifficulty === "all" ? "selected" : ""}>All Difficulties</option>
+              <option value="easy" ${selectedDifficulty === "easy" ? "selected" : ""}>Easy</option>
+              <option value="medium" ${selectedDifficulty === "medium" ? "selected" : ""}>Medium</option>
+              <option value="hard" ${selectedDifficulty === "hard" ? "selected" : ""}>Hard</option>
+            </select>
+
+            <button type="button" class="btn btn-primary" id="resetQuestionFilters">
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      `;
+    }
     function renderActiveType() {
-      const questions = questionsByType[activeType];
+      const questions = getFilteredQuestions();
 
       updateSubtitle(activeType);
+      subtitle.textContent = `${questions.length} matching question${questions.length === 1 ? "" : "s"} in this topic.`;
 
       let content = "";
 
@@ -675,6 +722,7 @@ async function initTopicPractice() {
 
       mount.innerHTML = `
         ${renderTypeSwitcher()}
+        ${renderQuestionFilters()}
         <div class="topic-practice-type-content">
           ${content}
         </div>
@@ -689,6 +737,29 @@ async function initTopicPractice() {
           });
         });
 
+      const searchInput = document.getElementById("questionSearchInput");
+      const difficultySelect = document.getElementById("questionDifficultyFilter");
+      const resetButton = document.getElementById("resetQuestionFilters");
+
+      searchInput?.addEventListener("input", (event) => {
+        questionSearch = event.target.value;
+        const cursor = event.target.selectionStart;
+        renderActiveType();
+        const nextInput = document.getElementById("questionSearchInput");
+        nextInput?.focus();
+        if (cursor !== null) nextInput?.setSelectionRange(cursor, cursor);
+      });
+
+      difficultySelect?.addEventListener("change", (event) => {
+        selectedDifficulty = event.target.value;
+        renderActiveType();
+      });
+
+      resetButton?.addEventListener("click", () => {
+        questionSearch = "";
+        selectedDifficulty = "all";
+        renderActiveType();
+      });
       if (activeType === "objective") {
         bindObjectivePractice(questions);
       } else if (activeType === "subjective") {
