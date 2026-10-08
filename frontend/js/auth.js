@@ -1,4 +1,4 @@
-﻿/* ===================================
+/* ===================================
    PREPVANTA AUTH SCRIPT
    Real backend authentication + OTP
 =================================== */
@@ -753,7 +753,7 @@ document
 
                     passwordInput.type = "text";
 
-                    button.textContent = "🙈";
+                    button.innerHTML = '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>';
 
                     button.setAttribute(
                         "aria-label",
@@ -765,7 +765,7 @@ document
                     passwordInput.type =
                         "password";
 
-                    button.textContent = "👁️";
+                    button.innerHTML = '<i class="fa-solid fa-eye" aria-hidden="true"></i>';
 
                     button.setAttribute(
                         "aria-label",

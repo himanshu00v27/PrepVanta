@@ -1,0 +1,64 @@
+﻿/* PrepVanta authentication panel illustrations */
+
+.auth-study-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    margin: 32px 0 8px;
+    color: #fff;
+}
+
+.auth-study-art i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-size: 1.5rem;
+    animation: authFloat 4s ease-in-out infinite;
+}
+
+.auth-study-art i:nth-child(2) {
+    width: 76px;
+    height: 76px;
+    font-size: 2rem;
+    animation-delay: -1.3s;
+}
+
+.auth-study-art i:nth-child(3) {
+    animation-delay: -2.6s;
+}
+
+@keyframes authFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-study-art i {
+        animation: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .auth-study-art {
+        gap: 12px;
+        margin: 20px 0 8px;
+    }
+
+    .auth-study-art i {
+        width: 46px;
+        height: 46px;
+        font-size: 1.2rem;
+    }
+
+    .auth-study-art i:nth-child(2) {
+        width: 60px;
+        height: 60px;
+        font-size: 1.6rem;
+    }
+}

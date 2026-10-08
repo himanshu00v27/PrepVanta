@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/auth-animations.css">
 </head>
 
 <body>
@@ -191,11 +192,16 @@
             <div class="auth-grid">
                 <div class="auth-visual">
                     <a href="index.html" class="logo"><img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span></a>
+                    <div class="auth-study-art" aria-hidden="true">
+                        <i class="fa-solid fa-book-open"></i>
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
                     <blockquote>
-                        "Everything I needed for placements was finally in one login."
-                        <div class="auth-quote-by">— A PrepVanta learner, placed at a Tier-1 firm</div>
+                        "Explore. Practice. Improve. Step up your preparation with PrepVanta."
+                        <div class="auth-quote-by">&mdash; PrepVanta</div>
                     </blockquote>
-                    <div style="opacity:.85;font-size:.85rem;">Join thousands already preparing smarter.</div>
+                    <div style="opacity:.85;font-size:.85rem;">Start building your skills today.</div>
                 </div>
                 <div class="auth-form-wrap">
                     <div class="auth-switch">
@@ -231,9 +237,7 @@
                             <label for="password">Password</label>
                             <div class="password-wrapper">
                                 <input type="password" id="password" placeholder="At least 6 characters">
-                                <button type="button" class="toggle-password" data-target="password" aria-label="Show password">
-                                   👁️
-                                </button>
+                                <button type="button" class="toggle-password" data-target="password" aria-label="Show password"><i class="fa-solid fa-eye" aria-hidden="true"></i></button>
                             </div>
                             <span class="form-error">Use at least 6 characters.</span>
                         </div>
