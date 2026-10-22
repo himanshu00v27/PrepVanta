@@ -225,6 +225,11 @@ router.put("/me/profile", authMiddleware, async (req, res) => {
       },
     ).lean();
 
+    if (profileData.name && profileData.name !== req.user.fullName) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $set: { fullName: profileData.name },
+      });
+    }
     res.json({
       message: "Profile updated successfully",
       profile: {
