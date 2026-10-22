@@ -81,3 +81,13 @@ footer{
         1fr;
     }
 }
+
+/* About PrepVanta footer section */
+.footer-about {
+    max-width: 280px;
+}
+
+.footer-about p {
+    line-height: 1.7;
+    margin-top: 20px;
+}

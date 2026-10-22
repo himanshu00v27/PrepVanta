@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -41,28 +42,36 @@
 
         <div class="sidebar-header">
             <h2>
-                <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
+                <span class="logo-text">
+                    <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                </span>
             </h2>
         </div>
 
         <div class="sidebar-section">
-
             <h4>Dashboard</h4>
-
             <a href="dashboard.html">
                 <i class="fa-solid fa-chart-line"></i>
                 Dashboard
             </a>
-
         </div>
 
         <div class="sidebar-section">
-
             <h4>Learning</h4>
 
             <a href="topics.html">
                 <i class="fa-solid fa-book"></i>
                 Topics
+            </a>
+
+            <a href="practice-sets.html">
+                <i class="fa-solid fa-clipboard-list"></i>
+                Practice Sets
+            </a>
+            <a href="attempt-history.html">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Attempt History
             </a>
 
             <a href="aptitude.html">
@@ -89,22 +98,18 @@
                 <i class="fa-solid fa-building"></i>
                 Companies
             </a>
-
         </div>
 
         <div class="sidebar-section">
-
             <h4>Community</h4>
 
             <a href="search-users.html">
                 <i class="fa-solid fa-users"></i>
                 Search Users
             </a>
-
         </div>
 
         <div class="sidebar-section">
-
             <h4>Support</h4>
 
             <a href="help-desk.html">
@@ -113,14 +118,12 @@
             </a>
 
             <a href="contact-us.html">
-                <i class="fa-solid fa-phone"></i>
+                <i class="fa-solid fa-envelope"></i>
                 Contact Us
             </a>
-
         </div>
 
         <div class="sidebar-section">
-
             <h4>Account</h4>
 
             <a href="login.html">
@@ -128,17 +131,15 @@
                 Login
             </a>
 
-            <a href="#" class="logout-link" onclick="prepvantaLogout(); return false;">
+            <a href="#" class="logout-link"
+                onclick="prepvantaLogout(); return false;">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
-
         </div>
-
     </aside>
 
     <!-- Navbar -->
-
     <nav class="navbar">
 
         <div class="container nav-container">
@@ -150,19 +151,19 @@
                 </button>
 
                 <a href="index.html" class="logo">
-                    <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                    <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
+                    <span class="logo-text">
+                        <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                    </span>
                 </a>
-
             </div>
 
             <div class="nav-links">
-
                 <a href="index.html">Home</a>
                 <a href="aptitude.html">Aptitude</a>
                 <a href="reasoning.html">Reasoning</a>
                 <a href="topics.html">Topics</a>
                 <a href="compiler.html">Compiler</a>
-
             </div>
 
             <div class="nav-right">
@@ -178,122 +179,388 @@
                     <i class="fa-solid fa-moon"></i>
                 </button>
 
-                <a href="dashboard.html" class="profile-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                <a href="dashboard.html" class="profile-btn"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
                     <i class="fa-solid fa-user"></i>
                 </a>
 
             </div>
-
         </div>
-
     </nav>
 
+    <!-- Privacy Policy -->
     <section class="support-page">
         <div class="container">
             <div class="legal-card">
+
                 <h1>Privacy Policy</h1>
-                <p class="updated">Last updated: 24 August 2026</p>
-                <p>PrepVanta ("we", "our", "us") built this platform to help students prepare for placements. This policy explains what information we collect, how we use it, and the choices you have.</p>
+                <p class="updated">Last updated: 22 October 2026</p>
+
+                <p>
+                    Welcome to PrepVanta, an educational practice platform
+                    designed to help students develop their aptitude,
+                    reasoning, programming, interview preparation, and
+                    placement-related skills.
+                </p>
+
+                <p>
+                    This Privacy Policy explains how PrepVanta ("we",
+                    "our", or "us") collects, uses, stores, and protects
+                    information when users access our website and services.
+                    By using PrepVanta, you acknowledge the data practices
+                    described in this policy.
+                </p>
 
                 <h2>1. Information We Collect</h2>
+
+                <p>
+                    We collect information necessary to provide and
+                    maintain the platform's features.
+                </p>
+
                 <ul>
-                    <li>Account details you provide: full name, username, email address or phone number, and password.</li>
-                    <li>Activity data: questions attempted, mock test scores, topics viewed and compiler usage, used to build your dashboard.</li>
-                    <li>Your PrepVanta user ID, generated automatically and used to identify your account across the platform.</li>
+                    <li>
+                        <strong>Account Information:</strong>
+                        Full name, username, email address, password
+                        hash, and unique user identifier.
+                    </li>
+
+                    <li>
+                        <strong>Authentication Information:</strong>
+                        Information required for email verification,
+                        login, password recovery, and account security.
+                    </li>
+
+                    <li>
+                        <strong>Practice Activity:</strong>
+                        Questions attempted, answers submitted,
+                        practice scores, attempt history, topic-wise
+                        performance, and learning progress.
+                    </li>
+
+                    <li>
+                        <strong>Coding Activity:</strong>
+                        Code submitted to the compiler, selected
+                        programming language, and execution output
+                        or errors, as applicable.
+                    </li>
+
+                    <li>
+                        <strong>Profile Information:</strong>
+                        Information associated with user profiles
+                        and the user search feature.
+                    </li>
+
+                    <li>
+                        <strong>Support Information:</strong>
+                        Messages, support tickets, and related
+                        communications submitted through available
+                        support features.
+                    </li>
+
+                    <li>
+                        <strong>Technical Information:</strong>
+                        Limited technical information processed
+                        for security, error handling, troubleshooting,
+                        and platform operation.
+                    </li>
                 </ul>
 
                 <h2>2. How We Use Your Information</h2>
+
+                <p>Information may be used to:</p>
+
                 <ul>
-                    <li>To operate your account, save your progress and personalise your dashboard.</li>
-                    <li>To let other learners find your public profile by username or user ID.</li>
-                    <li>To improve question quality and platform performance.</li>
+                    <li>Create and manage user accounts.</li>
+                    <li>Verify email addresses and authenticate users.</li>
+                    <li>Provide password recovery and account security.</li>
+                    <li>Save practice attempts and calculate scores.</li>
+                    <li>Display learning progress and performance statistics.</li>
+                    <li>Provide coding practice and compiler functionality.</li>
+                    <li>Enable user search and profile discovery.</li>
+                    <li>Process support tickets and respond to requests.</li>
+                    <li>Prevent unauthorized access and misuse.</li>
+                    <li>Maintain and improve platform reliability.</li>
                 </ul>
 
-                <h2>3. Sharing &amp; Visibility</h2>
-                <p>Your username, full name and user ID are visible to other registered users through the Find Users search. We do not sell your personal information to third parties.</p>
+                <h2>3. Account Authentication and Security</h2>
 
-                <h2>4. Data Security</h2>
-                <p>We apply reasonable technical safeguards to protect your data. No online platform can guarantee absolute security, so please use a strong, unique password.</p>
+                <p>
+                    PrepVanta uses account authentication mechanisms
+                    to help protect user accounts. Passwords are stored
+                    using cryptographic hashing rather than plain text.
+                </p>
 
-                <h2>5. Your Choices</h2>
-                <p>You can update your profile details from your dashboard at any time, or contact the Help Desk to request account deletion.</p>
+                <p>
+                    Authentication tokens and related information may
+                    be processed to maintain authenticated sessions
+                    and control access to protected functionality.
+                </p>
 
-                <h2>6. Contact Us</h2>
-                <p>Questions about this policy? Reach us at support@prepvanta.in or +91 98765 43210.</p>
+                <p>
+                    Users should maintain the confidentiality of their
+                    credentials, use strong passwords, and avoid sharing
+                    account access with others.
+                </p>
+
+                <h2>4. Email Verification and Communications</h2>
+
+                <p>
+                    PrepVanta uses email verification during registration
+                    and may send account-related messages, including
+                    verification codes and password recovery instructions.
+                </p>
+
+                <p>
+                    We use Resend as an email delivery service.
+                    Email addresses and the information necessary to
+                    deliver these messages may be processed by Resend.
+                </p>
+
+                <p>
+                    Email delivery depends on service availability and
+                    the platform's configured sending capabilities.
+                </p>
+
+                <h2>5. Practice Results and Progress Tracking</h2>
+
+                <p>
+                    PrepVanta records learning activity such as practice
+                    attempts, submitted answers, scores, and topic-wise
+                    performance to provide progress tracking and
+                    dashboard statistics.
+                </p>
+
+                <p>
+                    Authorized administrators may access relevant
+                    information where necessary for content management,
+                    troubleshooting, security, and platform administration.
+                </p>
+
+                <h2>6. Code Submissions and Compiler Usage</h2>
+
+                <p>
+                    When using the compiler, users may submit source code
+                    for execution. Submitted code and related execution
+                    information may be processed by the compiler backend
+                    or an integrated code execution service.
+                </p>
+
+                <p>
+                    Users should not include passwords, API keys,
+                    confidential documents, or other sensitive information
+                    in code submitted for execution.
+                </p>
+
+                <p>
+                    Compiler processing is provided for educational
+                    and programming practice purposes.
+                </p>
+
+                <h2>7. User Profiles and Visibility</h2>
+
+                <p>
+                    PrepVanta includes user search and profile
+                    functionality. Information such as usernames,
+                    display names, and user identifiers may be visible
+                    to other authenticated users.
+                </p>
+
+                <p>
+                    Password hashes, verification credentials, and
+                    other sensitive authentication information are
+                    not intended to be displayed through public
+                    user profiles.
+                </p>
+
+                <h2>8. Data Storage and Third-Party Services</h2>
+
+                <p>
+                    PrepVanta uses MongoDB Atlas for application
+                    data storage. We may also rely on external
+                    service providers for email delivery, hosting,
+                    and code execution.
+                </p>
+
+                <p>
+                    These providers may process information necessary
+                    to deliver their respective services, subject to
+                    their own applicable privacy and security practices.
+                </p>
+
+                <p>
+                    We do not sell users' personal information.
+                </p>
+
+                <h2>9. Data Protection</h2>
+
+                <p>
+                    We use reasonable technical measures, including
+                    password hashing, authentication controls, and
+                    role-based authorization, to help protect user
+                    information.
+                </p>
+
+                <p>
+                    However, no website, database, or online service
+                    can guarantee complete protection against every
+                    possible security threat.
+                </p>
+
+                <h2>10. Data Retention</h2>
+
+                <p>
+                    Account information, practice history, and other
+                    application data may be retained while an account
+                    remains active and for additional periods where
+                    reasonably necessary for security, administration,
+                    dispute resolution, or applicable legal obligations.
+                </p>
+
+                <p>
+                    Retention periods may vary depending on the type
+                    of information and the platform's operational needs.
+                </p>
+
+                <h2>11. Your Privacy Choices</h2>
+
+                <p>
+                    Users may be able to review or update certain
+                    account information through available profile
+                    settings.
+                </p>
+
+                <p>
+                    Users may submit requests concerning their
+                    personal information, including correction
+                    or account deletion, through the Help Desk.
+                    Requests will be reviewed according to available
+                    functionality and applicable requirements.
+                </p>
+
+                <p>
+                    Account deletion may be subject to legitimate
+                    retention requirements. Submitting a request
+                    does not necessarily result in immediate deletion.
+                </p>
+
+                <h2>12. Cookies and Local Storage</h2>
+
+                <p>
+                    PrepVanta may use browser storage and similar
+                    technologies to maintain authentication state,
+                    remember interface preferences, and support
+                    application functionality.
+                </p>
+
+                <p>
+                    Disabling browser storage may affect login
+                    sessions or certain platform features.
+                </p>
+
+                <h2>13. Children's Privacy</h2>
+
+                <p>
+                    PrepVanta is intended as an educational practice
+                    platform primarily for students preparing for
+                    academic assessments and placement opportunities.
+                </p>
+
+                <p>
+                    Users who are minors should use the platform
+                    with appropriate parent or guardian involvement,
+                    where required by applicable law.
+                </p>
+
+                <h2>14. Changes to This Privacy Policy</h2>
+
+                <p>
+                    We may revise this Privacy Policy to reflect
+                    changes in platform functionality, data practices,
+                    service providers, or applicable requirements.
+                </p>
+
+                <p>
+                    Updated versions will be published on this page
+                    with a revised "Last updated" date.
+                </p>
+
+                <h2>15. Contact and Privacy Requests</h2>
+
+                <p>
+                    For questions regarding this Privacy Policy
+                    or requests relating to personal information,
+                    registered users may use the
+                    <a href="help-desk.html">PrepVanta Help Desk</a>.
+                </p>
+
+                <p>
+                    PrepVanta does not currently provide telephone
+                    support or a dedicated public support email address.
+                </p>
+
             </div>
         </div>
     </section>
 
+    <!-- Footer -->
     <footer>
-
         <div class="container">
 
             <div class="footer-grid">
 
                 <div>
-
                     <h2 class="footer-logo">
-                        <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon"><span class="logo-text"><span class="prep">Prep</span><span class="vanta">Vanta</span></span>
+                        <img src="assets/img/logo-icon.png" alt="PrepVanta logo" class="logo-icon">
+                        <span class="logo-text">
+                            <span class="prep">Prep</span><span class="vanta">Vanta</span>
+                        </span>
                     </h2>
 
-                    <p>
-                        Learn. Practice. Succeed.
-                    </p>
-
+                    <p>Learn. Practice. Succeed.</p>
                 </div>
 
                 <div>
-
                     <h4>Quick Links</h4>
-
                     <a href="topics.html">Topics</a>
                     <a href="aptitude.html">Aptitude</a>
                     <a href="reasoning.html">Reasoning</a>
                     <a href="compiler.html">Compiler</a>
                     <a href="companies.html">Companies</a>
-
                 </div>
 
                 <div>
-
                     <h4>Support</h4>
-
                     <a href="help-desk.html">Help Desk</a>
                     <a href="contact-us.html">Contact Us</a>
                     <a href="privacy-policy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms & Conditions</a>
+                    <a href="terms.html">Terms &amp; Conditions</a>
+                </div>               
 
-                </div>
 
-                <div>
-
-                    <h4>Connect</h4>
-
-                    <a href="#">LinkedIn</a>
-                    <a href="#">GitHub</a>
-                    <a href="#">Instagram</a>
-
-                </div>
+<div class="footer-about">
+    <h4>About PrepVanta</h4>
+    <p>
+        PrepVanta is a learning and practice platform
+        where users can test their knowledge, develop
+        new skills, and improve through consistent practice.
+    </p>
+</div>
 
             </div>
 
             <div class="copyright">
-
-                Â© 2026 PrepVanta. All Rights Reserved.
-
+                &copy; 2026 PrepVanta. All Rights Reserved.
             </div>
 
         </div>
-
     </footer>
 
-<script src="js/sidebar.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/main.js"></script>
-<script src="js/auth.js"></script>
-
+    <script src="js/sidebar.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/platform-settings.js"></script>
+
 </body>
-
 </html>
-
