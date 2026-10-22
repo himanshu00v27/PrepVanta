@@ -20,7 +20,6 @@
   }
 
   const token = localStorage.getItem("prepvanta-token");
-  const status = document.getElementById("adminStatus");
 
   if (!token) {
     window.location.href = "login.html";
@@ -80,17 +79,9 @@
       if (!response.ok) {
         throw new Error(data.message || "Admin authorization failed.");
       }
-
-      if (status) {
-        status.textContent = "Administrator authorization confirmed.";
-      }
     })
     .catch((error) => {
       console.error("Admin authorization error:", error);
-
-      if (status) {
-        status.textContent = error.message || "Admin authorization failed.";
-      }
 
       if (
         error.message === "Admin access required" ||
@@ -113,6 +104,16 @@
 
   const adminUserCount = document.getElementById("adminUserCount");
 
+  const adminUserProfileModal = document.getElementById(
+    "adminUserProfileModal",
+  );
+
+  const adminUserProfileClose = document.getElementById(
+    "adminUserProfileClose",
+  );
+
+  const adminUserProfileBody = document.getElementById("adminUserProfileBody");
+
   let userSearchTimer = null;
 
   /* ===================================
@@ -126,6 +127,24 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function safeProfileUrl(value) {
+    if (!value) {
+      return "";
+    }
+
+    try {
+      const url = new URL(String(value).trim());
+
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        return "";
+      }
+
+      return url.href;
+    } catch {
+      return "";
+    }
   }
 
   /* ===================================
@@ -215,20 +234,31 @@
 
             </div>
 
-            <button
-              type="button"
-              class="admin-user-action ${active ? "deactivate" : "activate"}"
-              data-user-id="${escapeHtml(account._id)}"
-              data-active="${active}"
-            >
+                        <div class="admin-user-actions">
 
-              <i class="fa-solid ${
-                active ? "fa-user-slash" : "fa-user-check"
-              }"></i>
+              <button
+                type="button"
+                class="admin-user-profile-btn"
+                data-user-id="${escapeHtml(account._id)}"
+              >
+                <i class="fa-solid fa-id-card"></i>
+                View Profile
+              </button>
 
-              ${active ? "Deactivate" : "Activate"}
+              <button
+                type="button"
+                class="admin-user-action ${active ? "deactivate" : "activate"}"
+                data-user-id="${escapeHtml(account._id)}"
+                data-active="${active}"
+              >
+                <i class="fa-solid ${
+                  active ? "fa-user-slash" : "fa-user-check"
+                }"></i>
 
-            </button>
+                ${active ? "Deactivate" : "Activate"}
+              </button>
+
+            </div>
 
           </div>
         `;
@@ -282,6 +312,295 @@
         "fa-circle-exclamation",
         error.message || "Failed to load users.",
       );
+    }
+  }
+
+  /* ===================================
+     ADMIN USER PROFILE
+  =================================== */
+
+  function closeAdminUserProfile() {
+    if (!adminUserProfileModal) {
+      return;
+    }
+
+    adminUserProfileModal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  async function openAdminUserProfile(userId) {
+    if (!adminUserProfileModal || !adminUserProfileBody) {
+      return;
+    }
+
+    adminUserProfileModal.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    adminUserProfileBody.innerHTML = `
+      <div class="admin-users-state">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <p>Loading profile...</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/admin/users/${encodeURIComponent(
+          userId,
+        )}/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load user profile.");
+      }
+
+      const user = data.user || {};
+      const profile = data.profile || {};
+
+      const skills = Array.isArray(profile.skills) ? profile.skills : [];
+      const education = Array.isArray(profile.education)
+        ? profile.education
+        : [];
+      const experience = Array.isArray(profile.experience)
+        ? profile.experience
+        : [];
+      const projects = Array.isArray(profile.projects) ? profile.projects : [];
+
+      const resumeUrl = safeProfileUrl(profile.resumeUrl);
+      const githubUrl = safeProfileUrl(profile.githubUrl);
+      const linkedinUrl = safeProfileUrl(profile.linkedinUrl);
+      const portfolioUrl = safeProfileUrl(profile.portfolioUrl);
+
+      adminUserProfileBody.innerHTML = `
+        <div class="admin-profile-summary">
+          <div class="admin-profile-avatar">
+            ${escapeHtml(
+              String(user.fullName || user.username || "U")
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part.charAt(0).toUpperCase())
+                .join("") || "U",
+            )}
+          </div>
+
+          <div>
+            <h4>${escapeHtml(profile.name || user.fullName || "Unnamed User")}</h4>
+
+            <p>
+              @${escapeHtml(user.username || "")}
+              ${user.userId ? ` • ${escapeHtml(user.userId)}` : ""}
+            </p>
+
+            <div class="admin-profile-badges">
+              <span class="admin-role-badge">
+                ${escapeHtml(user.role === "admin" ? "Admin" : "User")}
+              </span>
+
+              <span class="admin-status-badge ${
+                user.isActive !== false ? "active" : "inactive"
+              }">
+                ${user.isActive !== false ? "Active" : "Deactivated"}
+              </span>
+
+              <span class="admin-profile-visibility">
+                ${profile.isPublic === false ? "Private Profile" : "Public Profile"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-profile-section">
+          <h4>About</h4>
+          <p>${escapeHtml(profile.bio || "No bio added.")}</p>
+        </div>
+
+        <div class="admin-profile-section">
+          <h4>Skills</h4>
+          <div class="admin-profile-skills">
+            ${
+              skills.length
+                ? skills
+                    .map(
+                      (skill) =>
+                        `<span>${escapeHtml(
+                          typeof skill === "string"
+                            ? skill
+                            : skill.name || String(skill),
+                        )}</span>`,
+                    )
+                    .join("")
+                : "<p>No skills added.</p>"
+            }
+          </div>
+        </div>
+
+        <div class="admin-profile-section">
+          <h4>Education</h4>
+          <div class="admin-profile-items">
+            ${
+              education.length
+                ? education
+                    .map(
+                      (item) => `
+                        <div class="admin-profile-item">
+                          <strong>${escapeHtml(
+                            item.degree ||
+                              item.course ||
+                              item.title ||
+                              "Education",
+                          )}</strong>
+                          <span>${escapeHtml(
+                            item.institution ||
+                              item.school ||
+                              item.college ||
+                              "",
+                          )}</span>
+                        </div>
+                      `,
+                    )
+                    .join("")
+                : "<p>No education details added.</p>"
+            }
+          </div>
+        </div>
+
+        <div class="admin-profile-section">
+          <h4>Experience</h4>
+          <div class="admin-profile-items">
+            ${
+              experience.length
+                ? experience
+                    .map(
+                      (item) => `
+                        <div class="admin-profile-item">
+                          <strong>${escapeHtml(
+                            item.role ||
+                              item.position ||
+                              item.title ||
+                              "Experience",
+                          )}</strong>
+                          <span>${escapeHtml(
+                            item.company || item.organization || "",
+                          )}</span>
+                        </div>
+                      `,
+                    )
+                    .join("")
+                : "<p>No experience added.</p>"
+            }
+          </div>
+        </div>
+
+        <div class="admin-profile-section">
+          <h4>Projects</h4>
+          <div class="admin-profile-items">
+            ${
+              projects.length
+                ? projects
+                    .map(
+                      (item) => `
+                        <div class="admin-profile-item">
+                          <strong>${escapeHtml(
+                            item.name || item.title || "Project",
+                          )}</strong>
+                          <span>${escapeHtml(item.description || "")}</span>
+                        </div>
+                      `,
+                    )
+                    .join("")
+                : "<p>No projects added.</p>"
+            }
+          </div>
+        </div>
+                <div class="admin-profile-section">
+          <h4>Profile Links</h4>
+
+          <div class="admin-profile-links">
+            ${
+              resumeUrl
+                ? `
+                  <a
+                    href="${escapeHtml(resumeUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i class="fa-solid fa-file-lines"></i>
+                    Resume
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              githubUrl
+                ? `
+                  <a
+                    href="${escapeHtml(githubUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i class="fa-brands fa-github"></i>
+                    GitHub
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              linkedinUrl
+                ? `
+                  <a
+                    href="${escapeHtml(linkedinUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i class="fa-brands fa-linkedin"></i>
+                    LinkedIn
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              portfolioUrl
+                ? `
+                  <a
+                    href="${escapeHtml(portfolioUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i class="fa-solid fa-globe"></i>
+                    Portfolio
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              !resumeUrl && !githubUrl && !linkedinUrl && !portfolioUrl
+                ? "<p>No profile links added.</p>"
+                : ""
+            }
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      console.error("Admin profile error:", error);
+
+      adminUserProfileBody.innerHTML = `
+        <div class="admin-users-state">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <p>${escapeHtml(error.message || "Failed to load user profile.")}</p>
+        </div>
+      `;
     }
   }
 
@@ -355,6 +674,18 @@
 
   if (adminUsersList) {
     adminUsersList.addEventListener("click", (event) => {
+      const profileButton = event.target.closest(".admin-user-profile-btn");
+
+      if (profileButton) {
+        const userId = profileButton.dataset.userId;
+
+        if (userId) {
+          openAdminUserProfile(userId);
+        }
+
+        return;
+      }
+
       const button = event.target.closest(".admin-user-action");
 
       if (!button) {
@@ -378,6 +709,28 @@
       updateUserStatus(userId, !currentlyActive, button);
     });
   }
+
+  if (adminUserProfileClose) {
+    adminUserProfileClose.addEventListener("click", closeAdminUserProfile);
+  }
+
+  if (adminUserProfileModal) {
+    adminUserProfileModal.addEventListener("click", (event) => {
+      if (event.target === adminUserProfileModal) {
+        closeAdminUserProfile();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      adminUserProfileModal &&
+      !adminUserProfileModal.hidden
+    ) {
+      closeAdminUserProfile();
+    }
+  });
 
   /* ===================================
      PLATFORM SETTINGS ELEMENTS

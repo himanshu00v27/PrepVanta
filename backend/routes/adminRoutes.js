@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const User = require("../models/User");
+const Profile = require("../models/Profile");
 const Company = require("../models/Company");
 const Ticket = require("../models/Ticket");
 const CompilerRun = require("../models/CompilerRun");
@@ -337,6 +338,72 @@ router.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
     });
   }
 });
+
+/* ===================================
+   ADMIN - VIEW USER PROFILE
+   GET /api/admin/users/:id/profile
+=================================== */
+router.get(
+  "/users/:id/profile",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id)
+        .select(
+          "fullName username email userId role isActive createdAt updatedAt",
+        )
+        .lean();
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      const profile = await Profile.findOne({
+        user: user._id,
+      }).lean();
+
+      res.json({
+        user,
+        profile: profile
+          ? {
+              name: profile.name || user.fullName,
+              bio: profile.bio || "",
+              skills: profile.skills || [],
+              education: profile.education || [],
+              experience: profile.experience || [],
+              projects: profile.projects || [],
+              resumeUrl: profile.resumeUrl || "",
+              githubUrl: profile.githubUrl || "",
+              linkedinUrl: profile.linkedinUrl || "",
+              portfolioUrl: profile.portfolioUrl || "",
+              isPublic: profile.isPublic !== false,
+            }
+          : {
+              name: user.fullName,
+              bio: "",
+              skills: [],
+              education: [],
+              experience: [],
+              projects: [],
+              resumeUrl: "",
+              githubUrl: "",
+              linkedinUrl: "",
+              portfolioUrl: "",
+              isPublic: true,
+            },
+      });
+    } catch (error) {
+      console.error("Error loading admin user profile:", error.message);
+
+      res.status(500).json({
+        message: "Failed to load user profile",
+      });
+    }
+  },
+);
 
 /* ===================================
    ADMIN - UPDATE USER ACTIVE STATUS
