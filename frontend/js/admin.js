@@ -66,7 +66,7 @@
      BACKEND ADMIN AUTHORIZATION
   =================================== */
 
-  fetch("http://localhost:5000/api/admin/protected", {
+  fetch("/api/admin/protected", {
     method: "GET",
 
     headers: {
@@ -285,7 +285,7 @@
       }
 
       const url =
-        "http://localhost:5000/api/admin/users" +
+        "/api/admin/users" +
         (params.toString() ? `?${params.toString()}` : "");
 
       const response = await fetch(url, {
@@ -345,7 +345,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${encodeURIComponent(
+        `/api/admin/users/${encodeURIComponent(
           userId,
         )}/profile`,
         {
@@ -617,7 +617,7 @@
       button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${encodeURIComponent(
+        `/api/admin/users/${encodeURIComponent(
           userId,
         )}/status`,
         {
@@ -890,7 +890,7 @@
 
       setSettingsStatus("Loading settings...");
 
-      const response = await fetch("http://localhost:5000/api/settings", {
+      const response = await fetch("/api/settings", {
         method: "GET",
 
         headers: {
@@ -1026,7 +1026,7 @@
 
       setSettingsStatus("Saving settings...");
 
-      const response = await fetch("http://localhost:5000/api/settings", {
+      const response = await fetch("/api/settings", {
         method: "PATCH",
 
         headers: {
@@ -1377,7 +1377,7 @@
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/companies/admin/all",
+        "/api/companies/admin/all",
         {
           method: "GET",
 
@@ -1543,8 +1543,8 @@
     const editing = Boolean(mongoId);
 
     const url = editing
-      ? `http://localhost:5000/api/companies/${encodeURIComponent(mongoId)}`
-      : "http://localhost:5000/api/companies";
+      ? `/api/companies/${encodeURIComponent(mongoId)}`
+      : "/api/companies";
 
     try {
       setCompanySaving(true);
@@ -1618,7 +1618,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/companies/${encodeURIComponent(
+        `/api/companies/${encodeURIComponent(
           company._id,
         )}`,
         {
@@ -1674,7 +1674,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/companies/${encodeURIComponent(
+        `/api/companies/${encodeURIComponent(
           company._id,
         )}`,
         {
@@ -1844,7 +1844,7 @@
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/dashboard",
+        "/api/admin/dashboard",
         {
           method: "GET",
 
@@ -2311,7 +2311,7 @@
       const query = buildAuditQuery();
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/audit-logs?${query}`,
+        `/api/admin/audit-logs?${query}`,
         {
           method: "GET",
 
@@ -2834,7 +2834,7 @@
       }
 
       const url =
-        "http://localhost:5000/api/support/admin/tickets" +
+        "/api/support/admin/tickets" +
         (params.toString() ? `?${params.toString()}` : "");
 
       const response = await fetch(url, {
@@ -2998,7 +2998,7 @@
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/support/admin/tickets/${encodeURIComponent(
+        `/api/support/admin/tickets/${encodeURIComponent(
           ticketId,
         )}`,
         {
@@ -3156,7 +3156,7 @@
       setAdminSupportFormStatus("Updating ticket status...");
 
       const response = await fetch(
-        `http://localhost:5000/api/support/admin/tickets/${encodeURIComponent(
+        `/api/support/admin/tickets/${encodeURIComponent(
           activeAdminSupportTicketId,
         )}/status`,
         {
@@ -3241,7 +3241,7 @@
       setAdminSupportFormStatus("Sending reply...");
 
       const response = await fetch(
-        `http://localhost:5000/api/support/admin/tickets/${encodeURIComponent(
+        `/api/support/admin/tickets/${encodeURIComponent(
           activeAdminSupportTicketId,
         )}/messages`,
         {
@@ -4025,8 +4025,8 @@
       }
 
       const url = editing
-        ? `http://localhost:5000/api/questions/${encodeURIComponent(mongoId)}`
-        : "http://localhost:5000/api/questions";
+        ? `/api/questions/${encodeURIComponent(mongoId)}`
+        : "/api/questions";
 
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
@@ -4273,7 +4273,7 @@
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/topics", {
+      const response = await fetch("/api/topics", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -4303,7 +4303,7 @@
     `;
 
     try {
-      const response = await fetch("http://localhost:5000/api/questions", {
+      const response = await fetch("/api/questions", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -4383,7 +4383,7 @@
           deleteButton.textContent = "Deleting...";
 
           const response = await fetch(
-            `http://localhost:5000/api/questions/${encodeURIComponent(questionId)}`,
+            `/api/questions/${encodeURIComponent(questionId)}`,
             {
               method: "DELETE",
 
@@ -4800,7 +4800,7 @@
     `;
 
     try {
-      const response = await fetch("http://localhost:5000/api/topics", {
+      const response = await fetch("/api/topics", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -4862,8 +4862,8 @@
       }
 
       const url = editing
-        ? `http://localhost:5000/api/topics/${encodeURIComponent(mongoId)}`
-        : "http://localhost:5000/api/topics";
+        ? `/api/topics/${encodeURIComponent(mongoId)}`
+        : "/api/topics";
 
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
@@ -4972,7 +4972,7 @@
           deleteButton.textContent = "Deleting...";
 
           const response = await fetch(
-            `http://localhost:5000/api/topics/${encodeURIComponent(topicId)}`,
+            `/api/topics/${encodeURIComponent(topicId)}`,
             {
               method: "DELETE",
               headers: {
@@ -5290,7 +5290,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions?topic=${encodeURIComponent(topicId)}`,
+        `/api/questions?topic=${encodeURIComponent(topicId)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -5567,7 +5567,7 @@
     `;
 
     try {
-      const response = await fetch("http://localhost:5000/api/practice", {
+      const response = await fetch("/api/practice", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -5642,8 +5642,8 @@
       }
 
       const url = editing
-        ? `http://localhost:5000/api/practice/${encodeURIComponent(mongoId)}`
-        : "http://localhost:5000/api/practice";
+        ? `/api/practice/${encodeURIComponent(mongoId)}`
+        : "/api/practice";
 
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
@@ -5760,7 +5760,7 @@
           deleteButton.textContent = "Deleting...";
 
           const response = await fetch(
-            `http://localhost:5000/api/practice/${encodeURIComponent(practiceSetId)}`,
+            `/api/practice/${encodeURIComponent(practiceSetId)}`,
             {
               method: "DELETE",
               headers: {

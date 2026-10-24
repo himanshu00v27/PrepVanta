@@ -1,4 +1,4 @@
-const TOPIC_PRACTICE_API_BASE_URL = "http://localhost:5000/api";
+const TOPIC_PRACTICE_API_BASE_URL = "/api";
 
 function getTopicPracticeParams() {
   const params = new URLSearchParams(window.location.search);

@@ -1,4 +1,4 @@
-const PRACTICE_API_BASE_URL = "http://localhost:5000/api";
+const PRACTICE_API_BASE_URL = "/api";
 
 function getParams() {
   const params = new URLSearchParams(window.location.search);

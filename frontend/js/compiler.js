@@ -3,7 +3,7 @@
 =================================== */
 
 (function () {
-  const API_BASE = "http://localhost:5000/api/compiler";
+  const API_BASE = "/api/compiler";
 
   const langSelect = document.getElementById("langSelect");
   const codeArea = document.getElementById("codeArea");
@@ -81,7 +81,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions/topic-practice/${encodeURIComponent(topicId)}/coding/${encodeURIComponent(questionId)}`,
+        `/api/questions/topic-practice/${encodeURIComponent(topicId)}/coding/${encodeURIComponent(questionId)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

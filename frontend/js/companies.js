@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/companies";
+const API_URL = "/api/companies";
 
 const companyGrid = document.getElementById("companyGrid");
 const companySearch = document.getElementById("companySearch");

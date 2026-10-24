@@ -1,4 +1,4 @@
-const SUPPORT_API = "http://localhost:5000/api/support";
+const SUPPORT_API = "/api/support";
 
 /* ===================================
    ELEMENTS

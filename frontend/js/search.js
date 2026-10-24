@@ -2,7 +2,7 @@
    PREPVANTA USER SEARCH
 =================================== */
 
-const USER_API = "http://localhost:5000/api/users";
+const USER_API = "/api/users";
 
 const userSearchInput = document.getElementById("userSearchInput");
 const userResults = document.getElementById("userResults");

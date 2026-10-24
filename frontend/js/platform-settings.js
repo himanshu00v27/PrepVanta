@@ -1,5 +1,5 @@
 (function () {
-  const SETTINGS_URL = "http://localhost:5000/api/settings/public";
+  const SETTINGS_URL = "/api/settings/public";
 
   async function loadPublicPlatformSettings() {
     try {

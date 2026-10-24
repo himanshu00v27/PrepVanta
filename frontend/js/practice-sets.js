@@ -1,4 +1,4 @@
-const PRACTICE_SETS_API_BASE_URL = "http://localhost:5000/api";
+const PRACTICE_SETS_API_BASE_URL = "/api";
 
 function getPracticeSetsAuthToken() {
     const token = localStorage.getItem("prepvanta-token");

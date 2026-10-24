@@ -1,4 +1,4 @@
-const ATTEMPT_RESULT_API_BASE_URL = "http://localhost:5000/api";
+const ATTEMPT_RESULT_API_BASE_URL = "/api";
 
 function getAttemptResultToken() {
   return localStorage.getItem("prepvanta-token");
