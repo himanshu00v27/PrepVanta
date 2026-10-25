@@ -281,6 +281,17 @@ document.addEventListener("DOMContentLoaded", () => {
             String(user.fullName || "").trim() ||
             "PrepVanta User";
 
+        const dashboardHeading =
+            document.getElementById("dashboardHeading");
+        const firstName = displayName.split(/\s+/)[0];
+
+        setText(
+            dashboardHeading,
+            displayName === "PrepVanta User" || !firstName
+                ? "Your Dashboard"
+                : `${firstName}'s Dashboard`
+        );
+
         setText(elements.profileAvatar, initials(displayName));
         setText(elements.profileName, displayName);
         setText(
