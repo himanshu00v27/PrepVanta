@@ -23,6 +23,8 @@ const practiceRoutes = require("./routes/practiceRoutes");
 const attemptRoutes = require("./routes/attemptRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const topicRoutes = require("./routes/topicRoutes");
+const Question = require("./models/Question");
+const Topic = require("./models/Topic");
 const app = express();
 
 app.use(cors());
@@ -48,6 +50,20 @@ app.use(maintenanceMiddleware);
 /* =========================
    AUTH ROUTES
 ========================= */
+
+app.get("/api/stats/public", async (req, res) => {
+  try {
+    const [questionCount, topicCount] = await Promise.all([
+      Question.countDocuments({ status: "published" }),
+      Topic.countDocuments({ status: "published" }),
+    ]);
+
+    res.json({ questionCount, topicCount });
+  } catch (error) {
+    console.error("Public statistics error:", error.message);
+    res.status(500).json({ message: "Unable to load statistics" });
+  }
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
