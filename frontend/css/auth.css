@@ -356,3 +356,43 @@
     }
 
 }
+/* Registration OTP verification and success screens */
+.otp-verification {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 12px 0;
+}
+
+.otp-verification h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.3;
+}
+
+.otp-verification p {
+    margin: 0;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+.otp-verification .form-group {
+    margin: 4px 0;
+}
+
+.otp-verification .btn-primary {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem;
+}
+
+.otp-verification .btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.otp-verification #otpStatus:empty {
+    display: none;
+}

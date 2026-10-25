@@ -356,6 +356,7 @@ function showOTPVerification(
             <button
                 type="button"
                 id="verifyOTPButton"
+                class="btn btn-primary"
             >
                 Verify Email
             </button>
@@ -470,6 +471,7 @@ function showOTPVerification(
                         <button
                             type="button"
                             id="goToLoginButton"
+                            class="btn btn-primary"
                         >
                             Continue to Login
                         </button>
