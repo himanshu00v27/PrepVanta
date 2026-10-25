@@ -221,4 +221,4 @@ PrepVanta/
 
 ---
 
-**PrepVanta — Preparing Students for Placement Success.**
+**PrepVanta — Practice. Improve. Upskill. Test. Succeed.**
