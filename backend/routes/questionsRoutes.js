@@ -125,6 +125,51 @@ router.get("/topic-practice/:topicId", authMiddleware, async (req, res) => {
 // Check objective answers for topic practice
 // --------------------------------------------------
 
+// --------------------------------------------------
+// Get correctly solved MCQs for topic practice
+// --------------------------------------------------
+router.get("/topic-practice/:topicId/status", authMiddleware, async (req, res) => {
+  try {
+    const topic = await Topic.findOne({
+      _id: req.params.topicId,
+      status: "published",
+    });
+
+    if (!topic) {
+      return res.status(404).json({
+        message: "Topic not found",
+      });
+    }
+
+    const questions = await Question.find({
+      topic: topic._id,
+      status: "published",
+      type: "objective",
+    }).select("_id");
+
+    const questionIds = questions.map((question) => question._id);
+
+    const solvedActivities = await QuestionActivity.find({
+      user: req.user._id,
+      topic: topic._id,
+      type: "objective",
+      question: { $in: questionIds },
+      isCorrect: true,
+    }).select("question");
+
+    res.json({
+      solvedQuestionIds: solvedActivities.map((activity) =>
+        String(activity.question)
+      ),
+    });
+  } catch (error) {
+    console.error("Error fetching topic practice status:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch topic practice status",
+    });
+  }
+});
 router.post("/topic-practice/:topicId/check", authMiddleware, async (req, res) => {
   try {
     const topic = await Topic.findOne({
@@ -177,9 +222,10 @@ router.post("/topic-practice/:topicId/check", authMiddleware, async (req, res) =
         questionId: String(question._id),
         valid: true,
         isCorrect,
-        correctAnswer,
-        explanation: question.explanation || "",
-        solution: question.solution || "",
+        ...(isCorrect ? {
+          explanation: question.explanation || "",
+          solution: question.solution || "",
+        } : {}),
       };
     });
 

@@ -135,6 +135,22 @@ async function checkTopicPracticeAnswers(topicId, answers) {
   return response.json();
 }
 
+async function getTopicSolvedStatus(topicId) {
+  const response = await fetch(
+    `${TOPIC_PRACTICE_API_BASE_URL}/questions/topic-practice/${encodeURIComponent(topicId)}/status`,
+    {
+      headers: {
+        Authorization: `Bearer ${getTopicPracticeToken()}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load saved question progress.");
+  }
+
+  return response.json();
+}
 async function revealTopicPracticeSubjectiveAnswer(topicId, questionId) {
   const token = getTopicPracticeToken();
 
@@ -321,6 +337,18 @@ async function initTopicPractice() {
     const topic = await resolveTopic(cat, name);
     const data = await loadTopicPractice(topic._id);
 
+    const solvedQuestionIds = new Set();
+
+    try {
+      const savedProgress = await getTopicSolvedStatus(topic._id);
+
+      (savedProgress.solvedQuestionIds || []).forEach((questionId) => {
+        solvedQuestionIds.add(String(questionId));
+      });
+    } catch (error) {
+      console.warn("Could not load saved question progress:", error);
+    }
+
     const allQuestions = Array.isArray(data.questions) ? data.questions : [];
     const isTechnical = getTopicCategory(cat) === "Technical";
 
@@ -342,6 +370,7 @@ async function initTopicPractice() {
 
     let questionSearch = "";
     let selectedDifficulty = "all";
+    let currentQuestionId = null;
 
     let activeType =
       allowedTypes.find((type) => questionsByType[type].length > 0) ||
@@ -418,28 +447,41 @@ async function initTopicPractice() {
       }
 
       return `
-        <div class="practice-test-container">
-          ${questions
-            .map((question, index) =>
-              renderTopicPracticeQuestion(question, index),
-            )
-            .join("")}
+        <div class="topic-practice-layout">
 
-          <div class="practice-actions">
+          <aside class="topic-question-navigator">
             <button
               type="button"
-              class="btn btn-primary"
-              id="checkTopicAnswersBtn"
+              class="topic-nav-toggle"
+              id="topicNavigatorToggle"
+              aria-expanded="false"
             >
-              Check Answers
+              Question Navigator
+              <span>&#9662;</span>
             </button>
-          </div>
 
-          <div id="topicPracticeMessage" style="margin-top:15px;"></div>
+            <div class="topic-navigator-inner" id="topicNavigatorInner">
+              <h3 class="topic-navigator-heading">Question Navigator</h3>
+
+              <p id="topicSolvedCount">0 of ${questions.length} correctly solved</p>
+
+              <div class="topic-progress-track">
+                <div id="topicProgressFill"></div>
+              </div>
+
+              <div class="topic-number-grid" id="topicNumberGrid"></div>
+
+              <p class="topic-nav-legend">
+                &#10003; Solved &nbsp; &#9675; Not Solved &nbsp; &#9679; Current
+              </p>
+            </div>
+          </aside>
+
+          <div class="topic-active-question" id="topicActiveQuestion"></div>
+
         </div>
       `;
     }
-
     function renderSubjectivePractice(questions) {
       if (questions.length === 0) {
         return renderEmptyType("subjective");
@@ -473,117 +515,238 @@ async function initTopicPractice() {
     }
 
     function bindObjectivePractice(questions) {
-      const checkButton = document.getElementById("checkTopicAnswersBtn");
-      const messageBox = document.getElementById("topicPracticeMessage");
+      const grid = document.getElementById("topicNumberGrid");
+      const activeQuestion = document.getElementById("topicActiveQuestion");
+      const solvedCount = document.getElementById("topicSolvedCount");
+      const progressFill = document.getElementById("topicProgressFill");
+      const navigatorToggle = document.getElementById("topicNavigatorToggle");
+      const navigatorInner = document.getElementById("topicNavigatorInner");
 
-      if (!checkButton || !messageBox) {
-        return;
+      if (!grid || !activeQuestion) return;
+
+      if (!questions.some((question) =>
+        String(question._id || question.id) === String(currentQuestionId)
+      )) {
+        currentQuestionId = String(questions[0]._id || questions[0].id);
       }
 
-      checkButton.addEventListener("click", async () => {
-        const answers = questions.map((question) => {
-          const questionId = question._id || question.id;
+      const questionId = (question) => String(question._id || question.id);
 
-          const selected = mount.querySelector(
-            `input[name="topic-question-${CSS.escape(String(questionId))}"]:checked`,
+      function updateNavigator() {
+        const allObjectiveQuestions = questionsByType.objective;
+        const total = allObjectiveQuestions.length;
+        const solved = allObjectiveQuestions.filter((question) =>
+          solvedQuestionIds.has(questionId(question))
+        ).length;
+
+        if (solvedCount) {
+          solvedCount.textContent = `${solved} of ${total} correctly solved`;
+        }
+
+        if (progressFill) {
+          progressFill.style.width = `${total ? (solved / total) * 100 : 0}%`;
+        }
+
+        grid.innerHTML = questions.map((question, index) => {
+          const id = questionId(question);
+          const isSolved = solvedQuestionIds.has(id);
+          const isCurrent = id === currentQuestionId;
+
+          const originalIndex = allObjectiveQuestions.findIndex(
+            (item) => questionId(item) === id
           );
 
-          return {
-            questionId,
-            answer: selected ? selected.value : "",
-          };
+          return `
+            <button
+              type="button"
+              class="topic-number-btn${isSolved ? " is-solved" : ""}${isCurrent ? " is-current" : ""}"
+              data-navigate-question="${escapeTopicPracticeHtml(id)}"
+              aria-label="Question ${originalIndex + 1}${isSolved ? ", solved" : ""}"
+              aria-current="${isCurrent ? "true" : "false"}"
+            >
+              ${originalIndex + 1}${isSolved ? " &#10003;" : ""}
+            </button>
+          `;
+        }).join("");
+
+        grid.querySelectorAll("[data-navigate-question]").forEach((button) => {
+          button.addEventListener("click", () => {
+            currentQuestionId = button.dataset.navigateQuestion;
+            renderCurrentQuestion();
+          });
+        });
+      }
+
+      function renderCurrentQuestion() {
+        const index = questions.findIndex(
+          (question) => questionId(question) === currentQuestionId
+        );
+
+        if (index < 0) return;
+
+        const question = questions[index];
+        const id = questionId(question);
+        const solved = solvedQuestionIds.has(id);
+
+        const originalIndex = questionsByType.objective.findIndex(
+          (item) => questionId(item) === id
+        );
+
+        activeQuestion.innerHTML = `
+          ${solved ? '<div class="topic-already-solved">&#10003; Already Solved</div>' : ""}
+
+          ${renderTopicPracticeQuestion(question, originalIndex)}
+
+          <div class="topic-question-actions">
+            <button type="button" id="topicPreviousQuestion"
+              ${index === 0 ? "disabled" : ""}>
+              &larr; Previous
+            </button>
+
+            <button type="button" id="topicCheckSingleAnswer">
+              Check Answer
+            </button>
+
+            <button type="button" id="topicNextQuestion"
+              ${index === questions.length - 1 ? "disabled" : ""}>
+              Next &rarr;
+            </button>
+          </div>
+        `;
+
+        updateNavigator();
+
+        const previous = document.getElementById("topicPreviousQuestion");
+        const next = document.getElementById("topicNextQuestion");
+        const check = document.getElementById("topicCheckSingleAnswer");
+
+        previous.addEventListener("click", () => {
+          if (index > 0) {
+            currentQuestionId = questionId(questions[index - 1]);
+            renderCurrentQuestion();
+          }
         });
 
-        checkButton.disabled = true;
-        checkButton.textContent = "Checking...";
-        messageBox.textContent = "";
+        next.addEventListener("click", () => {
+          if (index < questions.length - 1) {
+            currentQuestionId = questionId(questions[index + 1]);
+            renderCurrentQuestion();
+          }
+        });
 
-        try {
-          const result = await checkTopicPracticeAnswers(topic._id, answers);
-          const results = Array.isArray(result.results) ? result.results : [];
+        check.addEventListener("click", async () => {
+          const selected = activeQuestion.querySelector(
+            `input[name="topic-question-${CSS.escape(id)}"]:checked`
+          );
 
-          let correctCount = 0;
+          const feedback = activeQuestion.querySelector(
+            "[data-answer-feedback]"
+          );
 
-          results.forEach((item) => {
-            if (!item.valid) {
-              return;
+          if (!selected) {
+            if (feedback) {
+              feedback.textContent = "Please select an answer first.";
             }
+            return;
+          }
 
-            if (item.isCorrect) {
-              correctCount += 1;
-            }
+          const selectedAnswer = selected.value;
 
-            const card = mount.querySelector(
-              `[data-question-card="${CSS.escape(String(item.questionId))}"]`,
+          check.disabled = true;
+          check.textContent = "Checking...";
+
+          try {
+            const response = await checkTopicPracticeAnswers(topic._id, [
+              { questionId: id, answer: selectedAnswer }
+            ]);
+
+            const result = (response.results || []).find(
+              (item) => String(item.questionId) === id
             );
 
-            if (!card) {
-              return;
+            if (!result || !result.valid) {
+              throw new Error("Unable to check this answer.");
             }
 
-            const optionLabels = card.querySelectorAll("[data-option]");
+            if (currentQuestionId !== id) return;
 
-            optionLabels.forEach((label) => {
-              label.classList.remove("correct", "wrong");
+            if (result.isCorrect) {
+              solvedQuestionIds.add(id);
 
-              const input = label.querySelector("input");
+              const card = activeQuestion.querySelector(
+                "[data-question-card]"
+              );
 
-              if (!input) {
-                return;
+              if (card) {
+                card.querySelectorAll("[data-option]").forEach((label) => {
+                  const input = label.querySelector("input");
+                  if (input && input.checked) {
+                    label.classList.add("correct");
+                  }
+                  if (input) input.disabled = true;
+                });
               }
 
-              if (
-                input.value.trim().toLowerCase() ===
-                String(item.correctAnswer || "").trim().toLowerCase()
-              ) {
-                label.classList.add("correct");
-              } else if (input.checked) {
-                label.classList.add("wrong");
-              }
-
-              input.disabled = true;
-            });
-
-            const feedback = card.querySelector("[data-answer-feedback]");
-
-            if (feedback) {
               const details =
-                item.explanation ||
-                item.solution ||
+                result.explanation ||
+                result.solution ||
                 "No explanation available.";
 
-              feedback.innerHTML = `
-                <div class="answer-reveal${item.isCorrect ? " is-correct" : ""}">
-                  <strong>
-                    ${item.isCorrect ? "Correct." : "Correct answer:"}
-                  </strong>
-                  ${
-                    item.isCorrect
-                      ? ""
-                      : ` ${escapeTopicPracticeHtml(item.correctAnswer)}`
-                  }
-                  <br>
-                  ${escapeTopicPracticeHtml(details)}
-                </div>
-              `;
+              if (feedback) {
+                feedback.innerHTML = `
+                  <div class="answer-reveal is-correct">
+                    <strong>Correct!</strong><br>
+                    ${escapeTopicPracticeHtml(details)}
+                  </div>
+                `;
+              }
+
+              if (!activeQuestion.querySelector(".topic-already-solved")) {
+                activeQuestion.insertAdjacentHTML(
+                  "afterbegin",
+                  '<div class="topic-already-solved">&#10003; Already Solved</div>'
+                );
+              }
+
+              check.textContent = "Correct";
+              check.disabled = true;
+              updateNavigator();
+            } else {
+              if (feedback) {
+                feedback.innerHTML = `
+                  <div class="topic-try-again">
+                    Incorrect. Try Again!
+                  </div>
+                `;
+              }
+
+              check.disabled = false;
+              check.textContent = "Check Answer";
             }
-          });
+          } catch (error) {
+            if (currentQuestionId !== id) return;
 
-          messageBox.innerHTML = `
-            <div class="mcq-card">
-              <strong>
-                Score: ${correctCount} / ${questions.length}
-              </strong>
-            </div>
-          `;
+            if (feedback) {
+              feedback.textContent = error.message;
+            }
 
-          checkButton.style.display = "none";
-        } catch (error) {
-          messageBox.textContent = error.message;
-          checkButton.disabled = false;
-          checkButton.textContent = "Check Answers";
-        }
-      });
+            check.disabled = false;
+            check.textContent = "Check Answer";
+          }
+        });
+      }
+
+      if (navigatorToggle && navigatorInner) {
+        navigatorToggle.addEventListener("click", () => {
+          const expanded =
+            navigatorToggle.getAttribute("aria-expanded") === "true";
+
+          navigatorToggle.setAttribute("aria-expanded", String(!expanded));
+          navigatorInner.classList.toggle("is-open", !expanded);
+        });
+      }
+
+      renderCurrentQuestion();
     }
 
     function bindSubjectivePractice() {
@@ -774,8 +937,3 @@ async function initTopicPractice() {
   }
 }
 document.addEventListener("DOMContentLoaded", initTopicPractice);
-
-
-
-
-
